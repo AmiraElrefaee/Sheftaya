@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-//import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sheftaya/app/router.dart';
 import 'package:sheftaya/core/constants/app_regex.dart';
+import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
+import 'package:sheftaya/core/utils/snackbar.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/core/widgets/custom_text_form_field.dart';
+import 'package:sheftaya/features/forget_password/logic/create_new_password_cubit/create_new_password_cubit.dart';
+import 'package:sheftaya/features/forget_password/logic/create_new_password_cubit/create_new_password_state.dart';
 
 class CreateNewPasswordScreenBody extends StatefulWidget {
   const CreateNewPasswordScreenBody({super.key});
@@ -22,25 +27,25 @@ class _CreateNewPasswordScreenBodyState
 
   @override
   Widget build(BuildContext context) {
-    // return BlocConsumer<CreateNewPasswordCubit, CreatePasswordState>(
-    //   listener: (context, state) {
-    //     state.maybeWhen(
-    //       createNewPasswordsuccess: (message) {
-    //         customSnackBar(context, message, ColorsManager.success);
-    //         context.go(AppRouter.kLoginScreen);
-    //       },
-    //       createNewPassworderrorerror: (error) {
-    //         customSnackBar(context, error, ColorsManager.error);
-    //       },
-    //       orElse: () {},
-    //     );
-    //   },
-    //   builder: (context, state) {
-    //     final cubit = context.read<CreateNewPasswordCubit>();
-    //     final isLoading = state.maybeWhen(
-    //       createNewPasswordloading: () => true,
-    //       orElse: () => false,
-    //     );
+    return BlocConsumer<CreateNewPasswordCubit, CreatePasswordState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          createNewPasswordsuccess: (message) {
+            customSnackBar(context, message, ColorsManager.success);
+            context.go(AppRouter.kLoginScreen);
+          },
+          createNewPassworderrorerror: (error) {
+            customSnackBar(context, error, ColorsManager.error);
+          },
+          orElse: () {},
+        );
+      },
+      builder: (context, state) {
+        final cubit = context.read<CreateNewPasswordCubit>();
+        final isLoading = state.maybeWhen(
+          createNewPasswordloading: () => true,
+          orElse: () => false,
+        );
 
         return Scaffold(
           appBar: AppBar(),
@@ -48,7 +53,7 @@ class _CreateNewPasswordScreenBodyState
             child: Padding(
               padding: EdgeInsets.all(16.0.w),
               child: Form(
-               // key: cubit.formKey,
+                key: cubit.formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -62,7 +67,7 @@ class _CreateNewPasswordScreenBodyState
                     Text('كلمه المرور', style: TextStyles.font14BlackRegular),
                     SizedBox(height: 8.h),
                     AppTextFormField(
-                      //controller: cubit.newPasswordController,
+                      controller: cubit.newPasswordController,
                       hintText: 'ادخل كلمه مرورك',
                       obscureText: isPasswordObscureText,
                       validator: (value) => AppRegex.validatePassword(value),
@@ -87,14 +92,14 @@ class _CreateNewPasswordScreenBodyState
                     ),
                     SizedBox(height: 8.h),
                     AppTextFormField(
-                     // controller: cubit.passwordConfirmController,
+                      controller: cubit.passwordConfirmController,
                       hintText: 'ادخل كلمه مرورك',
                       obscureText: isConfirmPasswordObscureText,
-                      // validator:
-                      //     (value) => AppRegex.validateConfirmPassword(
-                      //       value,
-                      //       cubit.newPasswordController.text,
-                      //     ),
+                      validator:
+                          (value) => AppRegex.validateConfirmPassword(
+                            value,
+                            cubit.newPasswordController.text,
+                          ),
                       suffixIcon: InkWell(
                         onTap: () {
                           setState(() {
@@ -114,11 +119,11 @@ class _CreateNewPasswordScreenBodyState
                     AppTextButton(
                       buttonText: 'تأكيد',
                       onPressed: () {
-                        // if (cubit.formKey.currentState!.validate()) {
-                        //   cubit.emitCreateNewPasswordStates();
-                        // }
+                        if (cubit.formKey.currentState!.validate()) {
+                          cubit.emitCreateNewPasswordStates();
+                        }
                       },
-                     // isLoading: isLoading,
+                      isLoading: isLoading,
                     ),
                   ],
                 ),
@@ -126,8 +131,7 @@ class _CreateNewPasswordScreenBodyState
             ),
           ),
         );
-      }
-
-   // );
+      },
+   );
   }
-//}
+}

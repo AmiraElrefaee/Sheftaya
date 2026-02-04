@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:go_router/go_router.dart';
-// import 'package:sheftaya/app/router.dart';
-// import 'package:sheftaya/core/constants/shared_pref_helper.dart';
-// import 'package:sheftaya/core/constants/shared_pref_keys.dart';
-// import 'package:sheftaya/core/constants/user_cubit.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sheftaya/app/router.dart';
+import 'package:sheftaya/core/constants/shared_pref_helper.dart';
+import 'package:sheftaya/core/constants/shared_pref_keys.dart';
+import 'package:sheftaya/core/constants/user_cubit.dart';
+import 'package:sheftaya/core/di/service_locator.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
+import 'package:sheftaya/features/login/logic/login_cubit.dart';
 import 'package:sheftaya/features/login/presentation/widgets/login_screen_body.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,38 +20,39 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-final bool _isLoading = false;
+bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // _checkToken();
+     _checkToken();
   }
 
-  // Future<void> _checkToken() async {
-  //   final userCubit = context.read<UserCubit>();
-  //   final token = await SharedPrefHelper.getSecuredString(
-  //     SharedPrefKeys.userToken,
-  //   );
-  //   if (token.isEmpty) {
-  //     if (!mounted) return;
-  //     setState(() => _isLoading = false);
-  //     return;
-  //   }
-  //   while (userCubit.state.isLoading || userCubit.state.user == null) {
-  //     await Future.delayed(const Duration(milliseconds: 200));
-  //     if (!mounted) return;
-  //   }
+  Future<void> _checkToken() async {
+    final userCubit = context.read<UserCubit>();
+    final token = await SharedPrefHelper.getSecuredString(
+      SharedPrefKeys.userToken,
+    );
+    if (token.isEmpty) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      return;
+    }
+    while (userCubit.state.isLoading || userCubit.state.user == null) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      if (!mounted) return;
+    }
 
-  //   if (!mounted) return;
-  //   final role = userCubit.state.user!.role ?? '';
+    if (!mounted) return;
+    final role = userCubit.state.user!.role ?? '';
 
-  //   if (role == "") {
-  //     GoRouter.of(context).pushReplacement(AppRouter.);
-  //   else {
-  //     GoRouter.of(context).pushReplacement(AppRouter.);
-  //   }
-  // }
+    if (role == "") {
+      GoRouter.of(context).pushReplacement(AppRouter.kHomeScreen);
+    }
+    else {
+      GoRouter.of(context).pushReplacement(AppRouter.kHomeScreen);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,10 +82,10 @@ final bool _isLoading = false;
     }
 
     return
-    // BlocProvider(
-    //   create: (context) => getIt<LoginCubit>(),
-    //   child: const
-    LoginScreenBody();
-    //);
+    BlocProvider(
+      create: (context) => getIt<LoginCubit>(),
+      child: const
+    LoginScreenBody(),
+    );
   }
 }

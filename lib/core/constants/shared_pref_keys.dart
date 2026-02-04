@@ -11,5 +11,5 @@ class SharedPrefKeys {
   static const String userPasswordConfirm = 'userPasswordConfirm';
   static const String resetToken = 'resetToken';
   static const String userId = 'userId';
-  static const String userImage = 'userImage';
+  static const String userProfileImage = 'userImage';
 }

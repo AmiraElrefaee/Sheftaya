@@ -1,43 +1,47 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sheftaya/app/router.dart';
 import 'package:sheftaya/core/constants/app_regex.dart';
+import 'package:sheftaya/core/constants/user_cubit.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/font_weight_helper.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
+import 'package:sheftaya/core/utils/snackbar.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/core/widgets/custom_text_form_field.dart';
+import 'package:sheftaya/features/login/logic/login_cubit.dart';
+import 'package:sheftaya/features/login/logic/login_state.dart';
 
 class LoginScreenBody extends StatelessWidget {
   const LoginScreenBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // return BlocConsumer<LoginCubit, LoginState>(
-    //   listener: (context, state) {
-    //     state.maybeWhen(
-    //       success: (data) {
-    //         final user = context.read<UserCubit>().state.user;
-    //         if (user!.role == "") {
-    //           context.go(AppRouter.);
-    //         }else {
-    //           context.go(AppRouter.);
-    //         }
-    //       },
-    //       error: (error) {
-    //         customSnackBar(context, error, ColorsManager.error);
-    //       },
-    //       orElse: () {},
-    //     );
-    //   },
-    //   builder: (context, state) {
-    //     final cubit = context.read<LoginCubit>();
-    //     final isLoading = state.maybeWhen(
-    //       loading: () => true,
-    //       orElse: () => false,
-    //     );
+    return BlocConsumer<LoginCubit, LoginState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          success: (data) {
+            final user = context.read<UserCubit>().state.user;
+            if (user!.role == "") {
+              context.go(AppRouter.kHomeScreen);
+            }else {
+              context.go(AppRouter.kHomeScreen);
+            }
+          },
+          error: (error) {
+            customSnackBar(context, error, ColorsManager.error);
+          },
+          orElse: () {},
+        );
+      },
+      builder: (context, state) {
+        final cubit = context.read<LoginCubit>();
+        final isLoading = state.maybeWhen(
+          loading: () => true,
+          orElse: () => false,
+        );
 
     return Scaffold(
       appBar: AppBar(),
@@ -45,7 +49,7 @@ class LoginScreenBody extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.all(16.0.w),
           child: Form(
-            // key: cubit.formKey,
+            key: cubit.formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -57,7 +61,7 @@ class LoginScreenBody extends StatelessWidget {
                 Text('البريد الإلكتروني', style: TextStyles.font14BlackRegular),
                 SizedBox(height: 8.h),
                 AppTextFormField(
-                  // controller: cubit.emailController,
+                  controller: cubit.emailController,
                   hintText: 'ادخل البريد الالكتروني',
                   validator: (value) => AppRegex.validateEmail(value),
                   keyboardType: TextInputType.emailAddress,
@@ -67,7 +71,7 @@ class LoginScreenBody extends StatelessWidget {
                 SizedBox(height: 8.h),
 
                 _PasswordField(
-                  //cubit: cubit
+                  cubit: cubit
                 ),
                 SizedBox(height: 12.h),
                 Align(
@@ -90,11 +94,11 @@ class LoginScreenBody extends StatelessWidget {
                 AppTextButton(
                   buttonText: 'تسجيل الدخول',
                   onPressed: () {
-                    // if (cubit.formKey.currentState!.validate()) {
-                    //   cubit.emitLoginStates();
-                    // }
+                    if (cubit.formKey.currentState!.validate()) {
+                      cubit.emitLoginStates();
+                    }
                   },
-                  //isLoading: isLoading,
+                  isLoading: isLoading,
                 ),
                 SizedBox(height: 16.h),
                 Row(
@@ -126,17 +130,17 @@ class LoginScreenBody extends StatelessWidget {
         ),
       ),
     );
-  }
+  },
 
-  // );
+   );
 }
-//}
+}
 
 class _PasswordField extends StatefulWidget {
-  //final LoginCubit cubit;
+  final LoginCubit cubit;
 
   const _PasswordField(
-    //  {required this.cubit}
+      {required this.cubit}
   );
 
   @override
@@ -149,7 +153,7 @@ class _PasswordFieldState extends State<_PasswordField> {
   @override
   Widget build(BuildContext context) {
     return AppTextFormField(
-      //controller: widget.cubit.passwordController,
+      controller: widget.cubit.passwordController,
       hintText: 'ادخل كلمة المرور',
       obscureText: isPasswordObscureText,
       validator: (value) => AppRegex.validatePassword(value),

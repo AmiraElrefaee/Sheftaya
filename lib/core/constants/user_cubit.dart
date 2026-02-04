@@ -116,7 +116,7 @@ Future<UserModel?> getSavedUserData() async {
     await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userToken);
     await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userRole);
     await SharedPrefHelper.removeSecuredData(
-      SharedPrefKeys.userImage,
+      SharedPrefKeys.userProfileImage,
     );
     return null;
   }

@@ -8,7 +8,6 @@ class UserModel {
   final String? role;
   final String? phone;
   final String? token;
-  final bool createFeedback;
   final String? profileImg;
   final String? gender;
   final String? birthday;
@@ -21,7 +20,6 @@ class UserModel {
     this.role,
     this.phone,
     this.token,
-    required this.createFeedback,
     this.profileImg,
     this.gender,
     this.birthday,
@@ -47,7 +45,6 @@ class UserModel {
       role: data['role'],
       phone: data['phone'],
       token: json['token'] ?? data['token'],
-      createFeedback: data['createReport'] ?? false,
       profileImg: data['profileImg'],
       gender: data['gender'],
       birthday: birthday,
@@ -63,7 +60,6 @@ class UserModel {
         'email': email,
         'role': role,
         'phone': phone,
-        'createReport': createFeedback,
         'profileImg': profileImg,
         'gender': gender,
         'birthday': birthday,
@@ -93,7 +89,6 @@ class UserModel {
       role: role ?? this.role,
       phone: phone ?? this.phone,
       token: token ?? this.token,
-      createFeedback: createFeedback ?? this.createFeedback,
       profileImg: profileImg ?? this.profileImg,
       gender: gender ?? this.gender,
       birthday: birthday ?? this.birthday,

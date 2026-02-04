@@ -1,13 +1,12 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConstants {
-  static String get apiBaseUrl =>
-      dotenv.env['API_BASE_URL'] ?? '';
+  static String get apiBaseUrl => dotenv.env['API_BASE_URL'] ?? '';
   static const String login = "auth/login";
   static const String signUp = "auth/signup";
-  static const String forgetPassword = "auth/forgetpass";
-  static const String verifyPassword = "auth/verifycode";
-  static const String resetPassword = "auth/resetpassword";
+  static const String forgetPassword = "auth/password/forgot";
+  static const String verifyPassword = "auth/password/verify";
+  static const String resetPassword = "auth/password/reset";
   static const String verifyAccount = "auth/verifyEmailUser";
 }
 

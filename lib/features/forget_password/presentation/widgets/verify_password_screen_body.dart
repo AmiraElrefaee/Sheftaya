@@ -1,12 +1,17 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-//import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pinput/pinput.dart';
+import 'package:sheftaya/app/router.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
+import 'package:sheftaya/core/utils/snackbar.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
+import 'package:sheftaya/features/forget_password/logic/forget_password_cubit/forget_password_cubit.dart';
+import 'package:sheftaya/features/forget_password/logic/verify_password_cubit/verify_password_cubit.dart';
+import 'package:sheftaya/features/forget_password/logic/verify_password_cubit/verify_password_state.dart';
 
 
 class VerifyPasswordScreenBody extends StatelessWidget {
@@ -14,24 +19,24 @@ class VerifyPasswordScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return BlocConsumer<VerifyPasswordCubit, VerifyPasswordState>(
-    //   listener: (context, state) {
-    //     state.maybeWhen(
-    //       success: (data) {
-    //         context.push(AppRouter.kCreateNewPasswordScreen);
-    //       },
-    //       error: (error) {
-    //         customSnackBar(context, error, ColorsManager.error);
-    //       },
-    //       orElse: () {},
-    //     );
-    //   },
-    //   builder: (context, state) {
-    //     final cubit = context.read<VerifyPasswordCubit>();
-    //     final isLoading = state.maybeWhen(
-    //       loading: () => true,
-    //       orElse: () => false,
-    //     );
+    return BlocConsumer<VerifyPasswordCubit, VerifyPasswordState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          success: (data) {
+            context.push(AppRouter.kCreateNewPasswordScreen);
+          },
+          error: (error) {
+            customSnackBar(context, error, ColorsManager.error);
+          },
+          orElse: () {},
+        );
+      },
+      builder: (context, state) {
+        final cubit = context.read<VerifyPasswordCubit>();
+        final isLoading = state.maybeWhen(
+          loading: () => true,
+          orElse: () => false,
+        );
 
         final defaultPinTheme = PinTheme(
           width: 55.w,
@@ -58,7 +63,7 @@ class VerifyPasswordScreenBody extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all(16.0.w),
               child: Form(
-                //key: cubit.formKey,
+                key: cubit.formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -75,7 +80,7 @@ class VerifyPasswordScreenBody extends StatelessWidget {
                     ),
                     SizedBox(height: 32.h),
                     Pinput(
-                     // controller: cubit.otpField,
+                      controller: cubit.otpField,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'رمز التحقق مطلوب';
@@ -94,11 +99,11 @@ class VerifyPasswordScreenBody extends StatelessWidget {
                     AppTextButton(
                       buttonText: 'تأكيد',
                       onPressed: () {
-                        // if (cubit.formKey.currentState!.validate()) {
-                        //   cubit.emitVerifyPasswordStates();
-                        // }
+                        if (cubit.formKey.currentState!.validate()) {
+                          cubit.emitVerifyPasswordStates();
+                        }
                       },
-                      //isLoading: isLoading,
+                      isLoading: isLoading,
                     ),
                     SizedBox(height: 16.h),
                     Row(
@@ -110,9 +115,9 @@ class VerifyPasswordScreenBody extends StatelessWidget {
                         ),
                         InkWell(
                           onTap: () async {
-                           // await context
-                               // .read<ForgetPasswordCubit>()
-                             //   .emitForgetPasswordStates();
+                           await context
+                               .read<ForgetPasswordCubit>()
+                               .emitForgetPasswordStates();
                             if (context.mounted) {
                               AwesomeDialog(
                                 context: context,
@@ -160,7 +165,7 @@ class VerifyPasswordScreenBody extends StatelessWidget {
             ),
           ),
         );
-      }
-    //);
+      },
+    );
   }
-//}
+}

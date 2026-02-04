@@ -7,7 +7,7 @@ class AppRegex {
 
   static bool isPasswordValid(String password) {
     return RegExp(
-      r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
+      r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$",
     ).hasMatch(password);
   }
 
@@ -28,16 +28,13 @@ class AppRegex {
   }
 
   static bool hasSpecialCharacter(String password) {
-    return RegExp(r'^(?=.*?[@$!%*?&])').hasMatch(password);
+    return RegExp(r'^(?=.*?[@#$!%*?&])').hasMatch(password);
   }
 
   static bool hasMinLength(String password) {
     return RegExp(r'^(?=.{8,})').hasMatch(password);
   }
 
-  // دوال إرجاع رسائل الخطأ بالعربية
-
-  /// التحقق من البريد الإلكتروني وإرجاع رسالة الخطأ
   static String? validateEmail(String? email) {
     if (email == null || email.isEmpty) {
       return 'البريد الإلكتروني مطلوب';
@@ -48,7 +45,6 @@ class AppRegex {
     return null;
   }
 
-  /// التحقق من كلمة المرور وإرجاع رسالة الخطأ
   static String? validatePassword(String? password) {
     if (password == null || password.isEmpty) {
       return 'كلمة المرور مطلوبة';
@@ -66,7 +62,7 @@ class AppRegex {
       return 'كلمة المرور يجب أن تحتوي على رقم على الأقل';
     }
     if (!hasSpecialCharacter(password)) {
-      return 'كلمة المرور يجب أن تحتوي على رمز خاص (@!%*?&) على الأقل';
+      return 'كلمة المرور يجب أن تحتوي على رمز خاص (#@!%*?&) على الأقل';
     }
     if (!isPasswordValid(password)) {
       return 'كلمة المرور يجب أن تحتوي على حرف كبير، صغير، رقم ورمز خاص';
@@ -74,7 +70,6 @@ class AppRegex {
     return null;
   }
 
-  /// التحقق من رقم الهاتف وإرجاع رسالة الخطأ
   static String? validatePhoneNumber(String? phoneNumber) {
     if (phoneNumber == null || phoneNumber.isEmpty) {
       return 'رقم الهاتف مطلوب';
@@ -85,17 +80,6 @@ class AppRegex {
     return null;
   }
 
-  /// الحصول على رسالة متطلبات كلمة المرور
-  static String getPasswordRequirements() {
-    return 'كلمة المرور يجب أن تحتوي على:\n'
-        '• 8 أحرف على الأقل\n'
-        '• حرف كبير واحد على الأقل\n'
-        '• حرف صغير واحد على الأقل\n'
-        '• رقم واحد على الأقل\n'
-        '• رمز خاص واحد على الأقل (@!%*?&)';
-  }
-
-  /// التحقق من الاسم الأول وإرجاع رسالة الخطأ
   static String? validateFirstName(String? firstName) {
     if (firstName == null || firstName.isEmpty) {
       return 'الاسم الأول مطلوب';
@@ -106,7 +90,6 @@ class AppRegex {
     return null;
   }
 
-  /// التحقق من اسم العائلة وإرجاع رسالة الخطأ
   static String? validateLastName(String? lastName) {
     if (lastName == null || lastName.isEmpty) {
       return 'اسم العائلة مطلوب';
@@ -117,7 +100,6 @@ class AppRegex {
     return null;
   }
 
-  /// التحقق من تأكيد كلمة المرور وإرجاع رسالة الخطأ
   static String? validateConfirmPassword(
     String? confirmPassword,
     String? password,
@@ -131,26 +113,9 @@ class AppRegex {
     return null;
   }
 
-  /// التحقق من تاريخ الميلاد وإرجاع رسالة الخطأ
   static String? validateDateOfBirth(String? dateOfBirth) {
     if (dateOfBirth == null || dateOfBirth.isEmpty) {
       return 'تاريخ الميلاد مطلوب';
-    }
-    return null;
-  }
-
-  /// التحقق من نوع المستخدم وإرجاع رسالة الخطأ
-  static String? validateUserType(String? userType) {
-    if (userType == null || userType.isEmpty) {
-      return '      نوع المستخدم مطلوب';
-    }
-    return null;
-  }
-
-  /// التحقق من الجنس وإرجاع رسالة الخطأ
-  static String? validateGender(String? gender) {
-    if (gender == null || gender.isEmpty) {
-      return 'الجنس مطلوب';
     }
     return null;
   }
