@@ -17,6 +17,7 @@ class PersonalInfoStep extends StatelessWidget {
   final String? selectedGovernorate;
   final ValueChanged<String?> onGovernorateChanged;
   final DateTime? selectedDate;
+  final TextEditingController dateController;
   final ValueChanged<DateTime> onPickDate;
 
   const PersonalInfoStep({
@@ -32,6 +33,7 @@ class PersonalInfoStep extends StatelessWidget {
     required this.selectedGovernorate,
     required this.onGovernorateChanged,
     required this.selectedDate,
+    required this.dateController,
     required this.onPickDate,
   });
 
@@ -39,11 +41,21 @@ class PersonalInfoStep extends StatelessWidget {
     final initial = DateTime.now().subtract(const Duration(days: 365 * 25));
     final picked = await showDatePicker(
       context: context,
-      initialDate: initial,
+      initialDate: selectedDate ?? initial,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
-        return Theme(data: Theme.of(context).copyWith(), child: child!);
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(primary: ColorsManager.primary),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: ColorsManager.primary,
+              ),
+            ),
+          ),
+          child: child!,
+        );
       },
     );
     if (picked != null) onPickDate(picked);
@@ -135,9 +147,13 @@ class PersonalInfoStep extends StatelessWidget {
               onChanged: onGovernorateChanged,
             ),
             SizedBox(height: 12.h),
-            Text('تاريخ الميلاد', style: TextStyles.font14BlackRegular),
+            Text(
+              'تاريخ الميلاد (إختيارى)',
+              style: TextStyles.font14BlackRegular,
+            ),
             SizedBox(height: 8.h),
             AppTextFormField(
+              controller: dateController,
               hintText: selectedDate == null
                   ? 'يوم/شهر/سنة'
                   : '${selectedDate!.year}/${selectedDate!.month}/${selectedDate!.day}',
@@ -154,7 +170,7 @@ class PersonalInfoStep extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12.h),
-            Text('رقم الهاتف', style: TextStyles.font14BlackRegular),
+            Text('رقم الهاتف (إختيارى)', style: TextStyles.font14BlackRegular),
             SizedBox(height: 8.h),
             AppTextFormField(
               controller: phoneController,

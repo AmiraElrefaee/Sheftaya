@@ -34,39 +34,33 @@ class ProofOfIdentityStep extends StatelessWidget {
             style: TextStyles.font16BlackBold.copyWith(fontSize: 20.sp),
           ),
           SizedBox(height: 12.h),
-          Text(
-            'صورة وجه البطاقة (إجباري)',
-            style: TextStyles.font14BlackRegular,
-          ),
+          Text('صورة وجه البطاقة', style: TextStyles.font14BlackRegular),
           SizedBox(height: 8.h),
           UploadTile(
             label: idFront == null
-                ? 'ارفع الملف هنا'
+                ? 'ارفع الصورة هنا'
                 : idFront!.path.split('/').last,
             onPick: onPickIdFront,
             file: idFront,
             acceptPdf: false,
           ),
           SizedBox(height: 12.h),
-          Text(
-            'صورة خلفية البطاقة (إجباري)',
-            style: TextStyles.font14BlackRegular,
-          ),
+          Text('صورة خلفية البطاقة', style: TextStyles.font14BlackRegular),
           SizedBox(height: 8.h),
           UploadTile(
             label: idBack == null
-                ? 'ارفع الملف هنا'
+                ? 'ارفع الصورة هنا'
                 : idBack!.path.split('/').last,
             onPick: onPickIdBack,
             file: idBack,
             acceptPdf: false,
           ),
           SizedBox(height: 12.h),
-          Text('صورة شخصية لك (اختياري)', style: TextStyles.font14BlackRegular),
+          Text('صورة شخصية لك (إختياري)', style: TextStyles.font14BlackRegular),
           SizedBox(height: 8.h),
           UploadTile(
             label: personalPhoto == null
-                ? 'ارفع الملف هنا'
+                ? 'ارفع الصورة هنا'
                 : personalPhoto!.path.split('/').last,
             onPick: onPickPersonalPhoto,
             file: personalPhoto,

@@ -86,7 +86,7 @@ class WorkerSignUp extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
           Text(
-            'الشهادة الصحية (اختياري)',
+            'الشهادة الصحية (إختياري)',
             style: TextStyles.font14BlackRegular,
           ),
           SizedBox(height: 8.h),

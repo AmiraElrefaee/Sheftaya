@@ -50,6 +50,19 @@ class EmployerSignUp extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Container(
+            padding: EdgeInsets.all(8.h),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: Colors.grey, width: 1.w),
+            ),
+            child: Text(
+              '⚠️ إذا كنت صاحب مؤسسة، يرجى تزويدنا بمعلومات عن مؤسستك لتتمكن من نشر الوظائف المتاحة لديك.',
+              style: TextStyles.font12PrimarySemiBold,
+            ),
+          ),
+          SizedBox(height: 16.h),
           Text(
             'معلومات المؤسسة',
             style: TextStyles.font16BlackBold.copyWith(fontSize: 20.sp),
@@ -113,7 +126,7 @@ class EmployerSignUp extends StatelessWidget {
           ),
 
           SizedBox(height: 12.h),
-          Text('صور المؤسسة (اختياري)', style: TextStyles.font14BlackRegular),
+          Text('صور المؤسسة (إختياري)', style: TextStyles.font14BlackRegular),
           SizedBox(height: 8.h),
           UploadTile(
             label: 'ارفع صور المؤسسة',

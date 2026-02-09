@@ -6,12 +6,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
+import 'package:sheftaya/core/utils/snackbar.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/core/widgets/custom_toggle_button.dart';
 import 'package:sheftaya/features/sign_up/presentation/widgets/employer_sign_up.dart';
 import 'package:sheftaya/features/sign_up/presentation/widgets/worker_sign_up.dart';
 import 'personal_info_step.dart';
 import 'proof_of_identity_step.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 enum SignUpRole { worker, employer }
 
@@ -33,6 +35,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
   final TextEditingController passwordConfirmController =
       TextEditingController();
   String? selectedGovernorate;
@@ -135,7 +138,6 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
     'آخر',
   ];
 
-  // generic pick image
   Future<File?> _pickImage({bool pickImageOnly = true}) async {
     try {
       if (pickImageOnly) {
@@ -173,7 +175,6 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
 
   void _submit() {
     final isValid = _formKey.currentState?.validate() ?? false;
-
     final proofOk = idFront != null && idBack != null;
 
     bool roleOk = true;
@@ -186,15 +187,19 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
     }
 
     if (!isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إكمال الحقول المطلوبة')),
+      customSnackBar(
+        context,
+        'يرجى إكمال الحقول المطلوبة',
+        ColorsManager.error,
       );
       return;
     }
 
     if (!proofOk) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى رفع صورة وجه وخلفية البطاقة')),
+      customSnackBar(
+        context,
+        'يرجى إرفاق صور إثبات الهوية',
+        ColorsManager.error,
       );
       _pageController.animateToPage(
         1,
@@ -205,8 +210,10 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
     }
 
     if (!roleOk) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('يرجى إكمال بيانات المرحلة الأخيرة')),
+      customSnackBar(
+        context,
+        'يرجى إكمال بيانات المرحلة الأخيرة',
+        ColorsManager.error,
       );
       _pageController.animateToPage(
         2,
@@ -216,7 +223,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
       return;
     }
 
-    // // Build payload
+        // // Build payload
     // final Map<String, dynamic> payload = {
     //   'first_name': firstNameController.text.trim(),
     //   'last_name': lastNameController.text.trim(),
@@ -245,13 +252,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const SizedBox.shrink(),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: IconThemeData(color: ColorsManager.black),
-      ),
-      backgroundColor: Colors.white,
+      appBar: AppBar(),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -275,32 +276,32 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                 },
               ),
               SizedBox(height: 12.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (i) {
-                  final active = _pageIndex == i;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: EdgeInsets.symmetric(horizontal: 6.w),
-                    width: active ? 28.w : 12.w,
-                    height: 12.h,
-                    decoration: BoxDecoration(
-                      color: active
-                          ? ColorsManager.primary
-                          : ColorsManager.lightGrey,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                  );
-                }),
+              Center(
+                child: SmoothPageIndicator(
+                  controller: _pageController,
+                  count: 3,
+                  effect: WormEffect(
+                    dotHeight: 12.r,
+                    dotWidth: 12.r,
+                    spacing: 8.w,
+                    activeDotColor: ColorsManager.primary,
+                    dotColor: ColorsManager.lightGrey,
+                  ),
+                  onDotClicked: (index) {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.ease,
+                    );
+                  },
+                ),
               ),
               SizedBox(height: 14.h),
               Expanded(
                 child: PageView(
                   controller: _pageController,
                   physics: const BouncingScrollPhysics(),
-                  onPageChanged: (idx) {
-                    setState(() => _pageIndex = idx);
-                  },
+                  onPageChanged: (idx) => setState(() => _pageIndex = idx),
                   children: [
                     SingleChildScrollView(
                       child: PersonalInfoStep(
@@ -316,7 +317,11 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                         onGovernorateChanged: (v) =>
                             setState(() => selectedGovernorate = v),
                         selectedDate: selectedDate,
-                        onPickDate: (d) => setState(() => selectedDate = d),
+                        onPickDate: (d) {
+                          dateController.text = '${d.year}/${d.month}/${d.day}';
+                          setState(() => selectedDate = d);
+                        },
+                        dateController: dateController,
                       ),
                     ),
                     SingleChildScrollView(
@@ -394,6 +399,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                   ],
                 ),
               ),
+
               AppTextButton(
                 buttonText: _pageIndex < 2 ? 'التالي' : 'سجل الآن',
                 onPressed: () {
@@ -415,9 +421,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                     ),
                   ),
                   InkWell(
-                    onTap: () {
-                      GoRouter.of(context).pop();
-                    },
+                    onTap: () => GoRouter.of(context).pop(),
                     child: Text(
                       'سجل الدخول',
                       style: TextStyles.font14PrimaryBold.copyWith(
