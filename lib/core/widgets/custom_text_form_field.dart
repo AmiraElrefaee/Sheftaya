@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
+import 'package:sheftaya/core/theme/text_styles.dart';
 
 class AppTextFormField extends StatefulWidget {
   const AppTextFormField({
@@ -199,10 +200,9 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.r),
                 borderSide: BorderSide(
-                  color:
-                      widget.hasError
-                          ? ColorsManager.error
-                          : ColorsManager.primary,
+                  color: widget.hasError
+                      ? ColorsManager.error
+                      : ColorsManager.primary,
                   width: 2.w,
                 ),
               ),
@@ -225,7 +225,8 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
           ),
           hintText: widget.hintText,
           hintStyle:
-              widget.hintStyle ?? const TextStyle(color: ColorsManager.grey),
+              widget.hintStyle ??
+              TextStyles.font14BlackRegular.copyWith(color: ColorsManager.grey),
           suffixIcon: _buildSuffixIcon(),
           prefixIcon: widget.prefixIcon,
           filled: true,
