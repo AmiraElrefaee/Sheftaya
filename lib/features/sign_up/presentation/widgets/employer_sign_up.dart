@@ -16,6 +16,9 @@ class EmployerSignUp extends StatelessWidget {
   final TextEditingController institutionAddressController;
   final TextEditingController taxNumberController;
   final VoidCallback onPickInstitutionImages;
+  final List<String> institutionGovernorates;
+  final String? institutiSelectedGovernorate;
+  final ValueChanged<String?> institutionOnGovernorateChanged;
 
   const EmployerSignUp({
     super.key,
@@ -28,6 +31,9 @@ class EmployerSignUp extends StatelessWidget {
     required this.institutionAddressController,
     required this.taxNumberController,
     required this.onPickInstitutionImages,
+    required this.institutionGovernorates,
+    this.institutiSelectedGovernorate,
+    required this.institutionOnGovernorateChanged,
   });
 
   @override
@@ -102,7 +108,15 @@ class EmployerSignUp extends StatelessWidget {
             hint: 'اختر الوظائف المتاحة لديك',
             onChanged: onAvailableJobsChanged,
           ),
-
+          SizedBox(height: 12.h),
+          Text('اين تقع مؤسستك', style: TextStyles.font14BlackRegular),
+          SizedBox(height: 8.h),
+          AppDropdown(
+            items: institutionGovernorates,
+            value: institutiSelectedGovernorate,
+            hint: 'اختر المحافظة',
+            onChanged: institutionOnGovernorateChanged,
+          ),
           SizedBox(height: 12.h),
           Text('عنوان المؤسسة التفصيلي', style: TextStyles.font14BlackRegular),
           SizedBox(height: 8.h),

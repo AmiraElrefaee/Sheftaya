@@ -92,14 +92,12 @@ class _CreateNewPasswordScreenBodyState
                     ),
                     SizedBox(height: 8.h),
                     AppTextFormField(
-                      controller: cubit.passwordConfirmController,
                       hintText: 'ادخل كلمه مرورك',
                       obscureText: isConfirmPasswordObscureText,
-                      validator:
-                          (value) => AppRegex.validateConfirmPassword(
-                            value,
-                            cubit.newPasswordController.text,
-                          ),
+                      validator: (value) => AppRegex.validateConfirmPassword(
+                        value,
+                        cubit.newPasswordController.text,
+                      ),
                       suffixIcon: InkWell(
                         onTap: () {
                           setState(() {
@@ -132,6 +130,6 @@ class _CreateNewPasswordScreenBodyState
           ),
         );
       },
-   );
+    );
   }
 }

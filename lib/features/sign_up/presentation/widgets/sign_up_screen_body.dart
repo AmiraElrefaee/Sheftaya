@@ -56,6 +56,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
       TextEditingController();
   String? institutionType;
   List<String> availableJobs = [];
+  String? institutiSelectedGovernorate;
   final TextEditingController institutionAddressController =
       TextEditingController();
   final TextEditingController taxNumberController = TextEditingController();
@@ -223,7 +224,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
       return;
     }
 
-        // // Build payload
+    // // Build payload
     // final Map<String, dynamic> payload = {
     //   'first_name': firstNameController.text.trim(),
     //   'last_name': lastNameController.text.trim(),
@@ -393,6 +394,14 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                                     setState(() => institutionImages = f);
                                   }
                                 },
+                                institutionGovernorates: [...governorates],
+                                institutionOnGovernorateChanged:
+                                    (String? value) {
+                                      setState(
+                                        () => institutiSelectedGovernorate =
+                                            value,
+                                      );
+                                    },
                               ),
                       ),
                     ),

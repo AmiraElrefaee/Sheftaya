@@ -8,16 +8,8 @@ part of 'create_new_password_request_body.dart';
 
 CreateNewPasswordRequestBody _$CreateNewPasswordRequestBodyFromJson(
   Map<String, dynamic> json,
-) => CreateNewPasswordRequestBody(
-  email: json['email'] as String,
-  newPassword: json['newPassword'] as String,
-  passwordConfirm: json['passwordConfirm'] as String,
-);
+) => CreateNewPasswordRequestBody(newPassword: json['newPassword'] as String);
 
 Map<String, dynamic> _$CreateNewPasswordRequestBodyToJson(
   CreateNewPasswordRequestBody instance,
-) => <String, dynamic>{
-  'email': instance.email,
-  'newPassword': instance.newPassword,
-  'passwordConfirm': instance.passwordConfirm,
-};
+) => <String, dynamic>{'newPassword': instance.newPassword};

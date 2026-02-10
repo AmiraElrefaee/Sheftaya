@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sheftaya/core/constants/shared_pref_helper.dart';
-import 'package:sheftaya/core/constants/shared_pref_keys.dart';
 import 'package:sheftaya/core/networking/server_result.dart';
 import '../../data/models/create_new_password_model/create_new_password_request_body.dart';
 import '../../data/repos/create_new_password.dart';
@@ -14,8 +12,6 @@ class CreateNewPasswordCubit extends Cubit<CreatePasswordState> {
   final CreateNewPasswordRepo _createNewPasswordRepo;
 
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController passwordConfirmController =
-      TextEditingController();
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -24,11 +20,7 @@ class CreateNewPasswordCubit extends Cubit<CreatePasswordState> {
 
     final response = await _createNewPasswordRepo.createNewPassword(
       CreateNewPasswordRequestBody(
-        email: await SharedPrefHelper.getSecuredString(
-          SharedPrefKeys.userEmail,
-        ),
         newPassword: newPasswordController.text,
-        passwordConfirm: passwordConfirmController.text,
       ),
     );
 

@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:sheftaya/core/networking/api_constants.dart';
@@ -9,6 +8,10 @@ import 'package:sheftaya/features/forget_password/data/models/verify_password_mo
 import 'package:sheftaya/features/forget_password/data/models/verify_password_model/verify_password_response.dart';
 import 'package:sheftaya/features/login/data/models/login_request_body.dart';
 import 'package:sheftaya/features/login/data/models/login_response.dart';
+import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_request_body.dart';
+import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_response.dart';
+import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_request_body.dart';
+import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_response.dart';
 
 part 'api_service.g.dart';
 
@@ -18,13 +21,17 @@ abstract class ApiService {
   @POST(ApiConstants.login)
   Future<LoginResponse> login(@Body() LoginRequestBody loginRequestBody);
 
-  // @POST(ApiConstants.signUp)
-  // Future<SignupResponse> signup(@Body() SignupRequestBody signupRequestBody);
-  // @POST(ApiConstants.verifyAccount)
-  // Future<VerifyAccountResponse> verifyAccount(
-  //   @Body() VerifyAccountRequestBody verifyAccountRequestBody,
-  //   @Header('Authorization') String token,
-  // );
+  @POST(ApiConstants.signUp)
+  Future<SignupResponse> signup(
+    @Header("Authorization") String token,
+    @Body() SignupRequestBody signupRequestBody,
+  );
+
+  @POST(ApiConstants.verifyAccount)
+  Future<VerifySignupResponse> verifySignup(
+    @Body() VerifySignupRequestBody body,
+  );
+
   @POST(ApiConstants.forgetPassword)
   Future<ForgetPassResponse> forgetPassword(
     @Body() ForgetPassRequestBody forgetPassRequestBody,
