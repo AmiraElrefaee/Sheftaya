@@ -18,6 +18,9 @@ SignupRequestBody _$SignupRequestBodyFromJson(Map<String, dynamic> json) =>
       preferredLang: json['preferredLang'] as String?,
       city: json['city'] as String?,
       birthDate: json['birthDate'] as String?,
+      frontIdImage: json['frontIdImage'] as String?,
+      backIdImage: json['backIdImage'] as String?,
+      selfieImage: json['selfieImage'] as String?,
       employerProfile: json['employerProfile'] == null
           ? null
           : EmployerProfile.fromJson(
@@ -42,6 +45,9 @@ Map<String, dynamic> _$SignupRequestBodyToJson(SignupRequestBody instance) =>
       'preferredLang': instance.preferredLang,
       'city': instance.city,
       'birthDate': instance.birthDate,
+      'frontIdImage': instance.frontIdImage,
+      'backIdImage': instance.backIdImage,
+      'selfieImage': instance.selfieImage,
       'employerProfile': instance.employerProfile?.toJson(),
       'workerProfile': instance.workerProfile?.toJson(),
     };
@@ -52,6 +58,9 @@ EmployerProfile _$EmployerProfileFromJson(Map<String, dynamic> json) =>
       companyType: json['companyType'] as String,
       companyAddress: json['companyAddress'] as String,
       city: json['city'] as String,
+      companyImages: (json['companyImages'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$EmployerProfileToJson(EmployerProfile instance) =>
@@ -60,6 +69,7 @@ Map<String, dynamic> _$EmployerProfileToJson(EmployerProfile instance) =>
       'companyType': instance.companyType,
       'companyAddress': instance.companyAddress,
       'city': instance.city,
+      'companyImages': instance.companyImages,
     };
 
 WorkerProfile _$WorkerProfileFromJson(Map<String, dynamic> json) =>
@@ -79,6 +89,7 @@ WorkerProfile _$WorkerProfileFromJson(Map<String, dynamic> json) =>
       expectedHourlyRate: ExpectedHourlyRate.fromJson(
         json['expectedHourlyRate'] as Map<String, dynamic>,
       ),
+      healthCertificate: json['healthCertificate'] as String?,
     );
 
 Map<String, dynamic> _$WorkerProfileToJson(WorkerProfile instance) =>
@@ -90,6 +101,7 @@ Map<String, dynamic> _$WorkerProfileToJson(WorkerProfile instance) =>
       'experienceYears': instance.experienceYears,
       'availability': instance.availability.map((e) => e.toJson()).toList(),
       'expectedHourlyRate': instance.expectedHourlyRate.toJson(),
+      'healthCertificate': instance.healthCertificate,
     };
 
 Availability _$AvailabilityFromJson(Map<String, dynamic> json) => Availability(

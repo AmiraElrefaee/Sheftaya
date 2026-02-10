@@ -92,7 +92,7 @@ class _ApiService implements ApiService {
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            'auth/verifyEmailUser',
+            'auth/signup/verify',
             queryParameters: queryParameters,
             data: _data,
           )
@@ -170,15 +170,17 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<void> createNewPassword(
-    CreateNewPasswordRequestBody createNewPasswordRequestBody,
+  Future<CreateNewPasswordResponse> createNewPassword(
+    String token,
+    CreateNewPasswordRequestBody body,
   ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
     final _data = <String, dynamic>{};
-    _data.addAll(createNewPasswordRequestBody.toJson());
-    final _options = _setStreamType<void>(
+    _data.addAll(body.toJson());
+    final _options = _setStreamType<CreateNewPasswordResponse>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -188,7 +190,15 @@ class _ApiService implements ApiService {
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    await _dio.fetch<void>(_options);
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late CreateNewPasswordResponse _value;
+    try {
+      _value = CreateNewPasswordResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

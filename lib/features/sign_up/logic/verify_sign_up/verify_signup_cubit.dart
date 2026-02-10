@@ -85,60 +85,63 @@ class VerifySignupCubit extends Cubit<VerifySignupState> {
 
   // ================= Save to Local =================
   Future<void> _saveUserData(VerifySignupResponse response) async {
-    try {
-      final user = response.user;
+  try {
+    final user = response.user;
 
-      if ((response.token?.isNotEmpty ?? false)) {
+    if ((response.token?.isNotEmpty ?? false)) {
+      await SharedPrefHelper.setSecuredString(
+        SharedPrefKeys.userToken,
+        response.token!,         
+      );
+      log('✅ Token saved: ${response.token}');
+    }
+
+    // باقي البيانات (اختياري)
+    if (user != null) {
+      if ((user.firstName?.isNotEmpty ?? false)) {
         await SharedPrefHelper.setSecuredString(
-          SharedPrefKeys.userToken,
-          response.token!,
+          SharedPrefKeys.userFirstName,
+          user.firstName!,
         );
       }
-
-      if (user != null) {
-        if ((user.firstName?.isNotEmpty ?? false)) {
-          await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userFirstName,
-            user.firstName!,
-          );
-        }
-        if ((user.lastName?.isNotEmpty ?? false)) {
-          await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userLastName,
-            user.lastName!,
-          );
-        }
-        if ((user.email?.isNotEmpty ?? false)) {
-          await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userEmail,
-            user.email!,
-          );
-        }
-        if ((user.role?.isNotEmpty ?? false)) {
-          await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userRole,
-            user.role!,
-          );
-        }
-        if ((user.phone?.isNotEmpty ?? false)) {
-          await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userPhone,
-            user.phone!,
-          );
-        }
-        if ((user.imageProfile?.isNotEmpty ?? false)) {
-          await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userProfileImage,
-            user.imageProfile!,
-          );
-        }
+      if ((user.lastName?.isNotEmpty ?? false)) {
+        await SharedPrefHelper.setSecuredString(
+          SharedPrefKeys.userLastName,
+          user.lastName!,
+        );
       }
-
-      log('✅ Verified user data saved locally');
-    } catch (e) {
-      log('❌ Error saving verified user data: $e');
+      if ((user.email?.isNotEmpty ?? false)) {
+        await SharedPrefHelper.setSecuredString(
+          SharedPrefKeys.userEmail,
+          user.email!,
+        );
+      }
+      if ((user.role?.isNotEmpty ?? false)) {
+        await SharedPrefHelper.setSecuredString(
+          SharedPrefKeys.userRole,
+          user.role!,
+        );
+      }
+      if ((user.phone?.isNotEmpty ?? false)) {
+        await SharedPrefHelper.setSecuredString(
+          SharedPrefKeys.userPhone,
+          user.phone!,
+        );
+      }
+      if ((user.imageProfile?.isNotEmpty ?? false)) {
+        await SharedPrefHelper.setSecuredString(
+          SharedPrefKeys.userProfileImage,
+          user.imageProfile!,
+        );
+      }
     }
+
+    log('✅ Verified user data saved locally');
+  } catch (e) {
+    log('❌ Error saving verified user data: $e');
   }
+}
+
 
   @override
   Future<void> close() {

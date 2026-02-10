@@ -70,10 +70,8 @@ class AppRegex {
     return null;
   }
 
-  static String? validatePhoneNumber(String? phoneNumber) {
-    if (phoneNumber == null || phoneNumber.isEmpty) {
-      return 'رقم الهاتف مطلوب';
-    }
+  static String? validateOptionalPhone(String? phoneNumber) {
+    if (phoneNumber == null || phoneNumber.trim().isEmpty) return null;
     if (!isPhoneNumberValid(phoneNumber)) {
       return 'رقم الهاتف غير صحيح. يجب أن يبدأ بـ 010, 011, 012, أو 015 ويتكون من 11 رقم';
     }
@@ -109,13 +107,6 @@ class AppRegex {
     }
     if (confirmPassword != password) {
       return 'كلمة المرور غير متطابقة';
-    }
-    return null;
-  }
-
-  static String? validateDateOfBirth(String? dateOfBirth) {
-    if (dateOfBirth == null || dateOfBirth.isEmpty) {
-      return 'تاريخ الميلاد مطلوب';
     }
     return null;
   }

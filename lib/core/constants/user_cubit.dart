@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sheftaya/core/constants/shared_pref_helper.dart';
@@ -50,7 +49,6 @@ class UserCubit extends Cubit<UserState> {
 
   void clearUser() async {
     emit(UserState());
-    await SharedPrefHelper.removeSecuredData('user_data');
     await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userId);
     await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userEmail);
     await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userPhone);
@@ -66,7 +64,6 @@ Future<void> saveUserDataLocally(UserModel user) async {
     if (user.token != null) userMap['token'] = user.token;
     if (user.birthday != null) userMap['data']['birthday'] = user.birthday;
 
-    await SharedPrefHelper.setSecuredString('user_data', jsonEncode(userMap));
     await SharedPrefHelper.setSecuredString(SharedPrefKeys.userId, user.id);
     await SharedPrefHelper.setSecuredString(
       SharedPrefKeys.userEmail,
@@ -101,23 +98,45 @@ Future<void> saveUserDataLocally(UserModel user) async {
 
 Future<UserModel?> getSavedUserData() async {
   try {
-    final jsonString = await SharedPrefHelper.getSecuredString('user_data');
-    if (jsonString.isNotEmpty) {
-      final Map<String, dynamic> map = jsonDecode(jsonString);
-      return UserModel.fromJson(map);
-    } else {
-      return null;
-    }
-  } catch (e) {
-    await SharedPrefHelper.removeSecuredData('user_data');
-    await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userId);
-    await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userEmail);
-    await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userPhone);
-    await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userToken);
-    await SharedPrefHelper.removeSecuredData(SharedPrefKeys.userRole);
-    await SharedPrefHelper.removeSecuredData(
+    final token = await SharedPrefHelper.getSecuredString(
+      SharedPrefKeys.userToken,
+    );
+
+    if (token.isEmpty) return null;
+
+    final id = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userId);
+    final email = await SharedPrefHelper.getSecuredString(
+      SharedPrefKeys.userEmail,
+    );
+    final phone = await SharedPrefHelper.getSecuredString(
+      SharedPrefKeys.userPhone,
+    );
+    final role = await SharedPrefHelper.getSecuredString(
+      SharedPrefKeys.userRole,
+    );
+    final profile = await SharedPrefHelper.getSecuredString(
       SharedPrefKeys.userProfileImage,
     );
+
+    final firstName = await SharedPrefHelper.getSecuredString(
+      SharedPrefKeys.userFirstName,
+    );
+    final lastName = await SharedPrefHelper.getSecuredString(
+      SharedPrefKeys.userLastName,
+    );
+
+    return UserModel(
+      id: id,
+      firstname: firstName,
+      lastname: lastName,
+      email: email,
+      phone: phone,
+      role: role,
+      token: token,
+      profileImg: profile,
+    );
+  } catch (e) {
+    log('❌ Error restoring user: $e');
     return null;
   }
 }

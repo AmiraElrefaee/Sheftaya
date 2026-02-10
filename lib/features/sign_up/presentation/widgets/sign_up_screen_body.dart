@@ -1,14 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:sheftaya/app/router.dart';
+import 'package:sheftaya/core/constants/shared_pref_helper.dart';
+import 'package:sheftaya/core/constants/shared_pref_keys.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/utils/snackbar.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/core/widgets/custom_toggle_button.dart';
+import 'package:sheftaya/features/sign_up/logic/sign_up/sign_up_cubit.dart';
+import 'package:sheftaya/features/sign_up/logic/sign_up/sign_up_state.dart';
 import 'package:sheftaya/features/sign_up/presentation/widgets/employer_sign_up.dart';
 import 'package:sheftaya/features/sign_up/presentation/widgets/worker_sign_up.dart';
 import 'personal_info_step.dart';
@@ -27,40 +33,18 @@ class SignUpScreenBody extends StatefulWidget {
 class _SignUpScreenBodyState extends State<SignUpScreenBody> {
   final PageController _pageController = PageController();
   int _pageIndex = 0;
-  SignUpRole _role = SignUpRole.worker;
 
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-  final TextEditingController passwordConfirmController =
-      TextEditingController();
   String? selectedGovernorate;
   DateTime? selectedDate;
 
-  File? idFront;
-  File? idBack;
-  File? personalPhoto;
-
-  final TextEditingController educationController = TextEditingController();
   String? workerStatus;
   List<String> previousJobs = [];
   List<String> dailyJobs = [];
   List<String> searchingJobs = [];
-  File? healthCertificate;
 
-  final TextEditingController institutionNameController =
-      TextEditingController();
   String? institutionType;
   List<String> availableJobs = [];
   String? institutiSelectedGovernorate;
-  final TextEditingController institutionAddressController =
-      TextEditingController();
-  final TextEditingController taxNumberController = TextEditingController();
-  File? institutionImages;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -139,6 +123,12 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
     'آخر',
   ];
 
+  bool _showGovernorateError = false;
+  bool _showWorkerStatusError = false;
+  bool _showSearchingJobsError = false;
+  bool _showPreviousJobsError = false;
+  bool _showEducationError = false;
+
   Future<File?> _pickImage({bool pickImageOnly = true}) async {
     try {
       if (pickImageOnly) {
@@ -169,37 +159,57 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.ease,
       );
-    } else {
-      _submit();
     }
   }
 
-  void _submit() {
-    final isValid = _formKey.currentState?.validate() ?? false;
-    final proofOk = idFront != null && idBack != null;
+  Future<void> _submit(SignupCubit? cubit) async {
+    if (cubit == null) return;
 
-    bool roleOk = true;
-    if (_role == SignUpRole.worker) {
-      if (workerStatus == null || workerStatus!.isEmpty) roleOk = false;
-      if (searchingJobs.isEmpty) roleOk = false;
+    if (selectedDate != null) {
+      cubit.birthDateController.text =
+          '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}';
     } else {
-      if (institutionNameController.text.trim().isEmpty) roleOk = false;
-      if (institutionType == null || institutionType!.isEmpty) roleOk = false;
+      cubit.birthDateController.text = '';
     }
 
-    if (!isValid) {
-      customSnackBar(
-        context,
-        'يرجى إكمال الحقول المطلوبة',
-        ColorsManager.error,
+    cubit.cityController.text = selectedGovernorate ?? '';
+
+    if (cubit.selectedRole == 'worker') {
+      cubit.professionalStatusController.text = workerStatus ?? '';
+      cubit.pastExperience = previousJobs;
+      cubit.jobsLookedFor = searchingJobs;
+    } else {
+      cubit.companyTypeController.text = institutionType ?? '';
+      cubit.companyCityController.text = institutiSelectedGovernorate ?? '';
+    }
+
+    final isValid = cubit.formKey.currentState?.validate() ?? false;
+    final isGovernorateSelected = selectedGovernorate != null;
+
+    if (!isValid || !isGovernorateSelected) {
+      if (!isValid) {
+        customSnackBar(
+          context,
+          'يرجى إكمال الحقول المطلوبة بشكل صحيح',
+          ColorsManager.error,
+        );
+      }
+      setState(() {
+        _showGovernorateError = !isGovernorateSelected;
+      });
+      _pageController.animateToPage(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
       );
       return;
     }
 
+    final proofOk = cubit.frontIdImage != null && cubit.backIdImage != null;
     if (!proofOk) {
       customSnackBar(
         context,
-        'يرجى إرفاق صور إثبات الهوية',
+        'يرجى إرفاق صورتي وجه وخلف البطاقة',
         ColorsManager.error,
       );
       _pageController.animateToPage(
@@ -210,241 +220,311 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
       return;
     }
 
-    if (!roleOk) {
-      customSnackBar(
-        context,
-        'يرجى إكمال بيانات المرحلة الأخيرة',
-        ColorsManager.error,
-      );
-      _pageController.animateToPage(
-        2,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.ease,
-      );
-      return;
+    if (cubit.selectedRole == 'worker') {
+      final isWorkerStatusSelected =
+          workerStatus != null && workerStatus!.isNotEmpty;
+      final isPreviousJobsSelected = previousJobs.isNotEmpty;
+      final isSearchingJobsSelected = searchingJobs.isNotEmpty;
+      final isEducationFilled = cubit.educationController.text
+          .trim()
+          .isNotEmpty;
+
+      if (!isWorkerStatusSelected ||
+          !isPreviousJobsSelected ||
+          !isSearchingJobsSelected ||
+          !isEducationFilled) {
+        setState(() {
+          _showWorkerStatusError = !isWorkerStatusSelected;
+          _showPreviousJobsError = !isPreviousJobsSelected;
+          _showSearchingJobsError = !isSearchingJobsSelected;
+          _showEducationError = !isEducationFilled;
+        });
+
+        customSnackBar(
+          context,
+          'يرجى إكمال جميع الحقول المطلوبة في المعلومات المهنية',
+          ColorsManager.error,
+        );
+
+        _pageController.animateToPage(
+          2,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
+        return;
+      }
     }
 
-    // // Build payload
-    // final Map<String, dynamic> payload = {
-    //   'first_name': firstNameController.text.trim(),
-    //   'last_name': lastNameController.text.trim(),
-    //   'email': emailController.text.trim(),
-    //   'phone': phoneController.text.trim(),
-    //   'password': passwordController.text,
-    //   'governorate': selectedGovernorate,
-    //   'date_of_birth': selectedDate?.toIso8601String(),
-    //   'role': _role == SignUpRole.worker ? 'worker' : 'employer',
-    //   // proofs/files: send multipart files
-    //   // worker fields
-    //   'education': educationController.text.trim(),
-    //   'worker_status': workerStatus,
-    //   'previous_jobs': previousJobs,
-    //   'daily_jobs': dailyJobs,
-    //   'searching_jobs': searchingJobs,
-    //   // employer fields
-    //   'institution_name': institutionNameController.text.trim(),
-    //   'institution_type': institutionType,
-    //   'available_jobs': availableJobs,
-    //   'institution_address': institutionAddressController.text.trim(),
-    //   'tax_number': taxNumberController.text.trim(),
-    // };
+    await SharedPrefHelper.setSecuredString(
+      SharedPrefKeys.userEmail,
+      cubit.emailController.text.trim(),
+    );
+    await cubit.emitSignupStates();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'إنشاء حساب',
-                style: TextStyles.font24BlackBold.copyWith(fontSize: 40.sp),
-              ),
-              SizedBox(height: 12.h),
-              CustomToggleButton(
-                labels: ['باحث عن عمل', 'صاحب العمل'],
-                initialIndex: _role == SignUpRole.employer ? 1 : 0,
-                onToggle: (index) {
-                  setState(() {
-                    _role = index == 1
-                        ? SignUpRole.employer
-                        : SignUpRole.worker;
-                  });
-                },
-              ),
-              SizedBox(height: 12.h),
-              Center(
-                child: SmoothPageIndicator(
-                  controller: _pageController,
-                  count: 3,
-                  effect: WormEffect(
-                    dotHeight: 12.r,
-                    dotWidth: 12.r,
-                    spacing: 8.w,
-                    activeDotColor: ColorsManager.primary,
-                    dotColor: ColorsManager.lightGrey,
-                  ),
-                  onDotClicked: (index) {
-                    _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.ease,
-                    );
-                  },
-                ),
-              ),
-              SizedBox(height: 14.h),
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  physics: const BouncingScrollPhysics(),
-                  onPageChanged: (idx) => setState(() => _pageIndex = idx),
-                  children: [
-                    SingleChildScrollView(
-                      child: PersonalInfoStep(
-                        formKey: _formKey,
-                        firstNameController: firstNameController,
-                        lastNameController: lastNameController,
-                        emailController: emailController,
-                        phoneController: phoneController,
-                        passwordController: passwordController,
-                        passwordConfirmController: passwordConfirmController,
-                        governorates: governorates,
-                        selectedGovernorate: selectedGovernorate,
-                        onGovernorateChanged: (v) =>
-                            setState(() => selectedGovernorate = v),
-                        selectedDate: selectedDate,
-                        onPickDate: (d) {
-                          dateController.text = '${d.year}/${d.month}/${d.day}';
-                          setState(() => selectedDate = d);
-                        },
-                        dateController: dateController,
-                      ),
-                    ),
-                    SingleChildScrollView(
-                      child: ProofOfIdentityStep(
-                        idFront: idFront,
-                        idBack: idBack,
-                        personalPhoto: personalPhoto,
-                        onPickIdFront: () async {
-                          final f = await _pickImage();
-                          if (f != null) setState(() => idFront = f);
-                        },
-                        onPickIdBack: () async {
-                          final f = await _pickImage();
-                          if (f != null) setState(() => idBack = f);
-                        },
-                        onPickPersonalPhoto: () async {
-                          final f = await _pickImage();
-                          if (f != null) setState(() => personalPhoto = f);
-                        },
-                      ),
-                    ),
-                    SingleChildScrollView(
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 24.h),
-                        child: _role == SignUpRole.worker
-                            ? WorkerSignUp(
-                                educationController: educationController,
-                                workerStatus: workerStatus,
-                                onStatusChanged: (v) =>
-                                    setState(() => workerStatus = v),
-                                previousJobs: previousJobs,
-                                dailyJobs: dailyJobs,
-                                searchingJobs: searchingJobs,
-                                onPreviousJobsChanged: (list) =>
-                                    setState(() => previousJobs = list),
-                                onDailyJobsChanged: (list) =>
-                                    setState(() => dailyJobs = list),
-                                onSearchingJobsChanged: (list) =>
-                                    setState(() => searchingJobs = list),
-                                sampleJobs: sampleJobs,
-                                healthCertificate: healthCertificate,
-                                onPickHealthCert: () async {
-                                  final f = await _pickImage(
-                                    pickImageOnly: false,
-                                  );
-                                  if (f != null) {
-                                    setState(() => healthCertificate = f);
-                                  }
-                                },
-                              )
-                            : EmployerSignUp(
-                                institutionNameController:
-                                    institutionNameController,
-                                institutionType: institutionType,
-                                onTypeChanged: (v) =>
-                                    setState(() => institutionType = v),
-                                availableJobs: availableJobs,
-                                onAvailableJobsChanged: (list) =>
-                                    setState(() => availableJobs = list),
-                                sampleJobs: sampleJobs,
-                                institutionAddressController:
-                                    institutionAddressController,
-                                taxNumberController: taxNumberController,
-                                onPickInstitutionImages: () async {
-                                  final f = await _pickImage(
-                                    pickImageOnly: false,
-                                  );
-                                  if (f != null) {
-                                    setState(() => institutionImages = f);
-                                  }
-                                },
-                                institutionGovernorates: [...governorates],
-                                institutionOnGovernorateChanged:
-                                    (String? value) {
-                                      setState(
-                                        () => institutiSelectedGovernorate =
-                                            value,
-                                      );
-                                    },
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+    return BlocConsumer<SignupCubit, SignupState>(
+      listener: (context, state) {
+        state.maybeWhen(
+          success: (data) async {
+            final messenger = ScaffoldMessenger.of(context);
+            final router = GoRouter.of(context);
+            final cubit = context.read<SignupCubit>();
 
-              AppTextButton(
-                buttonText: _pageIndex < 2 ? 'التالي' : 'سجل الآن',
-                onPressed: () {
-                  if (_pageIndex < 2) {
-                    _nextPage();
-                  } else {
-                    _submit();
-                  }
-                },
+            if (!mounted) return;
+
+            messenger.showSnackBar(
+              SnackBar(
+                content: const Text(
+                  'تم إنشاء الحساب بنجاح! يرجى تأكيد بريدك الإلكتروني',
+                ),
+                backgroundColor: ColorsManager.success,
               ),
-              SizedBox(height: 8.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            );
+
+            router.push(
+              AppRouter.kVerifyAccountScreen,
+              extra: cubit.selectedRole,
+            );
+          },
+          error: (error) {
+            customSnackBar(context, error, ColorsManager.error);
+          },
+          orElse: () {},
+        );
+      },
+      builder: (context, state) {
+        final cubit = context.read<SignupCubit>();
+        final isLoading = state.maybeWhen(
+          loading: () => true,
+          orElse: () => false,
+        );
+
+        return Scaffold(
+          appBar: AppBar(),
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'لديك حساب بالفعل؟ ',
-                    style: TextStyles.font14BlackRegular.copyWith(
-                      color: ColorsManager.grey,
+                    'إنشاء حساب',
+                    style: TextStyles.font24BlackBold.copyWith(fontSize: 40.sp),
+                  ),
+                  SizedBox(height: 12.h),
+                  CustomToggleButton(
+                    labels: ['باحث عن عمل', 'صاحب العمل'],
+                    initialIndex: cubit.selectedRole == 'employer' ? 1 : 0,
+                    onToggle: (index) {
+                      setState(() {
+                        cubit.setRole(index == 1 ? 'employer' : 'worker');
+                      });
+                    },
+                  ),
+                  SizedBox(height: 12.h),
+                  Center(
+                    child: SmoothPageIndicator(
+                      controller: _pageController,
+                      count: 3,
+                      effect: WormEffect(
+                        dotHeight: 12.r,
+                        dotWidth: 12.r,
+                        spacing: 8.w,
+                        activeDotColor: ColorsManager.primary,
+                        dotColor: ColorsManager.lightGrey,
+                      ),
+                      onDotClicked: (index) {
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        );
+                      },
                     ),
                   ),
-                  InkWell(
-                    onTap: () => GoRouter.of(context).pop(),
-                    child: Text(
-                      'سجل الدخول',
-                      style: TextStyles.font14PrimaryBold.copyWith(
-                        decoration: TextDecoration.underline,
-                        decorationColor: ColorsManager.primary,
-                      ),
+                  SizedBox(height: 14.h),
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const BouncingScrollPhysics(),
+                      onPageChanged: (idx) => setState(() => _pageIndex = idx),
+                      children: [
+                        SingleChildScrollView(
+                          child: PersonalInfoStep(
+                            formKey: cubit.formKey,
+                            firstNameController: cubit.firstNameController,
+                            lastNameController: cubit.lastNameController,
+                            emailController: cubit.emailController,
+                            phoneController: cubit.phoneController,
+                            passwordController: cubit.passwordController,
+                            passwordConfirmController:
+                                cubit.passwordConfirmController,
+                            governorates: governorates,
+                            selectedGovernorate: selectedGovernorate,
+                            onGovernorateChanged: (v) {
+                              setState(() {
+                                selectedGovernorate = v;
+                                _showGovernorateError = false;
+                              });
+                            },
+                            selectedDate: selectedDate,
+                            onPickDate: (d) => setState(() => selectedDate = d),
+                            dateController: cubit.birthDateController,
+                            showGovernorateError: _showGovernorateError,
+                          ),
+                        ),
+                        SingleChildScrollView(
+                          child: ProofOfIdentityStep(
+                            idFront: cubit.frontIdImage,
+                            idBack: cubit.backIdImage,
+                            personalPhoto: cubit.selfieImage,
+                            onPickIdFront: () async {
+                              final f = await _pickImage();
+                              if (f != null) {
+                                setState(() => cubit.setFrontIdImage(f));
+                              }
+                            },
+                            onPickIdBack: () async {
+                              final f = await _pickImage();
+                              if (f != null) {
+                                setState(() => cubit.setBackIdImage(f));
+                              }
+                            },
+                            onPickPersonalPhoto: () async {
+                              final f = await _pickImage();
+                              if (f != null) {
+                                setState(() => cubit.setSelfieImage(f));
+                              }
+                            },
+                          ),
+                        ),
+                        SingleChildScrollView(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 24.h),
+                            child: cubit.selectedRole == 'worker'
+                                ? WorkerSignUp(
+                                    educationController:
+                                        cubit.educationController,
+                                    workerStatus: workerStatus,
+                                    onStatusChanged: (v) {
+                                      setState(() => workerStatus = v);
+                                    },
+                                    previousJobs: previousJobs,
+                                    dailyJobs: dailyJobs,
+                                    searchingJobs: searchingJobs,
+                                    onPreviousJobsChanged: (list) =>
+                                        setState(() => previousJobs = list),
+                                    onDailyJobsChanged: (list) =>
+                                        setState(() => dailyJobs = list),
+                                    onSearchingJobsChanged: (list) =>
+                                        setState(() => searchingJobs = list),
+                                    sampleJobs: sampleJobs,
+                                    healthCertificate: cubit.healthCertificate,
+                                    onPickHealthCert: () async {
+                                      final f = await _pickImage(
+                                        pickImageOnly: false,
+                                      );
+                                      if (f != null) {
+                                        cubit.setHealthCertificate(f);
+                                      }
+                                    },
+                                    showWorkerStatusError:
+                                        _showWorkerStatusError,
+                                    showPreviousJobsError:
+                                        _showPreviousJobsError,
+                                    showSearchingJobsError:
+                                        _showSearchingJobsError,
+                                    showEducationError: _showEducationError,
+                                    onEducationChanged: (value) {
+                                      if (_showEducationError) {
+                                        setState(
+                                          () => _showEducationError = false,
+                                        );
+                                      }
+                                    },
+                                  )
+                                : EmployerSignUp(
+                                    institutionNameController:
+                                        cubit.companyNameController,
+                                    institutionType: institutionType,
+                                    onTypeChanged: (v) =>
+                                        setState(() => institutionType = v),
+                                    availableJobs: availableJobs,
+                                    onAvailableJobsChanged: (list) =>
+                                        setState(() => availableJobs = list),
+                                    sampleJobs: sampleJobs,
+                                    institutionAddressController:
+                                        cubit.companyAddressController,
+                                    taxNumberController:
+                                        TextEditingController(),
+                                    institutionGovernorates: [...governorates],
+                                    institutiSelectedGovernorate:
+                                        institutiSelectedGovernorate,
+                                    institutionOnGovernorateChanged: (v) =>
+                                        setState(
+                                          () =>
+                                              institutiSelectedGovernorate = v,
+                                        ),
+                                    institutionImages: cubit.companyImages,
+                                    onPickInstitutionImages: () async {
+                                      final f = await _pickImage(
+                                        pickImageOnly: false,
+                                      );
+                                      if (f != null) cubit.addCompanyImage(f);
+                                    },
+                                    onRemoveInstitutionImage: (index) {
+                                      setState(
+                                        () =>
+                                            cubit.companyImages.removeAt(index),
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  AppTextButton(
+                    buttonText: _pageIndex < 2 ? 'التالي' : 'سجل الآن',
+                    isLoading: isLoading,
+                    onPressed: () {
+                      if (_pageIndex < 2) {
+                        _nextPage();
+                      } else {
+                        _submit(cubit);
+                      }
+                    },
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'لديك حساب بالفعل؟ ',
+                        style: TextStyles.font14BlackRegular.copyWith(
+                          color: ColorsManager.grey,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => GoRouter.of(context).pop(),
+                        child: Text(
+                          'سجل الدخول',
+                          style: TextStyles.font14PrimaryBold.copyWith(
+                            decoration: TextDecoration.underline,
+                            decorationColor: ColorsManager.primary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

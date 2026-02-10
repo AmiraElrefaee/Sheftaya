@@ -6,16 +6,19 @@ import 'package:sheftaya/features/sign_up/logic/verify_sign_up/verify_signup_cub
 import 'package:sheftaya/features/sign_up/presentation/widgets/verify_account_screen_body.dart';
 
 class VerifyAccountScreen extends StatelessWidget {
-  const VerifyAccountScreen({super.key});
+  final String role;
+
+  const VerifyAccountScreen({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => getIt<VerifySignupCubit>()),
-        BlocProvider(create: (context) => getIt<SignupCubit>()),
+        BlocProvider(create: (_) => getIt<VerifySignupCubit>()),
+        BlocProvider(create: (_) => getIt<SignupCubit>()),
       ],
-      child: const VerifyAccountScreenBody(),
+      child: VerifyAccountScreenBody(role: role),
     );
   }
 }
+

@@ -4,11 +4,10 @@ part 'verify_signup_response.g.dart';
 @JsonSerializable()
 class VerifySignupResponse {
   final String? status;
-  final String? message;
   final String? token;
   final UserData? user;
 
-  VerifySignupResponse({this.status, this.message, this.token, this.user});
+  VerifySignupResponse({this.status,this.token, this.user});
 
   factory VerifySignupResponse.fromJson(Map<String, dynamic> json) =>
       _$VerifySignupResponseFromJson(json);

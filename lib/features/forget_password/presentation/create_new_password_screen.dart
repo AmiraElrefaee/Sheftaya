@@ -5,12 +5,14 @@ import 'package:sheftaya/features/forget_password/logic/create_new_password_cubi
 import 'package:sheftaya/features/forget_password/presentation/widgets/create_new_password_screen_body.dart';
 
 class CreateNewPasswordScreen extends StatelessWidget {
-  const CreateNewPasswordScreen({super.key});
+  final String resetToken;
+
+  const CreateNewPasswordScreen({super.key, required this.resetToken});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<CreateNewPasswordCubit>(),
+      create: (context) => getIt<CreateNewPasswordCubit>(param1: resetToken),
       child: const CreateNewPasswordScreenBody(),
     );
   }

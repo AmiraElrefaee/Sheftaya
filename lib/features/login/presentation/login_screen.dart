@@ -20,12 +20,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-bool _isLoading = true;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-     _checkToken();
+    _checkToken();
   }
 
   Future<void> _checkToken() async {
@@ -38,18 +38,18 @@ bool _isLoading = true;
       setState(() => _isLoading = false);
       return;
     }
-    while (userCubit.state.isLoading || userCubit.state.user == null) {
-      await Future.delayed(const Duration(milliseconds: 200));
-      if (!mounted) return;
+    final user = userCubit.state.user;
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
     }
 
     if (!mounted) return;
     final role = userCubit.state.user!.role ?? '';
 
-    if (role == "") {
+    if (role == "worker") {
       GoRouter.of(context).pushReplacement(AppRouter.kHomeScreen);
-    }
-    else {
+    } else {
       GoRouter.of(context).pushReplacement(AppRouter.kHomeScreen);
     }
   }
@@ -81,11 +81,9 @@ bool _isLoading = true;
       );
     }
 
-    return
-    BlocProvider(
+    return BlocProvider(
       create: (context) => getIt<LoginCubit>(),
-      child: const
-    LoginScreenBody(),
+      child: const LoginScreenBody(),
     );
   }
 }

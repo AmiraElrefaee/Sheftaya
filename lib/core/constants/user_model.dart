@@ -9,7 +9,6 @@ class UserModel {
   final String? phone;
   final String? token;
   final String? profileImg;
-  final String? gender;
   final String? birthday;
 
   UserModel({
@@ -21,8 +20,7 @@ class UserModel {
     this.phone,
     this.token,
     this.profileImg,
-    this.gender,
-    this.birthday,
+   this.birthday,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -46,7 +44,6 @@ class UserModel {
       phone: data['phone'],
       token: json['token'] ?? data['token'],
       profileImg: data['profileImg'],
-      gender: data['gender'],
       birthday: birthday,
     );
   }
@@ -61,7 +58,6 @@ class UserModel {
         'role': role,
         'phone': phone,
         'profileImg': profileImg,
-        'gender': gender,
         'birthday': birthday,
       },
       'token': token,
@@ -90,7 +86,6 @@ class UserModel {
       phone: phone ?? this.phone,
       token: token ?? this.token,
       profileImg: profileImg ?? this.profileImg,
-      gender: gender ?? this.gender,
       birthday: birthday ?? this.birthday,
     );
   }

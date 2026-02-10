@@ -43,7 +43,6 @@ abstract class AppRouter {
           return const HomeScreen();
         },
       ),
-     
 
       GoRoute(
         path: AppRouter.kForgetPassScreen,
@@ -54,19 +53,24 @@ abstract class AppRouter {
       GoRoute(
         path: kVerifyPasswordScreen,
         builder: (context, state) {
-          return const VerifyPasswordScreen();
+          final email = state.extra as String;
+          return VerifyPasswordScreen(email: email);
         },
       ),
+
       GoRoute(
         path: kCreateNewPasswordScreen,
         builder: (context, state) {
-          return const CreateNewPasswordScreen();
+          final token = state.extra as String; 
+          return CreateNewPasswordScreen(resetToken: token);
         },
       ),
+
       GoRoute(
         path: kVerifyAccountScreen,
         builder: (context, state) {
-          return const VerifyAccountScreen();
+          final role = state.extra as String;
+          return VerifyAccountScreen(role: role);
         },
       ),
     ],

@@ -6,14 +6,10 @@ part 'create_new_password_request_body.g.dart';
 class CreateNewPasswordRequestBody {
   final String newPassword;
 
-  CreateNewPasswordRequestBody({
-    required this.newPassword,
-  });
+  CreateNewPasswordRequestBody({required this.newPassword});
 
-  Map<String, dynamic> toJson() =>
-      _$CreateNewPasswordRequestBodyToJson(this);
+  Map<String, dynamic> toJson() => _$CreateNewPasswordRequestBodyToJson(this);
 
   factory CreateNewPasswordRequestBody.fromJson(Map<String, dynamic> json) =>
       _$CreateNewPasswordRequestBodyFromJson(json);
 }
-

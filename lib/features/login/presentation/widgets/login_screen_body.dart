@@ -24,7 +24,7 @@ class LoginScreenBody extends StatelessWidget {
         state.maybeWhen(
           success: (data) {
             final user = context.read<UserCubit>().state.user;
-            if (user!.role == "") {
+            if (user!.role == "worker") {
               context.go(AppRouter.kHomeScreen);
             }else {
               context.go(AppRouter.kHomeScreen);

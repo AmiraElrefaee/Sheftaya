@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:sheftaya/core/constants/user_cubit.dart';
 import 'package:sheftaya/core/networking/api_constants.dart';
@@ -20,7 +21,7 @@ final getIt = GetIt.instance;
 
 void setupServiceLocator() {
   // Register Dio instance
-  getIt.registerLazySingleton(() => DioFactory.getDio());
+  getIt.registerLazySingleton<Dio>(() => DioFactory.getDio());
 
   // Register ApiService
   getIt.registerLazySingleton<ApiService>(
@@ -37,7 +38,7 @@ void setupServiceLocator() {
   );
 
   // signup
-  getIt.registerLazySingleton<SignupRepo>(() => SignupRepo(getIt()));
+  getIt.registerLazySingleton<SignupRepo>(() => SignupRepo(getIt<Dio>()));
   getIt.registerFactory<SignupCubit>(() => SignupCubit(getIt()));
 
   // forget password
@@ -50,16 +51,16 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<VerifyPasswordRepo>(
     () => VerifyPasswordRepo(getIt()),
   );
-  getIt.registerFactory<VerifyPasswordCubit>(
-    () => VerifyPasswordCubit(getIt()),
+  getIt.registerFactoryParam<VerifyPasswordCubit, String, void>(
+    (email, _) => VerifyPasswordCubit(getIt(), email),
   );
 
   // create new password
   getIt.registerLazySingleton<CreateNewPasswordRepo>(
     () => CreateNewPasswordRepo(getIt()),
   );
-  getIt.registerFactory<CreateNewPasswordCubit>(
-    () => CreateNewPasswordCubit(getIt()),
+  getIt.registerFactoryParam<CreateNewPasswordCubit, String, void>(
+    (resetToken, _) => CreateNewPasswordCubit(getIt(), resetToken),
   );
 
   // verify account

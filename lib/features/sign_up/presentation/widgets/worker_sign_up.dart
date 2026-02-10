@@ -20,6 +20,12 @@ class WorkerSignUp extends StatelessWidget {
   final List<String> sampleJobs;
   final File? healthCertificate;
   final VoidCallback onPickHealthCert;
+  final bool showWorkerStatusError;
+  final bool showPreviousJobsError;
+  final bool showSearchingJobsError;
+  final bool showEducationError;
+    final ValueChanged<String>? onEducationChanged; 
+
 
   const WorkerSignUp({
     super.key,
@@ -35,6 +41,12 @@ class WorkerSignUp extends StatelessWidget {
     required this.sampleJobs,
     required this.healthCertificate,
     required this.onPickHealthCert,
+    this.showPreviousJobsError = false,
+    this.showSearchingJobsError = false,
+    this.showWorkerStatusError = false,
+    this.showEducationError = false,
+        this.onEducationChanged, 
+
   });
 
   @override
@@ -51,11 +63,20 @@ class WorkerSignUp extends StatelessWidget {
           SizedBox(height: 12.h),
           Text('التعليم / التخصص', style: TextStyles.font14BlackRegular),
           SizedBox(height: 8.h),
-          AppTextFormField(
+                    AppTextFormField(
             controller: educationController,
             hintText: 'ادخل مجال دراستك أو تخصصك',
-            validator: (v) => null,
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) {
+                return 'التعليم / التخصص مطلوب';
+              }
+              return null;
+            },
+            hasError: showEducationError,
+            onChanged: onEducationChanged,
           ),
+          SizedBox(height: 12.h),
+
           SizedBox(height: 12.h),
           Text('الحالة المهنية', style: TextStyles.font14BlackRegular),
           SizedBox(height: 8.h),
@@ -64,16 +85,19 @@ class WorkerSignUp extends StatelessWidget {
             value: workerStatus,
             hint: 'اختر حالتك المهنية',
             onChanged: onStatusChanged,
+            hasError: showWorkerStatusError,
+            errorMessage: 'الحالة المهنية مطلوبة',
           ),
           SizedBox(height: 12.h),
           Text('الوظائف السابقة', style: TextStyles.font14BlackRegular),
           SizedBox(height: 8.h),
           AppMultiSelectDropdown(
-            
             items: sampleJobs,
             selectedValues: previousJobs,
             hint: 'اختر وظائفك السابقة',
             onChanged: onPreviousJobsChanged,
+            hasError: showPreviousJobsError,
+            errorMessage: 'يجب اختيار وظيفة واحدة على الأقل',
           ),
           SizedBox(height: 12.h),
           Text('الوظائف التي تبحث عنها', style: TextStyles.font14BlackRegular),
@@ -83,6 +107,8 @@ class WorkerSignUp extends StatelessWidget {
             selectedValues: searchingJobs,
             hint: 'اختر الوظائف التي تبحث عنها',
             onChanged: onSearchingJobsChanged,
+            hasError: showSearchingJobsError,
+            errorMessage: 'يجب اختيار وظيفة واحدة على الأقل',
           ),
           SizedBox(height: 12.h),
           Text(

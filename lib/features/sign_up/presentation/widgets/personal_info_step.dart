@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sheftaya/core/constants/app_regex.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/widgets/custom_text_form_field.dart';
 import 'package:sheftaya/core/widgets/app_dropdown.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 
-class PersonalInfoStep extends StatelessWidget {
+class PersonalInfoStep extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController firstNameController;
   final TextEditingController lastNameController;
@@ -13,12 +14,13 @@ class PersonalInfoStep extends StatelessWidget {
   final TextEditingController phoneController;
   final TextEditingController passwordController;
   final TextEditingController passwordConfirmController;
+  final TextEditingController dateController;
   final List<String> governorates;
   final String? selectedGovernorate;
   final ValueChanged<String?> onGovernorateChanged;
   final DateTime? selectedDate;
-  final TextEditingController dateController;
   final ValueChanged<DateTime> onPickDate;
+  final bool showGovernorateError; 
 
   const PersonalInfoStep({
     super.key,
@@ -29,19 +31,29 @@ class PersonalInfoStep extends StatelessWidget {
     required this.phoneController,
     required this.passwordController,
     required this.passwordConfirmController,
+    required this.dateController,
     required this.governorates,
     required this.selectedGovernorate,
     required this.onGovernorateChanged,
     required this.selectedDate,
-    required this.dateController,
     required this.onPickDate,
+    this.showGovernorateError = false, 
   });
+
+  @override
+  State<PersonalInfoStep> createState() => _PersonalInfoStepState();
+}
+
+class _PersonalInfoStepState extends State<PersonalInfoStep> {
+  bool isPasswordObscureText = true;
+  bool isConfirmPasswordObscureText = true;
 
   Future<void> _showDatePicker(BuildContext context) async {
     final initial = DateTime.now().subtract(const Duration(days: 365 * 25));
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? initial,
+      initialDate: widget.selectedDate ?? initial,
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -58,13 +70,18 @@ class PersonalInfoStep extends StatelessWidget {
         );
       },
     );
-    if (picked != null) onPickDate(picked);
+
+    if (picked != null) {
+      widget.onPickDate(picked);
+      widget.dateController.text =
+          '${picked.year}/${picked.month.toString().padLeft(2, '0')}/${picked.day.toString().padLeft(2, '0')}';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: widget.formKey,
       child: Padding(
         padding: EdgeInsets.only(bottom: 24.h),
         child: Column(
@@ -85,15 +102,9 @@ class PersonalInfoStep extends StatelessWidget {
                       Text('الاسم الاول', style: TextStyles.font14BlackRegular),
                       SizedBox(height: 8.h),
                       AppTextFormField(
-                        controller: firstNameController,
+                        controller: widget.firstNameController,
                         hintText: 'ادخل الاسم الاول',
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) {
-                            return 'هذا الحقل مطلوب';
-                          }
-                          if (v.trim().length < 2) return 'ادخل اسم صحيح';
-                          return null;
-                        },
+                        validator: AppRegex.validateFirstName,
                       ),
                     ],
                   ),
@@ -106,14 +117,9 @@ class PersonalInfoStep extends StatelessWidget {
                       Text('اسم العائلة', style: TextStyles.font14BlackRegular),
                       SizedBox(height: 8.h),
                       AppTextFormField(
-                        controller: lastNameController,
+                        controller: widget.lastNameController,
                         hintText: 'ادخل اسم العائلة',
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) {
-                            return 'هذا الحقل مطلوب';
-                          }
-                          return null;
-                        },
+                        validator: AppRegex.validateLastName,
                       ),
                     ],
                   ),
@@ -124,45 +130,37 @@ class PersonalInfoStep extends StatelessWidget {
             Text('البريد الالكتروني', style: TextStyles.font14BlackRegular),
             SizedBox(height: 8.h),
             AppTextFormField(
-              controller: emailController,
+              controller: widget.emailController,
               hintText: 'ادخل بريدك الالكتروني',
               keyboardType: TextInputType.emailAddress,
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'هذا الحقل مطلوب';
-                if (!RegExp(
-                  r'^[\w\.\-]+@([\w\-]+\.)+[a-zA-Z]{2,4}$',
-                ).hasMatch(v)) {
-                  return 'بريد غير صالح';
-                }
-                return null;
-              },
+              validator: AppRegex.validateEmail,
             ),
             SizedBox(height: 12.h),
             Text('المحافظة', style: TextStyles.font14BlackRegular),
             SizedBox(height: 8.h),
             AppDropdown(
-              items: governorates,
-              value: selectedGovernorate,
+              items: widget.governorates,
+              value: widget.selectedGovernorate,
               hint: 'اختر محافظتك',
-              onChanged: onGovernorateChanged,
+              onChanged: widget.onGovernorateChanged,
+              hasError: widget.showGovernorateError,
+              errorMessage: 'المحافظة مطلوبة',
             ),
+
             SizedBox(height: 12.h),
             Text(
-              'تاريخ الميلاد (إختيارى)',
+              'تاريخ الميلاد (إختياري)',
               style: TextStyles.font14BlackRegular,
             ),
             SizedBox(height: 8.h),
             AppTextFormField(
-              controller: dateController,
-              hintText: selectedDate == null
+              controller: widget.dateController,
+              hintText: widget.selectedDate == null
                   ? 'يوم/شهر/سنة'
-                  : '${selectedDate!.year}/${selectedDate!.month}/${selectedDate!.day}',
+                  : widget.dateController.text,
               readOnly: true,
+              validator: (value) => null,
               onTap: () => _showDatePicker(context),
-              validator: (v) {
-                if (selectedDate == null) return 'هذا الحقل مطلوب';
-                return null;
-              },
               suffixIcon: Icon(
                 Icons.calendar_today,
                 size: 20.w,
@@ -170,47 +168,61 @@ class PersonalInfoStep extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12.h),
-            Text('رقم الهاتف (إختيارى)', style: TextStyles.font14BlackRegular),
+            Text('رقم الهاتف (إختياري)', style: TextStyles.font14BlackRegular),
             SizedBox(height: 8.h),
             AppTextFormField(
-              controller: phoneController,
-              hintText: '000-0000-0000',
+              controller: widget.phoneController,
+              hintText: 'ادخل رقم الهاتف',
               keyboardType: TextInputType.phone,
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'هذا الحقل مطلوب';
-                if (!RegExp(r'^[0-9+\-\s]{7,15}$').hasMatch(v)) {
-                  return 'رقم غير صالح';
-                }
-                return null;
-              },
+              validator: AppRegex.validateOptionalPhone,
             ),
             SizedBox(height: 12.h),
             Text('كلمة المرور', style: TextStyles.font14BlackRegular),
             SizedBox(height: 8.h),
             AppTextFormField(
-              controller: passwordController,
+              controller: widget.passwordController,
               hintText: 'ادخل كلمة المرور',
-              obscureText: true,
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'هذا الحقل مطلوب';
-                if (v.length < 6) return 'الحد الأدنى 6 أحرف';
-                return null;
-              },
+              obscureText: isPasswordObscureText,
+              validator: AppRegex.validatePassword,
+              suffixIcon: InkWell(
+                onTap: () {
+                  setState(() {
+                    isPasswordObscureText = !isPasswordObscureText;
+                  });
+                },
+                child: Icon(
+                  size: 20.w,
+                  isPasswordObscureText
+                      ? Icons.visibility_off
+                      : Icons.visibility,
+                ),
+              ),
             ),
             SizedBox(height: 12.h),
             Text('تأكيد كلمة المرور', style: TextStyles.font14BlackRegular),
             SizedBox(height: 8.h),
             AppTextFormField(
-              controller: passwordConfirmController,
+              controller: widget.passwordConfirmController,
               hintText: 'اعد ادخال كلمة المرور',
-              obscureText: true,
-              validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'هذا الحقل مطلوب';
-                if (v != passwordController.text) {
-                  return 'كلمات المرور غير متطابقة';
-                }
-                return null;
-              },
+              obscureText: isConfirmPasswordObscureText,
+              validator: (v) => AppRegex.validateConfirmPassword(
+                v,
+                widget.passwordController.text,
+              ),
+              suffixIcon: InkWell(
+                onTap: () {
+                  setState(() {
+                    isConfirmPasswordObscureText =
+                        !isConfirmPasswordObscureText;
+                  });
+                },
+                child: Icon(
+                  size: 20.w,
+                  isConfirmPasswordObscureText
+                      ? Icons.visibility_off
+                      : Icons.visibility,
+                ),
+              ),
             ),
           ],
         ),

@@ -8,11 +8,8 @@ part of 'verify_password_response.dart';
 
 VerifyPasswordResponse _$VerifyPasswordResponseFromJson(
   Map<String, dynamic> json,
-) => VerifyPasswordResponse(
-  status: json['status'] as String?,
-  message: json['message'] as String?,
-);
+) => VerifyPasswordResponse(resetToken: json['resetToken'] as String?);
 
 Map<String, dynamic> _$VerifyPasswordResponseToJson(
   VerifyPasswordResponse instance,
-) => <String, dynamic>{'status': instance.status, 'message': instance.message};
+) => <String, dynamic>{'resetToken': instance.resetToken};

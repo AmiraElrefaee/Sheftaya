@@ -10,7 +10,6 @@ VerifySignupResponse _$VerifySignupResponseFromJson(
   Map<String, dynamic> json,
 ) => VerifySignupResponse(
   status: json['status'] as String?,
-  message: json['message'] as String?,
   token: json['token'] as String?,
   user: json['user'] == null
       ? null
@@ -21,7 +20,6 @@ Map<String, dynamic> _$VerifySignupResponseToJson(
   VerifySignupResponse instance,
 ) => <String, dynamic>{
   'status': instance.status,
-  'message': instance.message,
   'token': instance.token,
   'user': instance.user,
 };

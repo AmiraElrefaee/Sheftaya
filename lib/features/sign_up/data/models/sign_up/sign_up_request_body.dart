@@ -16,6 +16,11 @@ class SignupRequestBody {
   final String? city;
   final String? birthDate;
 
+  // صور الهوية والصورة الشخصية
+  final String? frontIdImage;
+  final String? backIdImage;
+  final String? selfieImage;
+
   final EmployerProfile? employerProfile;
   final WorkerProfile? workerProfile;
 
@@ -30,6 +35,9 @@ class SignupRequestBody {
     this.preferredLang,
     this.city,
     this.birthDate,
+    this.frontIdImage,
+    this.backIdImage,
+    this.selfieImage,
     this.employerProfile,
     this.workerProfile,
   });
@@ -46,12 +54,16 @@ class EmployerProfile {
   final String companyType;
   final String companyAddress;
   final String city;
+  
+  // صور المؤسسة
+  final List<String>? companyImages;
 
   EmployerProfile({
     required this.companyName,
     required this.companyType,
     required this.companyAddress,
     required this.city,
+    this.companyImages,
   });
 
   factory EmployerProfile.fromJson(Map<String, dynamic> json) =>
@@ -69,6 +81,9 @@ class WorkerProfile {
   final int experienceYears;
   final List<Availability> availability;
   final ExpectedHourlyRate expectedHourlyRate;
+  
+  // شهادة صحية
+  final String? healthCertificate;
 
   WorkerProfile({
     required this.education,
@@ -78,6 +93,7 @@ class WorkerProfile {
     required this.experienceYears,
     required this.availability,
     required this.expectedHourlyRate,
+    this.healthCertificate,
   });
 
   factory WorkerProfile.fromJson(Map<String, dynamic> json) =>

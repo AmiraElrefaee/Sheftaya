@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:sheftaya/core/networking/api_constants.dart';
 import 'package:sheftaya/features/forget_password/data/models/create_new_password_model/create_new_password_request_body.dart';
+import 'package:sheftaya/features/forget_password/data/models/create_new_password_model/create_new_password_response.dart';
 import 'package:sheftaya/features/forget_password/data/models/forget_password_model/forget_pass_request_body.dart';
 import 'package:sheftaya/features/forget_password/data/models/forget_password_model/forget_pass_response.dart';
 import 'package:sheftaya/features/forget_password/data/models/verify_password_model/verify_password_request_body.dart';
@@ -42,7 +43,8 @@ abstract class ApiService {
     @Body() VerifyPasswordRequestBody verifyPasswordRequestBody,
   );
   @POST(ApiConstants.resetPassword)
-  Future<void> createNewPassword(
-    @Body() CreateNewPasswordRequestBody createNewPasswordRequestBody,
+  Future<CreateNewPasswordResponse> createNewPassword(
+    @Header("Authorization") String token,
+    @Body() CreateNewPasswordRequestBody body,
   );
 }

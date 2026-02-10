@@ -4,10 +4,9 @@ part 'verify_password_response.g.dart';
 
 @JsonSerializable()
 class VerifyPasswordResponse {
-  final String? status;
-  final String? message;
+  final String? resetToken;
 
-  VerifyPasswordResponse({this.status, this.message});
+  VerifyPasswordResponse({this.resetToken});
 
   factory VerifyPasswordResponse.fromJson(Map<String, dynamic> json) =>
       _$VerifyPasswordResponseFromJson(json);

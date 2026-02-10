@@ -239,6 +239,9 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
         onChanged: widget.onChanged,
         onTap: widget.onTap,
         readOnly: widget.readOnly,
+        autovalidateMode: widget.hasError
+            ? AutovalidateMode.always
+            : AutovalidateMode.onUserInteraction,
       ),
     );
   }

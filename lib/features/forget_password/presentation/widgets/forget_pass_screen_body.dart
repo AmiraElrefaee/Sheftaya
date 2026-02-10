@@ -21,7 +21,12 @@ class ForgetPassScreenBody extends StatelessWidget {
       listener: (context, state) {
         state.maybeWhen(
           success: (data) {
-            context.push(AppRouter.kVerifyPasswordScreen);
+            final email = context
+                .read<ForgetPasswordCubit>()
+                .emailController
+                .text;
+
+            context.push(AppRouter.kVerifyPasswordScreen, extra: email);
           },
           error: (error) {
             customSnackBar(context, error, ColorsManager.error);

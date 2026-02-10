@@ -1,9 +1,8 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:sheftaya/core/networking/server_result.dart';
-import 'package:sheftaya/core/constants/shared_pref_helper.dart';
-import 'package:sheftaya/core/constants/shared_pref_keys.dart';
 import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_request_body.dart';
 import 'package:sheftaya/features/sign_up/data/repo/sign_up_repo.dart';
 import 'sign_up_state.dart';
@@ -33,11 +32,34 @@ class SignupCubit extends Cubit<SignupState> {
     selectedRole = role;
   }
 
+  // ================= صور الهوية =================
+  File? frontIdImage;
+  File? backIdImage;
+  File? selfieImage;
+
+  void setFrontIdImage(File file) {
+    frontIdImage = file;
+  }
+
+  void setBackIdImage(File file) {
+    backIdImage = file;
+  }
+
+  void setSelfieImage(File file) {
+    selfieImage = file;
+  }
+
   // ================= Employer =================
   final companyNameController = TextEditingController();
   final companyTypeController = TextEditingController();
   final companyAddressController = TextEditingController();
   final companyCityController = TextEditingController();
+
+  List<File> companyImages = [];
+
+  void addCompanyImage(File file) {
+    companyImages.add(file);
+  }
 
   // ================= Worker =================
   final educationController = TextEditingController();
@@ -47,8 +69,13 @@ class SignupCubit extends Cubit<SignupState> {
 
   List<String> pastExperience = [];
   List<String> jobsLookedFor = [];
-
   List<Availability> availabilityList = [];
+
+  File? healthCertificate;
+
+  void setHealthCertificate(File file) {
+    healthCertificate = file;
+  }
 
   // ================= Dispose =================
   @override
@@ -77,14 +104,10 @@ class SignupCubit extends Cubit<SignupState> {
 
   // ================= SIGNUP =================
   Future<void> emitSignupStates() async {
-    if (!formKey.currentState!.validate()) return;
+    final isValid = formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
 
     emit(const SignupState.loading());
-
-    // قراءة التوكن من SharedPreferences
-    final signupToken = await SharedPrefHelper.getSecuredString(
-      SharedPrefKeys.userToken,
-    );
 
     final signupBody = SignupRequestBody(
       firstName: firstNameController.text.trim(),
@@ -100,12 +123,18 @@ class SignupCubit extends Cubit<SignupState> {
           ? null
           : birthDateController.text,
 
+      // إضافة مسارات الصور
+      frontIdImage: frontIdImage?.path,
+      backIdImage: backIdImage?.path,
+      selfieImage: selfieImage?.path,
+
       employerProfile: selectedRole == 'employer'
           ? EmployerProfile(
               companyName: companyNameController.text.trim(),
               companyType: companyTypeController.text.trim(),
               companyAddress: companyAddressController.text.trim(),
               city: companyCityController.text.trim(),
+              companyImages: companyImages.map((f) => f.path).toList(),
             )
           : null,
 
@@ -122,11 +151,12 @@ class SignupCubit extends Cubit<SignupState> {
                 amount: num.tryParse(hourlyRateController.text) ?? 0,
                 currency: "EGP",
               ),
+              healthCertificate: healthCertificate?.path,
             )
           : null,
     );
 
-    final response = await _signupRepo.signup(signupToken, signupBody);
+    final response = await _signupRepo.signup(signupBody);
 
     response.when(
       success: (signupResponse) {

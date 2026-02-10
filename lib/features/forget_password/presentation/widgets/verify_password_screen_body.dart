@@ -13,7 +13,6 @@ import 'package:sheftaya/features/forget_password/logic/forget_password_cubit/fo
 import 'package:sheftaya/features/forget_password/logic/verify_password_cubit/verify_password_cubit.dart';
 import 'package:sheftaya/features/forget_password/logic/verify_password_cubit/verify_password_state.dart';
 
-
 class VerifyPasswordScreenBody extends StatelessWidget {
   const VerifyPasswordScreenBody({super.key});
 
@@ -23,7 +22,12 @@ class VerifyPasswordScreenBody extends StatelessWidget {
       listener: (context, state) {
         state.maybeWhen(
           success: (data) {
-            context.push(AppRouter.kCreateNewPasswordScreen);
+            final resetToken = data.resetToken; 
+
+            context.push(
+              AppRouter.kCreateNewPasswordScreen,
+              extra: resetToken, 
+            );
           },
           error: (error) {
             customSnackBar(context, error, ColorsManager.error);
@@ -115,18 +119,17 @@ class VerifyPasswordScreenBody extends StatelessWidget {
                         ),
                         InkWell(
                           onTap: () async {
-                           await context
-                               .read<ForgetPasswordCubit>()
-                               .emitForgetPasswordStates();
+                            await context
+                                .read<ForgetPasswordCubit>()
+                                .emitForgetPasswordStates();
                             if (context.mounted) {
                               AwesomeDialog(
                                 context: context,
                                 dialogType: DialogType.success,
                                 animType: AnimType.bottomSlide,
                                 title: 'تم إرسال الرمز',
-                                titleTextStyle: TextStyles.font16BlackBold.copyWith(
-                                  fontSize: 20.sp,
-                                ),
+                                titleTextStyle: TextStyles.font16BlackBold
+                                    .copyWith(fontSize: 20.sp),
                                 desc:
                                     'تم إرسال رمز التحقق الجديد إلى بريدك الإلكتروني',
                                 descTextStyle: TextStyles.font14BlackRegular,
@@ -136,8 +139,8 @@ class VerifyPasswordScreenBody extends StatelessWidget {
                                 dismissOnBackKeyPress: true,
                                 dismissOnTouchOutside: true,
                                 width: 400,
-                               padding: EdgeInsets.all(20.w),
-              dialogBorderRadius: BorderRadius.circular(20.r),
+                                padding: EdgeInsets.all(20.w),
+                                dialogBorderRadius: BorderRadius.circular(20.r),
                                 showCloseIcon: false,
                                 buttonsTextStyle: TextStyles.font14WhiteBold,
                                 dialogBackgroundColor: Colors.white,

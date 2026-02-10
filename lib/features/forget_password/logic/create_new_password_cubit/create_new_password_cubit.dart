@@ -6,23 +6,27 @@ import '../../data/repos/create_new_password.dart';
 import 'create_new_password_state.dart';
 
 class CreateNewPasswordCubit extends Cubit<CreatePasswordState> {
-  CreateNewPasswordCubit(this._createNewPasswordRepo)
+  final CreateNewPasswordRepo _createNewPasswordRepo;
+  final String resetToken;
+
+  CreateNewPasswordCubit(this._createNewPasswordRepo, this.resetToken)
     : super(const CreatePasswordState.initial());
 
-  final CreateNewPasswordRepo _createNewPasswordRepo;
-
   final TextEditingController newPasswordController = TextEditingController();
-
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   Future<void> emitCreateNewPasswordStates() async {
+    if (!formKey.currentState!.validate()) return;
+
     emit(const CreatePasswordState.createNewPasswordloading());
 
-    final response = await _createNewPasswordRepo.createNewPassword(
-      CreateNewPasswordRequestBody(
-        newPassword: newPasswordController.text,
-      ),
-    );
+   final response = await _createNewPasswordRepo.createNewPassword(
+  resetToken,
+  CreateNewPasswordRequestBody(
+    newPassword: newPasswordController.text.trim(),
+  ),
+);
+
 
     response.when(
       success: (_) {
@@ -40,5 +44,11 @@ class CreateNewPasswordCubit extends Cubit<CreatePasswordState> {
         );
       },
     );
+  }
+
+  @override
+  Future<void> close() {
+    newPasswordController.dispose();
+    return super.close();
   }
 }
