@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:sheftaya/features/employer/home/presentation/home_screen.dart';
+import 'package:sheftaya/features/employer/home/presentation/employer_home_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/create_new_password_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/forget_pass_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/verify_password_screen.dart';
@@ -7,12 +7,14 @@ import 'package:sheftaya/features/login/presentation/login_screen.dart';
 import 'package:sheftaya/features/on_boarding_screen.dart/on_boarding_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/sign_up_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/verify_account_screen.dart';
+import 'package:sheftaya/features/worker/home/presentation/worker_home_screen.dart';
 
 abstract class AppRouter {
   static const kSignUpScreen = '/signUpScreen';
   static const kLoginScreen = '/loginScreen';
   static const kOnBoardingScreen = '/';
-  static const kHomeScreen = '/HomeScreen';
+  static const kEmployerHomeScreen = '/employerHomeScreen';
+  static const kWorkerHomeScreen = '/workerHomeScreen';
   static const kForgetPassScreen = '/forgetPassScreen';
   static const kVerifyPasswordScreen = '/verifyPasswordScreen';
   static const kCreateNewPasswordScreen = '/createNewPasswordScreen';
@@ -38,9 +40,15 @@ abstract class AppRouter {
         },
       ),
       GoRoute(
-        path: kHomeScreen,
+        path: kEmployerHomeScreen,
         builder: (context, state) {
-          return const HomeScreen();
+          return const EmployerHomeScreen();
+        },
+      ),
+      GoRoute(
+        path: kWorkerHomeScreen,
+        builder: (context, state) {
+          return const WorkerHomeScreen();
         },
       ),
 
@@ -61,7 +69,7 @@ abstract class AppRouter {
       GoRoute(
         path: kCreateNewPasswordScreen,
         builder: (context, state) {
-          final token = state.extra as String; 
+          final token = state.extra as String;
           return CreateNewPasswordScreen(resetToken: token);
         },
       ),

@@ -30,27 +30,39 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _checkToken() async {
     final userCubit = context.read<UserCubit>();
+
     final token = await SharedPrefHelper.getSecuredString(
       SharedPrefKeys.userToken,
     );
+
     if (token.isEmpty) {
       if (!mounted) return;
       setState(() => _isLoading = false);
       return;
     }
+
+    while (userCubit.state.isLoading) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      if (!mounted) return;
+    }
+
     final user = userCubit.state.user;
+
     if (user == null) {
+      if (!mounted) return;
       setState(() => _isLoading = false);
       return;
     }
 
     if (!mounted) return;
-    final role = userCubit.state.user!.role ?? '';
+    _navigateByRole(user.role);
+  }
 
-    if (role == "worker") {
-      GoRouter.of(context).pushReplacement(AppRouter.kHomeScreen);
+  void _navigateByRole(String? role) {
+    if (role == 'employer') {
+      GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
     } else {
-      GoRouter.of(context).pushReplacement(AppRouter.kHomeScreen);
+      GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
     }
   }
 

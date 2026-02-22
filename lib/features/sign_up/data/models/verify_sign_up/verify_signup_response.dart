@@ -1,16 +1,32 @@
 import 'package:json_annotation/json_annotation.dart';
 
 part 'verify_signup_response.g.dart';
+
 @JsonSerializable()
 class VerifySignupResponse {
   final String? status;
   final String? token;
   final UserData? user;
 
-  VerifySignupResponse({this.status,this.token, this.user});
+  VerifySignupResponse({this.status, this.token, this.user});
 
-  factory VerifySignupResponse.fromJson(Map<String, dynamic> json) =>
-      _$VerifySignupResponseFromJson(json);
+  factory VerifySignupResponse.fromJson(Map<String, dynamic> json) {
+    final rawUser = json['user'];
+    UserData? userData;
+
+    if (rawUser != null) {
+      final nested = rawUser['data']?['user'];
+      if (nested != null) {
+        userData = UserData.fromJson(nested as Map<String, dynamic>);
+      }
+    }
+
+    return VerifySignupResponse(
+      status: json['status'] as String?,
+      token: json['token'] as String?,
+      user: userData,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$VerifySignupResponseToJson(this);
 }

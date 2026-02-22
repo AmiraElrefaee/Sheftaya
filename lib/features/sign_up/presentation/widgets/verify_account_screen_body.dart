@@ -32,10 +32,10 @@ class VerifyAccountScreenBody extends StatelessWidget {
                   desc: 'تم تأكيد حسابك بنجاح',
                   btnOkText: 'استمرار',
                   btnOkOnPress: () {
-                    if (role == "worker") {
-                      context.go(AppRouter.kHomeScreen);
+                    if (role == 'employer') {
+                      context.go(AppRouter.kEmployerHomeScreen);
                     } else {
-                      context.go(AppRouter.kHomeScreen);
+                      context.go(AppRouter.kWorkerHomeScreen);
                     }
                   },
                 ).show();

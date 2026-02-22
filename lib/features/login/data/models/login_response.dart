@@ -9,8 +9,22 @@ class LoginResponse {
 
   LoginResponse({this.token, this.user});
 
-  factory LoginResponse.fromJson(Map<String, dynamic> json) =>
-      _$LoginResponseFromJson(json);
+  factory LoginResponse.fromJson(Map<String, dynamic> json) {
+    final rawUser = json['user'];
+    UserData? userData;
+
+    if (rawUser != null) {
+      final nested = rawUser['data']?['user'];
+      if (nested != null) {
+        userData = UserData.fromJson(nested as Map<String, dynamic>);
+      }
+    }
+
+    return LoginResponse(
+      token: json['token'] as String?,
+      user: userData,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$LoginResponseToJson(this);
 }
@@ -26,7 +40,6 @@ class UserData {
   final String? imageProfile;
   final String? phone;
   final String? birthday;
-
 
   UserData({
     this.id,

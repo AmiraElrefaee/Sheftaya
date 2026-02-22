@@ -441,4 +441,176 @@ class TextStyles {
     fontWeight: FontWeightHelper.bold,
     color: ColorsManager.secondary,
   );
+
+  // ===================== Font 20 =====================
+
+  static TextStyle get font20BlackRegular => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.regular,
+    color: ColorsManager.black,
+  );
+  static TextStyle get font20BlackMedium => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.black,
+  );
+  static TextStyle get font20BlackSemiBold => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.black,
+  );
+  static TextStyle get font20BlackBold => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.black,
+  );
+
+  static TextStyle get font20WhiteRegular => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.regular,
+    color: ColorsManager.white,
+  );
+  static TextStyle get font20WhiteMedium => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.white,
+  );
+  static TextStyle get font20WhiteSemiBold => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.white,
+  );
+  static TextStyle get font20WhiteBold => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.white,
+  );
+
+  static TextStyle get font20PrimaryRegular => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.regular,
+    color: ColorsManager.primary,
+  );
+  static TextStyle get font20PrimaryMedium => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.primary,
+  );
+  static TextStyle get font20PrimarySemiBold => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.primary,
+  );
+  static TextStyle get font20PrimaryBold => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.primary,
+  );
+
+  static TextStyle get font20SecondaryRegular => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.regular,
+    color: ColorsManager.secondary,
+  );
+  static TextStyle get font20SecondaryMedium => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.secondary,
+  );
+  static TextStyle get font20SecondarySemiBold => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.secondary,
+  );
+  static TextStyle get font20SecondaryBold => _createStyle(
+    fontSize: 20,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.secondary,
+  );
+
+  // ===================== Font 18 =====================
+
+  static TextStyle get font18BlackRegular => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.regular,
+    color: ColorsManager.black,
+  );
+  static TextStyle get font18BlackMedium => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.black,
+  );
+  static TextStyle get font18BlackSemiBold => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.black,
+  );
+  static TextStyle get font18BlackBold => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.black,
+  );
+
+  static TextStyle get font18WhiteRegular => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.regular,
+    color: ColorsManager.white,
+  );
+  static TextStyle get font18WhiteMedium => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.white,
+  );
+  static TextStyle get font18WhiteSemiBold => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.white,
+  );
+  static TextStyle get font18WhiteBold => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.white,
+  );
+
+  static TextStyle get font18PrimaryRegular => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.regular,
+    color: ColorsManager.primary,
+  );
+  static TextStyle get font18PrimaryMedium => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.primary,
+  );
+  static TextStyle get font18PrimarySemiBold => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.primary,
+  );
+  static TextStyle get font18PrimaryBold => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.primary,
+  );
+
+  static TextStyle get font18SecondaryRegular => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.regular,
+    color: ColorsManager.secondary,
+  );
+  static TextStyle get font18SecondaryMedium => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.medium,
+    color: ColorsManager.secondary,
+  );
+  static TextStyle get font18SecondarySemiBold => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.semiBold,
+    color: ColorsManager.secondary,
+  );
+  static TextStyle get font18SecondaryBold => _createStyle(
+    fontSize: 18,
+    fontWeight: FontWeightHelper.bold,
+    color: ColorsManager.secondary,
+  );
 }

@@ -48,17 +48,26 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         return;
       }
 
-      while (userCubit.state.isLoading || userCubit.state.user == null) {
+      while (userCubit.state.isLoading) {
         await Future.delayed(const Duration(milliseconds: 200));
         if (!mounted) return;
       }
 
       if (!mounted) return;
-      GoRouter.of(context).pushReplacement(AppRouter.kHomeScreen);
+
+      _navigateByRole(userCubit.state.user?.role);
     } else {
       await prefs.setBool('hasOpenedBefore', true);
       if (!mounted) return;
       setState(() => _isLoading = false);
+    }
+  }
+
+  void _navigateByRole(String? role) {
+    if (role == 'employer') {
+      GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
+    } else {
+      GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
     }
   }
 

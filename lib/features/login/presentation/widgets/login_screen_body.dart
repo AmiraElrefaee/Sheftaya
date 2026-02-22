@@ -23,11 +23,11 @@ class LoginScreenBody extends StatelessWidget {
       listener: (context, state) {
         state.maybeWhen(
           success: (data) {
-            final user = context.read<UserCubit>().state.user;
-            if (user!.role == "worker") {
-              context.go(AppRouter.kHomeScreen);
-            }else {
-              context.go(AppRouter.kHomeScreen);
+            final role = context.read<UserCubit>().state.user?.role;
+            if (role == 'employer') {
+              context.go(AppRouter.kEmployerHomeScreen);
+            } else {
+              context.go(AppRouter.kWorkerHomeScreen);
             }
           },
           error: (error) {
@@ -43,105 +43,105 @@ class LoginScreenBody extends StatelessWidget {
           orElse: () => false,
         );
 
-    return Scaffold(
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0.w),
-          child: Form(
-            key: cubit.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'مرحبًا،\nأهلاً بعودتك',
-                  style: TextStyles.font24BlackBold.copyWith(fontSize: 44.sp),
-                ),
-                SizedBox(height: 32.h),
-                Text('البريد الإلكتروني', style: TextStyles.font14BlackRegular),
-                SizedBox(height: 8.h),
-                AppTextFormField(
-                  controller: cubit.emailController,
-                  hintText: 'ادخل البريد الالكتروني',
-                  validator: (value) => AppRegex.validateEmail(value),
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                SizedBox(height: 16.h),
-                Text('كلمة المرور', style: TextStyles.font14BlackRegular),
-                SizedBox(height: 8.h),
-
-                _PasswordField(
-                  cubit: cubit
-                ),
-                SizedBox(height: 12.h),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: InkWell(
-                    onTap: () {
-                      GoRouter.of(context).push(AppRouter.kForgetPassScreen);
-                    },
-                    child: Text(
-                      'نسيت كلمة المرور؟',
-                      style: TextStyles.font12PrimaryBold.copyWith(
-                        fontWeight: FontWeightHelper.semiBold,
-                        decoration: TextDecoration.underline,
-                        decorationColor: ColorsManager.primary,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 32.h),
-                AppTextButton(
-                  buttonText: 'تسجيل الدخول',
-                  onPressed: () {
-                    if (cubit.formKey.currentState!.validate()) {
-                      cubit.emitLoginStates();
-                    }
-                  },
-                  isLoading: isLoading,
-                ),
-                SizedBox(height: 16.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        return Scaffold(
+          appBar: AppBar(),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(16.0.w),
+              child: Form(
+                key: cubit.formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'ليس لديك حساب؟ ',
-                      style: TextStyles.font14BlackRegular.copyWith(
-                        color: ColorsManager.grey,
+                      'مرحبًا،\nأهلاً بعودتك',
+                      style: TextStyles.font24BlackBold.copyWith(
+                        fontSize: 44.sp,
                       ),
                     ),
-                    InkWell(
-                      onTap: () {
-                        GoRouter.of(context).push(AppRouter.kSignUpScreen);
-                      },
-                      child: Text(
-                        'سجل الآن',
-                        style: TextStyles.font14PrimaryBold.copyWith(
-                          decoration: TextDecoration.underline,
-                          decorationColor: ColorsManager.primary,
+                    SizedBox(height: 32.h),
+                    Text(
+                      'البريد الإلكتروني',
+                      style: TextStyles.font14BlackRegular,
+                    ),
+                    SizedBox(height: 8.h),
+                    AppTextFormField(
+                      controller: cubit.emailController,
+                      hintText: 'ادخل البريد الالكتروني',
+                      validator: (value) => AppRegex.validateEmail(value),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    SizedBox(height: 16.h),
+                    Text('كلمة المرور', style: TextStyles.font14BlackRegular),
+                    SizedBox(height: 8.h),
+                    _PasswordField(cubit: cubit),
+                    SizedBox(height: 12.h),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: InkWell(
+                        onTap: () {
+                          GoRouter.of(
+                            context,
+                          ).push(AppRouter.kForgetPassScreen);
+                        },
+                        child: Text(
+                          'نسيت كلمة المرور؟',
+                          style: TextStyles.font12PrimaryBold.copyWith(
+                            fontWeight: FontWeightHelper.semiBold,
+                            decoration: TextDecoration.underline,
+                            decorationColor: ColorsManager.primary,
+                          ),
                         ),
                       ),
                     ),
+                    SizedBox(height: 32.h),
+                    AppTextButton(
+                      buttonText: 'تسجيل الدخول',
+                      onPressed: () {
+                        if (cubit.formKey.currentState!.validate()) {
+                          cubit.emitLoginStates();
+                        }
+                      },
+                      isLoading: isLoading,
+                    ),
+                    SizedBox(height: 16.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'ليس لديك حساب؟ ',
+                          style: TextStyles.font14BlackRegular.copyWith(
+                            color: ColorsManager.grey,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            GoRouter.of(context).push(AppRouter.kSignUpScreen);
+                          },
+                          child: Text(
+                            'سجل الآن',
+                            style: TextStyles.font14PrimaryBold.copyWith(
+                              decoration: TextDecoration.underline,
+                              decorationColor: ColorsManager.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
-  },
-
-   );
-}
+  }
 }
 
 class _PasswordField extends StatefulWidget {
   final LoginCubit cubit;
-
-  const _PasswordField(
-      {required this.cubit}
-  );
+  const _PasswordField({required this.cubit});
 
   @override
   State<_PasswordField> createState() => _PasswordFieldState();
@@ -159,9 +159,7 @@ class _PasswordFieldState extends State<_PasswordField> {
       validator: (value) => AppRegex.validatePassword(value),
       suffixIcon: InkWell(
         onTap: () {
-          setState(() {
-            isPasswordObscureText = !isPasswordObscureText;
-          });
+          setState(() => isPasswordObscureText = !isPasswordObscureText);
         },
         child: Icon(
           size: 20.w,

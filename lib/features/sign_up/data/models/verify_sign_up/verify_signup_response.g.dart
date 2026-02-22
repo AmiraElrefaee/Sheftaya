@@ -6,15 +6,6 @@ part of 'verify_signup_response.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-VerifySignupResponse _$VerifySignupResponseFromJson(
-  Map<String, dynamic> json,
-) => VerifySignupResponse(
-  status: json['status'] as String?,
-  token: json['token'] as String?,
-  user: json['user'] == null
-      ? null
-      : UserData.fromJson(json['user'] as Map<String, dynamic>),
-);
 
 Map<String, dynamic> _$VerifySignupResponseToJson(
   VerifySignupResponse instance,
