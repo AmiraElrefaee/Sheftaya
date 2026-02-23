@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sheftaya/app/router.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
@@ -88,7 +90,12 @@ class _EmployerHomeScreenBodyState extends State<EmployerHomeScreenBody> {
                   children: [
                     Text('وظائفى المنشوره', style: TextStyles.font18BlackBold),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.push(
+                          AppRouter.kMyPostedJobsScreen,
+                          extra: jobs,
+                        );
+                      },
                       child: Text(
                         'رؤيه الكل',
                         style: TextStyles.font12SecondaryBold,
@@ -107,6 +114,7 @@ class _EmployerHomeScreenBodyState extends State<EmployerHomeScreenBody> {
                           child: HomeJobCard(job: j),
                         ),
                       )
+                      .take(2)
                       .toList(),
                 ),
               ),

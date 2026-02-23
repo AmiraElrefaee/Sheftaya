@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
+import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
 import 'package:sheftaya/features/employer/home/presentation/employer_home_screen.dart';
+import 'package:sheftaya/features/employer/home/presentation/widgets/my_posted_jobs_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/create_new_password_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/forget_pass_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/verify_password_screen.dart';
@@ -7,6 +9,8 @@ import 'package:sheftaya/features/login/presentation/login_screen.dart';
 import 'package:sheftaya/features/on_boarding_screen.dart/on_boarding_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/sign_up_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/verify_account_screen.dart';
+import 'package:sheftaya/features/worker/home/presentation/widgets/all_jobs_screen.dart';
+import 'package:sheftaya/features/worker/home/presentation/widgets/search_screen.dart';
 import 'package:sheftaya/features/worker/home/presentation/worker_home_screen.dart';
 
 abstract class AppRouter {
@@ -19,6 +23,9 @@ abstract class AppRouter {
   static const kVerifyPasswordScreen = '/verifyPasswordScreen';
   static const kCreateNewPasswordScreen = '/createNewPasswordScreen';
   static const kVerifyAccountScreen = '/verifyAccountScreen';
+  static const kSearchScreen = '/searchScreen';
+  static const kAllJobsScreen = '/allJobsScreen';
+  static const kMyPostedJobsScreen = '/myPostedJobsScreen';
   static final router = GoRouter(
     routes: [
       GoRoute(
@@ -79,6 +86,30 @@ abstract class AppRouter {
         builder: (context, state) {
           final role = state.extra as String;
           return VerifyAccountScreen(role: role);
+        },
+      ),
+      GoRoute(
+        path: kSearchScreen,
+        builder: (context, state) {
+          final jobs = state.extra as List<JobModel>;
+          return SearchJobsScreen(jobs: jobs);
+        },
+      ),
+      GoRoute(
+        path: AppRouter.kAllJobsScreen,
+        builder: (context, state) {
+          final data = state.extra as Map<String, dynamic>;
+          final jobs = data['jobs'] as List<JobModel>;
+          final title = data['title'] as String;
+
+          return AllJobsScreen(jobs: jobs, title: title);
+        },
+      ),
+      GoRoute(
+        path: kMyPostedJobsScreen,
+        builder: (context, state) {
+          final jobs = state.extra as List<JobModel>;
+          return MyPostedJobsScreen(jobs: jobs);
         },
       ),
     ],

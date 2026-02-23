@@ -4,11 +4,11 @@ import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
 
-class MyJobCard extends StatelessWidget {
+class MyApplicationsJobCard extends StatelessWidget {
   final JobModel job;
   final VoidCallback? onTap;
 
-  const MyJobCard({super.key, required this.job, this.onTap});
+  const MyApplicationsJobCard({super.key, required this.job, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +23,7 @@ class MyJobCard extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-
         children: [
-          /// Image
           ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
             child: job.imageUrl != null && job.imageUrl!.isNotEmpty
@@ -41,7 +39,6 @@ class MyJobCard extends StatelessWidget {
 
           SizedBox(width: 12.w),
 
-          /// Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,16 +47,14 @@ class MyJobCard extends StatelessWidget {
                 SizedBox(height: 2.h),
                 Text(
                   job.company,
-                  style: TextStyles.font14BlackSemiBold.copyWith(
-                    color: ColorsManager.darkGrey,
-                  ),
+                  style: TextStyles.font14BlackSemiBold
+                      .copyWith(color: ColorsManager.darkGrey),
                 ),
                 SizedBox(height: 2.h),
                 Text(
                   job.postedAt,
-                  style: TextStyles.font12BlackMedium.copyWith(
-                    color: ColorsManager.grey,
-                  ),
+                  style: TextStyles.font12BlackMedium
+                      .copyWith(color: ColorsManager.grey),
                 ),
               ],
             ),
@@ -91,10 +86,10 @@ class MyJobCard extends StatelessWidget {
         return ColorsManager.success;
       case JobStatus.rejected:
         return ColorsManager.error;
-      case JobStatus.reportResolved:
-        return ColorsManager.success;
       case JobStatus.reportUnderReview:
         return ColorsManager.warning;
+      case JobStatus.reportResolved:
+        return ColorsManager.success;
       case JobStatus.accepted:
         return ColorsManager.success;
     }
@@ -132,7 +127,7 @@ class StatusActionButton extends StatelessWidget {
     switch (status) {
       case JobStatus.active:
         return _StatusData(
-          'عرض التفاصيل',
+          'قيد الانتظار',
           ColorsManager.primary.withValues(alpha: .12),
           ColorsManager.primary,
         );

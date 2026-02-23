@@ -228,7 +228,7 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
               widget.hintStyle ??
               TextStyles.font14BlackRegular.copyWith(color: ColorsManager.grey),
           suffixIcon: _buildSuffixIcon(),
-          prefixIcon: widget.prefixIcon,
+          prefixIcon: _buildPrefixIcon(),
           filled: true,
           fillColor: Colors.transparent,
           errorMaxLines: 2,
@@ -243,6 +243,33 @@ class _AppTextFormFieldState extends State<AppTextFormField> {
             ? AutovalidateMode.always
             : AutovalidateMode.onUserInteraction,
       ),
+    );
+  }
+
+  Widget? _buildPrefixIcon() {
+    if (widget.prefixIcon == null) return null;
+
+    final iconColor = _getIconColor();
+
+    if (widget.prefixIcon is Icon) {
+      final icon = widget.prefixIcon as Icon;
+      return Icon(icon.icon, color: iconColor, size: icon.size);
+    }
+
+    if (widget.prefixIcon is GestureDetector) {
+      final gesture = widget.prefixIcon as GestureDetector;
+      if (gesture.child is Icon) {
+        final icon = gesture.child as Icon;
+        return GestureDetector(
+          onTap: gesture.onTap,
+          child: Icon(icon.icon, color: iconColor, size: icon.size ?? 24),
+        );
+      }
+    }
+
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+      child: widget.prefixIcon,
     );
   }
 }

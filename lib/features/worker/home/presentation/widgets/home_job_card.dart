@@ -5,6 +5,7 @@ import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
+import 'package:sheftaya/features/worker/service/saved_jobs_service.dart';
 
 class HomeJobCard extends StatelessWidget {
   final JobModel job;
@@ -63,6 +64,24 @@ class HomeJobCard extends StatelessWidget {
                   ],
                 ),
               ),
+              Spacer(),
+              FutureBuilder<bool>(
+                future: SavedJobsService.isSaved(job.id),
+                builder: (_, snapshot) {
+                  final saved = snapshot.data ?? false;
+                  return IconButton(
+                    onPressed: () async {
+                      await SavedJobsService.toggleJob(job);
+                      (context as Element).markNeedsBuild();
+                    },
+                    icon: Icon(
+                      size: 32.sp,
+                      saved ? Icons.bookmark : Icons.bookmark_border,
+                      color: ColorsManager.primary,
+                    ),
+                  );
+                },
+              ),
             ],
           ),
 
@@ -85,8 +104,6 @@ class HomeJobCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-
-              /// Applicants Badge
               _applicantsBadge(job.applicantsCount),
             ],
           ),
