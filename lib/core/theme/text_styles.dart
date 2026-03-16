@@ -14,6 +14,7 @@ class TextStyles {
       fontSize: fontSize.sp,
       fontWeight: fontWeight,
       color: color,
+
     );
   }
 

@@ -201,6 +201,66 @@ class _ApiService implements ApiService {
     return _value;
   }
 
+  @override
+  Future<PublishJobResponse> publishJob(
+    String token,
+    Map<String, dynamic> job,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = <String, dynamic>{};
+    _data.addAll(job);
+    final _options = _setStreamType<PublishJobResponse>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'jobs',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late PublishJobResponse _value;
+    try {
+      _value = PublishJobResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<JobDetailsResponse> getJobDetails(String token, String jobId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<JobDetailsResponse>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'jobs/${jobId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late JobDetailsResponse _value;
+    try {
+      _value = JobDetailsResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

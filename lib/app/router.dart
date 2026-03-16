@@ -1,3 +1,4 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sheftaya/features/employer/home/presentation/home_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/create_new_password_screen.dart';
@@ -5,8 +6,15 @@ import 'package:sheftaya/features/forget_password/presentation/forget_pass_scree
 import 'package:sheftaya/features/forget_password/presentation/verify_password_screen.dart';
 import 'package:sheftaya/features/login/presentation/login_screen.dart';
 import 'package:sheftaya/features/on_boarding_screen.dart/on_boarding_screen.dart';
+import 'package:sheftaya/features/publish_job/presentation/widgets/publish_job_view_body.dart';
 import 'package:sheftaya/features/sign_up/presentation/sign_up_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/verify_account_screen.dart';
+
+import '../core/di/service_locator.dart';
+import '../features/publish_job/presentation/job_publish_success_screen.dart';
+import '../features/publish_job/presentation/mangers/job_details_cubit/job_details_cubit.dart';
+import '../features/publish_job/presentation/publish_job_view.dart';
+import '../features/term_condition/presentation/term_condtion_view.dart';
 
 abstract class AppRouter {
   static const kSignUpScreen = '/signUpScreen';
@@ -17,6 +25,10 @@ abstract class AppRouter {
   static const kVerifyPasswordScreen = '/verifyPasswordScreen';
   static const kCreateNewPasswordScreen = '/createNewPasswordScreen';
   static const kVerifyAccountScreen = '/verifyAccountScreen';
+  static const kPublishJobView = '/PublishJobView';
+  static const kTermCondtionView = '/TermCondtionView';
+  static const kPublishJobNewLocation = '/PublishJobNewLocation';
+  static const kJobPublishSuccessScreen = '/JobPublishSuccessScreen';
   static final router = GoRouter(
     routes: [
       GoRoute(
@@ -51,6 +63,12 @@ abstract class AppRouter {
         },
       ),
       GoRoute(
+        path: AppRouter.kPublishJobView,
+        builder: (context, state) {
+          return const PublishJobView();
+        },
+      ),
+      GoRoute(
         path: kVerifyPasswordScreen,
         builder: (context, state) {
           final email = state.extra as String;
@@ -61,7 +79,7 @@ abstract class AppRouter {
       GoRoute(
         path: kCreateNewPasswordScreen,
         builder: (context, state) {
-          final token = state.extra as String; 
+          final token = state.extra as String;
           return CreateNewPasswordScreen(resetToken: token);
         },
       ),
@@ -73,6 +91,25 @@ abstract class AppRouter {
           return VerifyAccountScreen(role: role);
         },
       ),
+
+      GoRoute(
+        path: kTermCondtionView,
+        builder: (context, state) => const TermCondtionView(),
+      ),
+      GoRoute(
+          path: kJobPublishSuccessScreen,
+          builder: (context, state) {
+            final String jobId = state.extra as String;
+            return BlocProvider(
+              create: (context) => getIt<JobDetailsCubit>(),
+              child: JobPublishSuccessScreen(jobId: jobId),
+            );
+          }
+      ),
+      // GoRoute(
+      //   path: kPublishJobNewLocation,
+      //   builder: (context, state) => const PublishJobNewLocation(),
+      // ),
     ],
   );
 }

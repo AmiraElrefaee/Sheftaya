@@ -54,7 +54,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       }
 
       if (!mounted) return;
-      GoRouter.of(context).pushReplacement(AppRouter.kHomeScreen);
+      GoRouter.of(context).pushReplacement(AppRouter.kPublishJobView);
     } else {
       await prefs.setBool('hasOpenedBefore', true);
       if (!mounted) return;
