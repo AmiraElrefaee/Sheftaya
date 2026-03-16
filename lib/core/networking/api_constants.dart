@@ -8,6 +8,8 @@ class ApiConstants {
   static const String verifyPassword = "auth/password/verify";
   static const String resetPassword = "auth/password/reset";
   static const String verifyAccount = "auth/signup/verify";
+  static const String publishJob = "jobs";
+  static const String getJobDetails = "jobs/{jobId}";
 }
 
 class ApiErrors {

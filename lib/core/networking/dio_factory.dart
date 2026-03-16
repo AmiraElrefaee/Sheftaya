@@ -25,6 +25,31 @@ class DioFactory {
         requestBody: true,
         requestHeader: true,
         responseHeader: true,
+        responseBody: true,
+        error: true,
+        compact: true,
+        maxWidth: 120,
+        logPrint: (object) {
+          print('🛰️ $object');
+        },
+      ),
+    );
+    dio?.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          print("📤 REQUEST → ${options.method} ${options.baseUrl}${options.path}");
+          print("📦 DATA → ${options.data}");
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          print("📥 RESPONSE → ${response.data}");
+          return handler.next(response);
+        },
+        onError: (error, handler) {
+          print("❌ ERROR → ${error.response?.data}");
+          return handler.next(error);
+        },
+
       ),
     );
   }

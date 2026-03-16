@@ -54,6 +54,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       }
 
       if (!mounted) return;
+      GoRouter.of(context).pushReplacement(AppRouter.kPublishJobView);
 
       _navigateByRole(userCubit.state.user?.role);
     } else {
