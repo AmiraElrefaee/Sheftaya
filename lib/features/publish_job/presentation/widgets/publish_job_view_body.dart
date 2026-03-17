@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:sheftaya/app/router.dart';
@@ -8,6 +9,9 @@ import 'package:sheftaya/core/widgets/app_dropdown.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/section_institute_step_form.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/section_job_info_form.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/set_progress_indicator.dart';
+import '../../../../core/constants/shared_pref_helper.dart';
+import '../../../../core/constants/shared_pref_keys.dart';
+import '../../../../core/helper/location_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../data/model/publish_job.dart';
 import '../mangers/job_publish_cubit/job_publish_cubit.dart';
@@ -41,30 +45,38 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
   final institutionNameController = TextEditingController();
   final institutionAddressController = TextEditingController();
   final taxNumberController = TextEditingController();
+  double? lat;
+  double? long;
 
-  void _onPublish() {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LocationHelper.checkAndRequestLocation();
+    });
+    // _getUserCurrentLocation(); // جلب الموقع فور فتح الصفحة
+  }
+
+  // Future<void> _getUserCurrentLocation() async {
+  //   try {
+  //     Position position = await LocationHelper.determinePosition();
+  //     setState(() {
+  //       lat = position.latitude;
+  //       long = position.longitude;
+  //       // اختيارياً: يمكنك استخدام مكتبة geocoding لتحويل الإحداثيات لاسم منطقة وتضعيه في الـ controller
+  //       jobLocationController.text = "موقعي الحالي";
+  //     });
+  //   } catch (e) {
+  //     print("Location Error: $e");
+  //   }
+  // }
+  void _onPublish()async {
     if (!_formKey.currentState!.validate()) {
       // Form is invalid, show errors
       return;
     }
 
     try {
-      // Parse date (YYYY-MM-DD)
-      // final dateParts = dateController.text.split('-');
-      // final year = int.parse(dateParts[0]);
-      // final month = int.parse(dateParts[1]);
-      // final day = int.parse(dateParts[2]);
-      //
-      // // Parse time (HH:mm)
-      // final timeParts = timeController.text.split(':');
-      // final hour = int.parse(timeParts[0]);
-      // final minute = int.parse(timeParts[1]);
-      //
-      // // Combine into DateTime
-      // final DateTime startDateTime = DateTime(year, month, day, hour, minute);
-      //
-      // // Calculate end date
-      // final DateTime endDateTime = startDateTime.add(Duration(days: days));
 
       final dateParts = dateController.text.split('-');
       final timeParts = timeController.text.split(':');
@@ -83,11 +95,14 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
       final DateTime utcEnd = utcStart.add(Duration(days: days));
       double dailySalary = double.tryParse(salaryController.text) ?? 0;
 
+
+      double savedLat = await SharedPrefHelper.getDouble(SharedPrefKeys.lastLatitude);
+      double savedLong = await SharedPrefHelper.getDouble(SharedPrefKeys.lastLongitude);
       final job = JobModel(
         title: jobTitleController.text,
         place: selectedInstitution ?? "المؤسسة المسجلة",
-        longitude: 31.2357,
-        latitude: 30.0444,
+        longitude: long ?? 31.2357,
+        latitude: lat ?? 30.0444,
         mainPlace: jobLocationController.text,
         address: jobLocationController.text,
         // startDateTime: startDateTime.toUtc(), // ✅ DateTime object

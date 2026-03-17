@@ -53,8 +53,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         if (!mounted) return;
       }
 
-      if (!mounted) return;
-      GoRouter.of(context).pushReplacement(AppRouter.kPublishJobView);
+      // if (!mounted) return;
+
 
       _navigateByRole(userCubit.state.user?.role);
     } else {
@@ -68,7 +68,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     if (role == 'employer') {
       GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
     } else {
-      GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
+      GoRouter.of(context).pushReplacement(AppRouter.kPublishJobView);
+      // GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
     }
   }
 
