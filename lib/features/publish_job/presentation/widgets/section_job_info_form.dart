@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/section_build_term_check_boc.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/section_date.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/section_experience_salary.dart';
 
+import '../../../../app/router.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../../../core/widgets/custom_text_form_field.dart';
 import 'counter_field.dart';
@@ -13,7 +16,7 @@ class JobInfoStepForm extends StatelessWidget {
   final TextEditingController titleController, locationController, salaryController, detailsController, reqController, dateController, timeController;
   final Function(int) onDaysChanged, onHoursChanged, onWorkersChanged;
   final Function(String?) onExperienceChanged;
-
+  final Function(double lat, double lng) onLocationSelected;
   const JobInfoStepForm({
     super.key,
     required this.titleController,
@@ -27,6 +30,7 @@ class JobInfoStepForm extends StatelessWidget {
     required this.onHoursChanged,
     required this.onWorkersChanged,
     required this.onExperienceChanged,
+    required this.onLocationSelected,
   });
   @override
   Widget build(BuildContext context) {
@@ -41,10 +45,29 @@ class JobInfoStepForm extends StatelessWidget {
             validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
             controller: titleController, hintText: 'مثال: عامل كافيه'),
         SizedBox(height: 16.h),
+        // const CustomLabelText(text: 'موقع العمل'),
+        // AppTextFormField(
+        //     validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
+        //     controller: locationController, hintText: 'ادخل موقع العمل'),
+
+        // داخل JobInfoStepForm في الـ build
         const CustomLabelText(text: 'موقع العمل'),
         AppTextFormField(
-            validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
-            controller: locationController, hintText: 'ادخل موقع العمل'),
+          readOnly: true, // عشان يفتح الخريطة بدل ما يكتب كيبورد
+          onTap: () async {
+            // هنا هننادي الـ Map Picker اللي هنعمله تحت
+            final result = await context.push(AppRouter.kMapPickerScreen);
+            if (result != null && result is Map<String, dynamic>) {
+              locationController.text = result['address'];
+              // بنبعت الإحداثيات للـ ViewBody عشان يحفظها في الـ variables
+              onLocationSelected(result['lat'], result['lng']);
+            }
+          },
+          validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
+          controller: locationController,
+          hintText: 'اضغط لتحديد موقع العمل على الخريطة',
+          suffixIcon: Icon(Icons.location_on, color: Colors.red),
+        ),
         SizedBox(height: 16.h),
         SectionDate(
           dateController: dateController,

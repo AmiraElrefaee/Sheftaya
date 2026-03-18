@@ -76,7 +76,9 @@ class _EmployerHomeScreenBodyState extends State<EmployerHomeScreenBody> {
               padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: AppTextButton(
                 buttonText: 'نشر وظيفة جديده',
-                onPressed: () {},
+                onPressed: () {
+                  GoRouter.of(context).push(AppRouter.kPublishJobView);
+                },
               ),
             ),
             SizedBox(height: 12.h),

@@ -68,8 +68,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     if (role == 'employer') {
       GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
     } else {
-      GoRouter.of(context).pushReplacement(AppRouter.kPublishJobView);
-      // GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
+     // GoRouter.of(context).pushReplacement(AppRouter.kPublishJobView);
+      GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
     }
   }
 
