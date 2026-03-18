@@ -33,4 +33,23 @@ class JobRemoteDataSource {
       throw ServerErrorHandler.handle(e).serverFailure;
     }
   }
+
+
+  // داخل كلاس JobRemoteDataSource
+  // inside JobRemoteDataSource
+  Future<PublishJobResponse> updateJob(String jobId, JobModel job) async {
+    try {
+      final String token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final String formattedToken = token.startsWith('Bearer') ? token : 'Bearer $token';
+
+      final response = await _apiService.updateJob(
+        formattedToken,
+        jobId,
+        job.toJson(),
+      );
+      return response;
+    } catch (e) {
+      throw ServerErrorHandler.handle(e).serverFailure;
+    }
+  }
 }

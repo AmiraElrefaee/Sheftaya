@@ -24,4 +24,13 @@ class JobPublishCubit extends Cubit<JobPublishState> {
       },
     );
   }
+  // inside JobPublishCubit
+  Future<void> updateJob(String jobId, JobModel job) async {
+    emit( PublishJobLoading());
+    final result = await _repository.updateJob(jobId, job);
+    result.fold(
+          (error) => emit(PublishJobError( error.errmessage)),
+          (response) => emit(PublishJobSuccess(jobId: response.data.id)), // بنرجع نفس الـ ID عشان يروح لصفحة النجاح تاني
+    );
+  }
 }

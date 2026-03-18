@@ -17,4 +17,13 @@ class JobRepository {
       return Left(failure);
     }
   }
+  // inside JobRepository
+  Future<Either<Failure, PublishJobResponse>> updateJob(String jobId, JobModel job) async {
+    try {
+      final response = await _remoteDataSource.updateJob(jobId, job);
+      return Right(response);
+    } catch (e) {
+      return Left(ServerErrorHandler.handle(e).serverFailure);
+    }
+  }
 }

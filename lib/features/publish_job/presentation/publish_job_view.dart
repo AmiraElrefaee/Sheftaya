@@ -6,11 +6,13 @@ import 'package:sheftaya/features/publish_job/presentation/widgets/publish_job_v
 import '../../../core/di/service_locator.dart';
 import '../../../core/theme/colors_manager.dart';
 import '../../../core/theme/text_styles.dart';
+import '../../employer/home/data/models/job_model.dart';
+import '../data/model/job_details_response.dart';
 import 'mangers/job_publish_cubit/job_publish_cubit.dart';
 
 class PublishJobView extends StatelessWidget {
-  const PublishJobView({super.key});
-
+  final JobDetails? existingJob;
+  const PublishJobView({super.key, this.existingJob});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +22,7 @@ class PublishJobView extends StatelessWidget {
 
       body: BlocProvider(
         create: (context) => getIt<JobPublishCubit>(),
-        child: const PublishJobViewBody(),
+        child:  PublishJobViewBody( existingJob: existingJob ),
       ),
     );
   }

@@ -64,4 +64,11 @@ abstract class ApiService {
       @Header("Authorization") String token,
       @Path("jobId") String jobId,
       );
+  // inside ApiService
+  @PUT("${ApiConstants.publishJob}/{jobId}") // سيصبح base_url/jobs/job_id
+  Future<PublishJobResponse> updateJob(
+      @Header("Authorization") String token,
+      @Path("jobId") String jobId,
+      @Body() Map<String, dynamic> job,
+      );
 }

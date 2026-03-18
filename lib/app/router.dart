@@ -16,6 +16,7 @@ import 'package:sheftaya/features/worker/home/presentation/widgets/search_screen
 import 'package:sheftaya/features/worker/home/presentation/worker_home_screen.dart';
 
 import '../core/di/service_locator.dart';
+import '../features/publish_job/data/model/job_details_response.dart';
 import '../features/publish_job/presentation/job_publish_success_screen.dart';
 import '../features/publish_job/presentation/mangers/job_details_cubit/job_details_cubit.dart';
 import '../features/publish_job/presentation/publish_job_view.dart';
@@ -78,9 +79,10 @@ abstract class AppRouter {
         },
       ),
       GoRoute(
-        path: AppRouter.kPublishJobView,
+        path: kPublishJobView,
         builder: (context, state) {
-          return const PublishJobView();
+          final job = state.extra as JobDetails?; // ✅ استقبال الـ extra
+          return PublishJobView(existingJob: job);
         },
       ),
       GoRoute(

@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/router.dart';
 import '../../../../core/theme/colors_manager.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../mangers/job_details_cubit/job_details_cubit.dart';
 
 class ActionButtonsSection extends StatelessWidget {
   const ActionButtonsSection({super.key});
@@ -14,7 +18,14 @@ class ActionButtonsSection extends StatelessWidget {
       children: [
         // زرار تعديل الوظيفة
         OutlinedButton(
-          onPressed: () {},
+          onPressed: () {
+
+            final state = context.read<JobDetailsCubit>().state;
+            if (state is JobDetailsSuccess) {
+              // نرجع لصفحة الـ Create ونبعت الـ Job كـ extra
+              context.pushReplacement(AppRouter.kPublishJobView, extra: state.job);
+            }
+          },
           style: OutlinedButton.styleFrom(
             side: const BorderSide(color: ColorsManager.primary,
                 width: 2

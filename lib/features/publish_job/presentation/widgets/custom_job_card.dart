@@ -16,7 +16,7 @@ class JobSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // تنسيق التاريخ والوقت
-    DateTime startUtc = DateTime.parse(job.startDateTime);
+    DateTime startUtc = DateTime.parse(job.startDateTime.toString());
 
     // 2. التحويل من UTC إلى التوقيت المحلي (توقيت مصر)
     DateTime localStart = startUtc.toLocal();
