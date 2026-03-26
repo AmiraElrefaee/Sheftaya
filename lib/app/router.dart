@@ -21,6 +21,7 @@ import '../features/publish_job/presentation/job_publish_success_screen.dart';
 import '../features/publish_job/presentation/mangers/job_details_cubit/job_details_cubit.dart';
 import '../features/publish_job/presentation/map_picker_screen.dart';
 import '../features/publish_job/presentation/publish_job_view.dart';
+import '../features/shift_details/presentation/shift_details_view.dart';
 import '../features/term_condition/presentation/term_condtion_view.dart';
 
 abstract class AppRouter {
@@ -41,6 +42,7 @@ abstract class AppRouter {
   static const kPublishJobNewLocation = '/PublishJobNewLocation';
   static const kJobPublishSuccessScreen = '/JobPublishSuccessScreen';
   static const kMapPickerScreen ='/MapPickerScreen';
+  static const kShiftDetailsView='/ShiftDetailsView';
   static final router = GoRouter(
     routes: [
       GoRoute(
@@ -158,6 +160,11 @@ abstract class AppRouter {
       //   path: kPublishJobNewLocation,
       //   builder: (context, state) => const PublishJobNewLocation(),
       // ),
+      GoRoute(
+        path: kShiftDetailsView,
+        builder: (context, state) =>  ShiftDetailsView(),
+      ),
+
     ],
   );
 }
