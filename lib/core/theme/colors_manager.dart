@@ -2,7 +2,9 @@ import 'dart:ui';
 
 class ColorsManager {
   static const Color primary = Color(0xFF3C93F7);
-  static const Color secondary = Color(0xFF265BB1);
+  static const Color secondary = Color(0xFFFDBF5A);
+static const Color background=Color(0xffFAFAFA);
+  // static const Color secondary = Color(0xFF265BB1);
 
   // Neutral colors
   static const Color black = Color(0xFF000000);
@@ -13,6 +15,7 @@ class ColorsManager {
 
   // Status colors
   static const Color success = Color(0xFF10B981);
+ static const Color green =Color(0xff4DCE1F);
   static const Color error = Color(0xFFEF4444);
   static const Color warning = Color(0xFFF59E0B);
   static const Color info = Color(0xFF3B82F6);

@@ -14,11 +14,17 @@ import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_response.d
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_request_body.dart';
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_response.dart';
 
+import '../../features/publish_job/data/model/job_details_response.dart';
+import '../../features/publish_job/data/model/publish_job.dart';
+import '../../features/publish_job/data/model/publish_job_request.dart';
+
 part 'api_service.g.dart';
 
 @RestApi()
 abstract class ApiService {
+
   factory ApiService(Dio dio, {String? baseUrl}) = _ApiService;
+
   @POST(ApiConstants.login)
   Future<LoginResponse> login(@Body() LoginRequestBody loginRequestBody);
 
@@ -47,4 +53,22 @@ abstract class ApiService {
     @Header("Authorization") String token,
     @Body() CreateNewPasswordRequestBody body,
   );
+
+  @POST(ApiConstants.publishJob)
+  Future<PublishJobResponse> publishJob(
+      @Header("Authorization") String token,
+      @Body() Map<String, dynamic> job,
+      );
+  @GET(ApiConstants.getJobDetails)
+  Future<JobDetailsResponse> getJobDetails(
+      @Header("Authorization") String token,
+      @Path("jobId") String jobId,
+      );
+  // inside ApiService
+  @PUT("${ApiConstants.publishJob}/{jobId}") // سيصبح base_url/jobs/job_id
+  Future<PublishJobResponse> updateJob(
+      @Header("Authorization") String token,
+      @Path("jobId") String jobId,
+      @Body() Map<String, dynamic> job,
+      );
 }

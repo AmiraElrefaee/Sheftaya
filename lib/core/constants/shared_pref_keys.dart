@@ -12,4 +12,7 @@ class SharedPrefKeys {
   static const String resetToken = 'resetToken';
   static const String userId = 'userId';
   static const String userProfileImage = 'userImage';
+  static const String lastLatitude = 'lastLatitude';
+  static const String lastLongitude = 'lastLongitude';
+  static const String locationPermissionRequested = 'locationPermissionRequested';
 }
