@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sheftaya/core/di/service_locator.dart';
+import 'package:sheftaya/features/worker/home/logic/all_jobs/open_jobs_cubit.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/bottom_nav.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/worker_home_screen_body.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/saved_jobs_screen.dart';
@@ -23,11 +26,14 @@ class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: screens[currentIndex],
-      bottomNavigationBar: BottomNav(
-        currentIndex: currentIndex,
-        onTap: (i) => setState(() => currentIndex = i),
+    return BlocProvider<OpenJobsCubit>(
+      create: (_) => getIt<OpenJobsCubit>()..fetchOpenJobs(),
+      child: Scaffold(
+        body: screens[currentIndex],
+        bottomNavigationBar: BottomNav(
+          currentIndex: currentIndex,
+          onTap: (i) => setState(() => currentIndex = i),
+        ),
       ),
     );
   }

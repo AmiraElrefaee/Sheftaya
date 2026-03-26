@@ -13,16 +13,14 @@ import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_request_bo
 import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_response.dart';
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_request_body.dart';
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_response.dart';
-
+import 'package:sheftaya/features/worker/home/data/models/all_jobs/open_jobs_response.dart';
 import '../../features/publish_job/data/model/job_details_response.dart';
-import '../../features/publish_job/data/model/publish_job.dart';
 import '../../features/publish_job/data/model/publish_job_request.dart';
 
 part 'api_service.g.dart';
 
 @RestApi()
 abstract class ApiService {
-
   factory ApiService(Dio dio, {String? baseUrl}) = _ApiService;
 
   @POST(ApiConstants.login)
@@ -56,19 +54,24 @@ abstract class ApiService {
 
   @POST(ApiConstants.publishJob)
   Future<PublishJobResponse> publishJob(
-      @Header("Authorization") String token,
-      @Body() Map<String, dynamic> job,
-      );
+    @Header("Authorization") String token,
+    @Body() Map<String, dynamic> job,
+  );
   @GET(ApiConstants.getJobDetails)
   Future<JobDetailsResponse> getJobDetails(
-      @Header("Authorization") String token,
-      @Path("jobId") String jobId,
-      );
+    @Header("Authorization") String token,
+    @Path("jobId") String jobId,
+  );
   // inside ApiService
-  @PUT("${ApiConstants.publishJob}/{jobId}") // سيصبح base_url/jobs/job_id
+  @PUT("${ApiConstants.publishJob}/{jobId}")
   Future<PublishJobResponse> updateJob(
-      @Header("Authorization") String token,
-      @Path("jobId") String jobId,
-      @Body() Map<String, dynamic> job,
-      );
+    @Header("Authorization") String token,
+    @Path("jobId") String jobId,
+    @Body() Map<String, dynamic> job,
+  );
+  
+  @GET(ApiConstants.openJobs)
+Future<OpenJobsResponse> getOpenJobs(
+  @Header('Authorization') String token,
+);
 }

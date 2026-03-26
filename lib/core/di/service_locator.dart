@@ -16,6 +16,8 @@ import 'package:sheftaya/features/sign_up/data/repo/sign_up_repo.dart';
 import 'package:sheftaya/features/sign_up/data/repo/verify_sign_up_repo.dart';
 import 'package:sheftaya/features/sign_up/logic/sign_up/sign_up_cubit.dart';
 import 'package:sheftaya/features/sign_up/logic/verify_sign_up/verify_signup_cubit.dart';
+import 'package:sheftaya/features/worker/home/data/repos/open_jobs_repo.dart';
+import 'package:sheftaya/features/worker/home/logic/all_jobs/open_jobs_cubit.dart';
 
 import '../../features/publish_job/data/api_service/job_details_remote_data_source.dart';
 import '../../features/publish_job/data/api_service/publish_job_remote_data_source.dart';
@@ -80,27 +82,27 @@ void setupServiceLocator() {
 
   //create job
 
-  getIt.registerLazySingleton<JobRemoteDataSource>(
-        () => JobRemoteDataSource(),
-  );
+  getIt.registerLazySingleton<JobRemoteDataSource>(() => JobRemoteDataSource());
   getIt.registerLazySingleton<JobRepository>(
-        () => JobRepository(getIt<JobRemoteDataSource>()),
+    () => JobRepository(getIt<JobRemoteDataSource>()),
   );
   getIt.registerFactory<JobPublishCubit>(
-        () => JobPublishCubit(getIt<JobRepository>()),
+    () => JobPublishCubit(getIt<JobRepository>()),
   );
 
   //successs publish
   getIt.registerLazySingleton<JobDetailsRemoteDataSource>(
-        () => JobDetailsRemoteDataSource(),
+    () => JobDetailsRemoteDataSource(),
   );
 
   getIt.registerLazySingleton<JobDetailsRepo>(
-        () => JobDetailsRepo(getIt<JobDetailsRemoteDataSource>()),
+    () => JobDetailsRepo(getIt<JobDetailsRemoteDataSource>()),
   );
 
   getIt.registerFactory<JobDetailsCubit>(
-        () => JobDetailsCubit(getIt<JobDetailsRepo>()),
+    () => JobDetailsCubit(getIt<JobDetailsRepo>()),
   );
 
+  getIt.registerLazySingleton<OpenJobsRepo>(() => OpenJobsRepo(getIt()));
+  getIt.registerFactory<OpenJobsCubit>(() => OpenJobsCubit(getIt()));
 }

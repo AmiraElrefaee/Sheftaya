@@ -23,6 +23,7 @@ class HomeJobCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,6 +46,7 @@ class HomeJobCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(job.title, style: TextStyles.font18BlackBold),
                     SizedBox(height: 2.h),
@@ -53,10 +55,12 @@ class HomeJobCard extends StatelessWidget {
                       style: TextStyles.font14BlackSemiBold.copyWith(
                         color: ColorsManager.darkGrey,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      job.postedAt,
+                      'نُشرت ${job.postedAt}',
                       style: TextStyles.font12BlackMedium.copyWith(
                         color: ColorsManager.grey,
                       ),
@@ -64,7 +68,7 @@ class HomeJobCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Spacer(),
+              SizedBox(width: 20.w),
               FutureBuilder<bool>(
                 future: SavedJobsService.isSaved(job.id),
                 builder: (_, snapshot) {
@@ -165,7 +169,7 @@ class HomeJobCard extends StatelessWidget {
           ),
           SizedBox(width: 4.w),
           Text(
-            '$count متقدمين',
+            '$count عمال مطلوبون',
             style: TextStyles.font12BlackMedium.copyWith(
               color: ColorsManager.darkGrey,
             ),
