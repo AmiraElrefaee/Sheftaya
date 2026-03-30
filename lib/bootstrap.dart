@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -15,7 +16,7 @@ Future<void> bootstrap() async {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-
+      await Firebase.initializeApp();
       await dotenv.load(fileName: 'assets/.env');
 
       setupServiceLocator();

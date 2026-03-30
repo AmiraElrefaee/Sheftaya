@@ -14,6 +14,8 @@ import 'package:sheftaya/features/on_boarding_screen.dart/screen2.dart';
 import 'package:sheftaya/features/on_boarding_screen.dart/screen3.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../shift_details/presentation/widget/enums.dart';
+
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});
 
@@ -67,9 +69,22 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   void _navigateByRole(String? role) {
     if (role == 'employer') {
       // GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
-      GoRouter.of(context).pushReplacement(AppRouter.kShiftDetailsView);
+      context.push(
+        AppRouter.kShiftDetailsView,
+        extra: {
+          'role': UserRole.employer, // أو UserRole.employer عشان تشوفي الفرق
+          'jobId': 'job_001',      // الـ ID اللي هيتكرت في Firebase
+        },
+      );
     } else {
      // GoRouter.of(context).pushReplacement(AppRouter.kShiftDetailsView);
+      context.push(
+        AppRouter.kShiftDetailsView,
+        extra: {
+          'role': UserRole.worker, // أو UserRole.employer عشان تشوفي الفرق
+          'jobId': 'job_001',      // الـ ID اللي هيتكرت في Firebase
+        },
+      );
       GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
     }
   }

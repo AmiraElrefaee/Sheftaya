@@ -22,6 +22,7 @@ import '../features/publish_job/presentation/mangers/job_details_cubit/job_detai
 import '../features/publish_job/presentation/map_picker_screen.dart';
 import '../features/publish_job/presentation/publish_job_view.dart';
 import '../features/shift_details/presentation/shift_details_view.dart';
+import '../features/shift_details/presentation/widget/enums.dart';
 import '../features/term_condition/presentation/term_condtion_view.dart';
 
 abstract class AppRouter {
@@ -162,9 +163,20 @@ abstract class AppRouter {
       // ),
       GoRoute(
         path: kShiftDetailsView,
-        builder: (context, state) =>  ShiftDetailsView(),
-      ),
+        builder: (context, state) {
+          // استلام الداتا من الـ extra على شكل Map
+          // لو الـ extra فاضي (للتيست)، هنحط قيم افتراضية (Dummy)
+          final Map<String, dynamic> data = state.extra as Map<String, dynamic>? ?? {
+            'role': UserRole.worker, // القيمة الافتراضية للتيست
+            'jobId': 'test_job_123', // ID افتراضي للتيست
+          };
 
+          return ShiftDetailsView(
+            role: data['role'] as UserRole,
+            shiftId: data['jobId'] as String,
+          );
+        },
+      ),
     ],
   );
 }

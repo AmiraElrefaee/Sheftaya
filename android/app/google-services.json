@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "172318839735",
+    "project_id": "sheftaya-ab412",
+    "storage_bucket": "sheftaya-ab412.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:172318839735:android:6696d287c1be0cb19a0e32",
+        "android_client_info": {
+          "package_name": "com.example.sheftaya"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAugZNuDAbrXKVjfDG5D4ON5Pkc1yvE7ys"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

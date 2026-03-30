@@ -23,6 +23,8 @@ import '../../features/publish_job/domain/repo/job_details_repo.dart';
 import '../../features/publish_job/domain/repo/job_post_repo.dart';
 import '../../features/publish_job/presentation/mangers/job_details_cubit/job_details_cubit.dart';
 import '../../features/publish_job/presentation/mangers/job_publish_cubit/job_publish_cubit.dart';
+import '../../features/shift_details/domain/repo/shift_repo.dart';
+import '../../features/shift_details/presentation/managers/shift_cubit.dart';
 
 final getIt = GetIt.instance;
 
@@ -101,6 +103,14 @@ void setupServiceLocator() {
 
   getIt.registerFactory<JobDetailsCubit>(
         () => JobDetailsCubit(getIt<JobDetailsRepo>()),
+  );
+  // Shift Details Feature
+  getIt.registerLazySingleton<ShiftRepository>(
+        () => ShiftRepository(),
+  );
+
+  getIt.registerFactory<ShiftCubit>(
+        () => ShiftCubit(getIt<ShiftRepository>()),
   );
 
 }

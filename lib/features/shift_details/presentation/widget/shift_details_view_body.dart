@@ -1,65 +1,69 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:sheftaya/features/publish_job/presentation/widgets/custom_app_bar.dart';
 import 'package:sheftaya/features/shift_details/presentation/widget/shift_job_summary_card.dart';
 import 'package:sheftaya/features/shift_details/presentation/widget/shift_status_time_line.dart';
 
 import '../../../../core/theme/colors_manager.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../data/model/shift_model.dart';
+import '../managers/shift_cubit.dart';
 import 'enums.dart';
 
 class ShiftDetailsViewBody extends StatelessWidget {
-  const ShiftDetailsViewBody({super.key});
+  final UserRole role;
 
-  get role => null;
+  const ShiftDetailsViewBody({super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
-    return  SingleChildScrollView(
-      // padding: EdgeInsets.all(20.w),
-      child: Column(
-        children: [
-
-          // _buildMapSection(),
-          // SizedBox(height: 20.h),
-          ShiftJobSummaryCard(),
-          SizedBox(height: 20.h),
-          Text("يرجي تأكيد دخولك", style: TextStyles.font24BlackMedium),
-          Text("لن يتم احتساب الوقت حتي يتم التأكيد من الطرفين", style: TextStyles.font16BlackMedium.copyWith(color: ColorsManager.grey)),
-          SizedBox(height: 20.h),
-          _buildTimelineSection(),
-          SizedBox(height: 40.h),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 34, vertical: 28),
-
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-              border: Border.all(
-                color: Color(0xffD9D9D9),
-                width: 1
-              )
-            ),
+    return BlocBuilder<ShiftCubit, ShiftState>(
+      builder: (context, state) {
+        if (state is ShiftLoading) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (state is ShiftLoaded) {
+          final shift = state.shift;
+          return SingleChildScrollView(
             child: Column(
-              
               children: [
-                AppTextButton(
-                  textStyle:TextStyles.font16BlackMedium.copyWith(color: Colors.white),
-                  backgroundColor: Color(0xffD9D9D9),
-                  buttonText: "تأكيد وصولى",
-                  onPressed: (){},
-
+                // تمرير بيانات الشفت للكارت العلوي
+                 ShiftJobSummaryCard(),
+                SizedBox(height: 20.h),
+                Text("يرجي تأكيد دخولك", style: TextStyles.font24BlackMedium),
+                Text(
+                  "لن يتم احتساب الوقت حتي يتم التأكيد من الطرفين",
+                  style: TextStyles.font16BlackMedium.copyWith(color: ColorsManager.grey),
                 ),
+                SizedBox(height: 20.h),
+                // تمرير البيانات للـ Timeline
+                _buildTimelineSection(shift),
+                SizedBox(height: 40.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 34.w, vertical: 28.h),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.r),
+                    color: Colors.white,
+                    border: Border.all(color: const Color(0xffD9D9D9), width: 1),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildActionButton(context, shift),
+                    ],
+                  ),
+                )
               ],
             ),
-          )
-        ],
-      ),
+          );
+        } else if (state is ShiftError) {
+          return Center(child: Text(state.message));
+        }
+        return const Center(child: Text("حدث خطأ ما"));
+      },
     );
   }
-  Widget _buildTimelineSection() {
+
+  Widget _buildTimelineSection(ShiftModel shift) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
       padding: EdgeInsets.all(16.w),
@@ -71,25 +75,28 @@ class ShiftDetailsViewBody extends StatelessWidget {
       child: Column(
         children: [
           ShiftStatusTimelineStep(
-            title: "وقت البدء الساعة (2:00) مساءً",
+            title: "وقت البدء الساعة (${shift.startTime.hour}:${shift.startTime.minute})",
             subTitle: "تم بحلول الوقت الرسمي",
             status: ShiftStepStatus.completed,
           ),
           ShiftStatusTimelineStep(
             title: role == UserRole.worker ? "وصولك" : "وصول العامل",
-            subTitle: "تم تأكيد وصولك",
-            status: ShiftStepStatus.completed,
+            subTitle: shift.isWorkerArrived ? "تم تأكيد الوصول" : "بانتظار التأكيد",
+            status: shift.isWorkerArrived ? ShiftStepStatus.completed : ShiftStepStatus.inProgress,
           ),
           ShiftStatusTimelineStep(
-
             title: "تأكيد صاحب العمل",
-            subTitle: "برجاء الإنتظار...",
-            status: ShiftStepStatus.inProgress,
+            subTitle: shift.isEmployerConfirmed ? "تم التأكيد من صاحب العمل" : "برجاء الإنتظار...",
+            status: shift.isEmployerConfirmed
+                ? ShiftStepStatus.completed
+                : (shift.isWorkerArrived ? ShiftStepStatus.inProgress : ShiftStepStatus.pending),
           ),
           ShiftStatusTimelineStep(
             title: "بدء العمل",
-            subTitle: "",
-            status: ShiftStepStatus.pending,
+            subTitle: (shift.isWorkerArrived && shift.isEmployerConfirmed) ? "جاهز للبدء" : "",
+            status: (shift.isWorkerArrived && shift.isEmployerConfirmed)
+                ? ShiftStepStatus.completed
+                : ShiftStepStatus.pending,
             isLast: true,
           ),
         ],
@@ -97,15 +104,39 @@ class ShiftDetailsViewBody extends StatelessWidget {
     );
   }
 
-  // Widget _buildActionButton() {
-  //   // منطق الزرار يختلف حسب حالة الـ Timeline
-  //   return AppTextButton(
-  //     buttonText: "تأكيد وصولي",
-  //     onPressed: () {},
-  //     backgroundColor: ColorsManager.primary,
-  //   );
-  // }
+  Widget _buildActionButton(BuildContext context, ShiftModel shift) {
+    bool isFullyConfirmed = shift.isWorkerArrived && shift.isEmployerConfirmed;
 
+    // الحالة 1: تم التأكيد من الطرفين (زرار بدء العمل)
+    if (isFullyConfirmed) {
+      return AppTextButton(
+        textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+        backgroundColor: ColorsManager.primary,
+        buttonText: "الانتقال لبدء العمل",
+        onPressed: () {
+          // الانتقال لصفحة الـ Timer
+        },
+      );
+    }
 
+    // الحالة 2: العامل داس تأكيد وبانتظار صاحب العمل (زرار مطفأ)
+    if (role == UserRole.worker && shift.isWorkerArrived) {
+      return AppTextButton(
+        textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+        backgroundColor: const Color(0xffD9D9D9),
+        buttonText: "بانتظار صاحب العمل",
+        onPressed: () {}, // Disabled
+      );
+    }
 
+    // الحالة 3: زرار التأكيد الفعلي (للعامل أو صاحب العمل)
+    return AppTextButton(
+      textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+      backgroundColor: ColorsManager.primary,
+      buttonText: role == UserRole.worker ? "تأكيد وصولى" : "تأكيد وصول العامل",
+      onPressed: () {
+        context.read<ShiftCubit>().confirmArrival(shift.id, role);
+      },
+    );
+  }
 }
