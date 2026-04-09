@@ -13,13 +13,10 @@ class SuccessMessageSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SvgPicture.asset('assets/images/success.svg',
-          height: 120.h,
-
-        ),
+        SvgPicture.asset('assets/images/success.svg', height: 120.h),
         // CircleAvatar(
         //   radius: 50.r,
-        //   backgroundColor: ColorsManager.success.withOpacity(0.1),
+        //   backgroundColor: ColorsManager.success.withValues(alpha:0.1),
         //   child: Icon(Icons.check_circle, color: ColorsManager.success, size: 80.sp),
         // ),
         SizedBox(height: 24.h),
@@ -34,4 +31,3 @@ class SuccessMessageSection extends StatelessWidget {
     );
   }
 }
-

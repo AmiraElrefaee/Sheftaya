@@ -14,6 +14,8 @@ import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_response.d
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_request_body.dart';
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_response.dart';
 import 'package:sheftaya/features/worker/home/data/models/all_jobs/jobs_response.dart';
+import 'package:sheftaya/features/worker/home/data/models/apply_for_job/apply_job_response.dart';
+import 'package:sheftaya/features/worker/home/data/models/job_recommendation/job_recommendation_response.dart';
 import '../../features/publish_job/data/model/job_details_response.dart';
 import '../../features/publish_job/data/model/publish_job_request.dart';
 
@@ -84,4 +86,13 @@ abstract class ApiService {
     @Path('jobId') required String jobId,
     @Header('Authorization') required String token,
   });
+  @GET(ApiConstants.getRecommendations)
+  Future<JobRecommendationResponse> getRecommendations(
+    @Header('Authorization') String token,
+  );
+  @POST(ApiConstants.applyForJob)
+  Future<ApplyJobResponse> applyForJob(
+    @Path('jobId') String jobId,
+    @Header('Authorization') String token,
+  );
 }

@@ -11,6 +11,7 @@ import 'package:sheftaya/features/on_boarding_screen.dart/on_boarding_screen.dar
 import 'package:sheftaya/features/sign_up/presentation/sign_up_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/verify_account_screen.dart';
 import 'package:sheftaya/features/worker/home/data/models/review_model.dart';
+import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_cubit.dart';
 import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart'
     as worker_cubit;
 import 'package:sheftaya/features/worker/home/presentation/widgets/all_jobs_screen.dart';
@@ -108,7 +109,7 @@ abstract class AppRouter {
       GoRoute(
         path: kSearchScreen,
         builder: (context, state) {
-          final jobs = state.extra as List<JobModel>;
+          final jobs = state.extra as List<dynamic>;
           return SearchJobsScreen(jobs: jobs);
         },
       ),
@@ -123,8 +124,13 @@ abstract class AppRouter {
         path: AppRouter.kJobDetailsScreen,
         builder: (context, state) {
           final jobId = state.extra as String;
-          return BlocProvider(
-            create: (_) => getIt<worker_cubit.JobDetailsCubit>(),
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) => getIt<worker_cubit.JobDetailsCubit>(),
+              ),
+              BlocProvider(create: (context) => getIt<ApplyJobCubit>()),
+            ],
             child: JobDetails(jobId: jobId),
           );
         },

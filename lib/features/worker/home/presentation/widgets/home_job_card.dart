@@ -10,17 +10,16 @@ import 'package:sheftaya/features/worker/service/saved_jobs_service.dart';
 
 class HomeJobCard extends StatelessWidget {
   final dynamic job;
+  final VoidCallback? onToggle;
 
-  const HomeJobCard({super.key, required this.job});
+  const HomeJobCard({super.key, required this.job, this.onToggle});
 
   String _formatDate() {
     final startDateTime = job.startDateTime;
     final dt = startDateTime != null
         ? DateTime.tryParse(startDateTime.toString())?.toLocal()
         : null;
-
     if (dt == null) return '';
-
     const months = [
       '',
       'يناير',
@@ -36,7 +35,6 @@ class HomeJobCard extends StatelessWidget {
       'نوفمبر',
       'ديسمبر',
     ];
-
     return '${dt.day} ${months[dt.month]}';
   }
 
@@ -44,12 +42,10 @@ class HomeJobCard extends StatelessWidget {
     if (isoString == null) return '';
     final dt = DateTime.tryParse(isoString)?.toLocal();
     if (dt == null) return '';
-
     final hour = dt.hour;
     final minute = dt.minute.toString().padLeft(2, '0');
     final isAm = hour < 12;
     final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
-
     return '$hour12:$minute ${isAm ? 'ص' : 'م'}';
   }
 
@@ -66,10 +62,7 @@ class HomeJobCard extends StatelessWidget {
     final imageUrl = job.jobImages != null && job.jobImages.isNotEmpty
         ? job.jobImages.first
         : null;
-
-    final expLevel = job.experienceLevel == 'junior'
-        ? 'بدون خبرة'
-        : 'خبرة مطلوبة';
+    final expLevel = job.experienceLevel ?? 'بدون خبرة';
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -120,23 +113,7 @@ class HomeJobCard extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 20.w),
-              FutureBuilder<bool>(
-                future: SavedJobsService.isSaved(_jobId()),
-                builder: (_, snapshot) {
-                  final saved = snapshot.data ?? false;
-                  return IconButton(
-                    onPressed: () async {
-                      await SavedJobsService.toggleJobItem(job);
-                      (context as Element).markNeedsBuild();
-                    },
-                    icon: Icon(
-                      size: 32.sp,
-                      saved ? Icons.bookmark : Icons.bookmark_border,
-                      color: ColorsManager.primary,
-                    ),
-                  );
-                },
-              ),
+              _SaveButton(job: job, onToggle: onToggle),
             ],
           ),
           SizedBox(height: 12.h),
@@ -188,9 +165,10 @@ class HomeJobCard extends StatelessWidget {
                 height: 40.h,
                 child: AppTextButton(
                   buttonText: 'التفاصيل',
-                  onPressed: () {
-                    context.push(AppRouter.kJobDetailsScreen, extra: _jobId());
-                  },
+                  onPressed: () => context.push(
+                    AppRouter.kJobDetailsScreen,
+                    extra: _jobId(),
+                  ),
                 ),
               ),
             ],
@@ -200,23 +178,71 @@ class HomeJobCard extends StatelessWidget {
     );
   }
 
-  Widget _placeholder() {
-    return Container(
-      height: 80.h,
-      width: 80.w,
-      color: ColorsManager.lightGrey,
-      child: const Icon(Icons.image, color: ColorsManager.grey),
-    );
+  Widget _placeholder() => Container(
+    height: 80.h,
+    width: 80.w,
+    color: ColorsManager.lightGrey,
+    child: const Icon(Icons.image, color: ColorsManager.grey),
+  );
+
+  Widget _buildTag(String text) => Container(
+    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+    decoration: BoxDecoration(
+      color: ColorsManager.lightGrey.withValues(alpha: 0.5),
+      borderRadius: BorderRadius.circular(8.r),
+    ),
+    child: Text(text, style: TextStyles.font14BlackMedium),
+  );
+}
+
+class _SaveButton extends StatefulWidget {
+  final dynamic job;
+  final VoidCallback? onToggle;
+  const _SaveButton({required this.job, this.onToggle});
+  @override
+  State<_SaveButton> createState() => _SaveButtonState();
+}
+
+class _SaveButtonState extends State<_SaveButton> {
+  bool isSaved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatus();
   }
 
-  Widget _buildTag(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: ColorsManager.lightGrey.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8.r),
+  @override
+  void didUpdateWidget(covariant _SaveButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _checkStatus();
+  }
+
+  Future<void> _checkStatus() async {
+    final id = (widget.job.id ?? '').toString();
+    final status = await SavedJobsService.isSaved(id);
+    if (mounted) setState(() => isSaved = status);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () async {
+        setState(() => isSaved = !isSaved);
+        await SavedJobsService.toggleJobItem(widget.job);
+        if (widget.onToggle != null) widget.onToggle!();
+      },
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        transitionBuilder: (child, anim) =>
+            ScaleTransition(scale: anim, child: child),
+        child: Icon(
+          isSaved ? Icons.bookmark : Icons.bookmark_border,
+          key: ValueKey<bool>(isSaved),
+          size: 32.sp,
+          color: ColorsManager.primary,
+        ),
       ),
-      child: Text(text, style: TextStyles.font14BlackMedium),
     );
   }
 }

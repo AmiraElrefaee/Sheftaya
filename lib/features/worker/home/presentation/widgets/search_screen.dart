@@ -4,7 +4,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/widgets/custom_text_form_field.dart';
-import 'package:sheftaya/features/worker/home/data/models/all_jobs/jobs_response.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/home_job_card.dart';
 
 class SearchJobsScreen extends StatefulWidget {
@@ -96,21 +95,24 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
 
   double _salaryOf(dynamic job) {
     try {
-      if (job is JobItem) {
-        return (job.pricePerHour?.amount ?? 0).toDouble();
+      // 1. check if it's a model with pricePerHour.amount
+      if (job.pricePerHour != null && job.pricePerHour.amount != null) {
+        return (job.pricePerHour.amount as num).toDouble();
       }
-
-      final pricePerHour = job.pricePerHour;
-      if (pricePerHour != null) {
-        return (pricePerHour.amount ?? 0).toDouble();
+      // 2. check if it's a map
+      if (job is Map) {
+        if (job['pricePerHour']?['amount'] != null) {
+          return (job['pricePerHour']['amount'] as num).toDouble();
+        }
+        if (job['salary'] != null) {
+          return (job['salary'] as num).toDouble();
+        }
       }
-
-      final salary = job.salary;
-      if (salary != null) {
-        return (salary as num).toDouble();
+      // 3. check direct salary property
+      if (job.salary != null) {
+        return (job.salary as num).toDouble();
       }
     } catch (_) {}
-
     return 0;
   }
 
@@ -122,7 +124,8 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filtered = widget.jobs
+    // نستخدم List<dynamic> لتجنب مشاكل الـ casting
+    final List<dynamic> filtered = widget.jobs
         .where((j) => _titleOf(j).toLowerCase().contains(query.toLowerCase()))
         .toList();
 

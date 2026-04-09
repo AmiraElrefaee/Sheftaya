@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sheftaya/core/di/service_locator.dart';
 import 'package:sheftaya/features/worker/home/logic/all_jobs/open_jobs_cubit.dart';
+import 'package:sheftaya/features/worker/home/logic/job_recommendation/job_recommendation_cubit.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/bottom_nav.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/worker_home_screen_body.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/saved_jobs_screen.dart';
@@ -12,8 +13,13 @@ class WorkerHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<OpenJobsCubit>(
-      create: (_) => getIt<OpenJobsCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<OpenJobsCubit>(create: (_) => getIt<OpenJobsCubit>()),
+        BlocProvider<JobsRecommendationsCubit>(
+          create: (_) => getIt<JobsRecommendationsCubit>(),
+        ),
+      ],
       child: const _WorkerHomeScreenShell(),
     );
   }

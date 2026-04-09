@@ -22,13 +22,16 @@ class JobSummaryCard extends StatelessWidget {
     DateTime localStart = startUtc.toLocal();
 
     // 3. التنسيق العربي اللي اخترتيه (يوم/شهر)
-    String formattedDay = DateFormat('d MMMM', 'ar').format(localStart); // مثال: 16 مارس
+    String formattedDay = DateFormat(
+      'd MMMM',
+      'ar',
+    ).format(localStart); // مثال: 16 مارس
 
     // 4. التنسيق العربي للوقت (صباحاً/مساءً) مع استخدام localStart
-    String formattedTime = DateFormat('h:mm a', 'ar')
-        .format(localStart)
-        .replaceAll('AM', 'صباحاً')
-        .replaceAll('PM', 'مساءً');
+    String formattedTime = DateFormat(
+      'h:mm a',
+      'ar',
+    ).format(localStart).replaceAll('AM', 'صباحاً').replaceAll('PM', 'مساءً');
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -49,29 +52,40 @@ class JobSummaryCard extends StatelessWidget {
                   width: 50.w,
                   height: 50.h,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => const CustomLoadingIndicator(size: 20),
+                  placeholder: (context, url) =>
+                      const CustomLoadingIndicator(size: 20),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
               SizedBox(width: 10.w),
-              Expanded( // لتجنب الـ Overflow
+              Expanded(
+                // لتجنب الـ Overflow
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(job.title, // العنوان من الـ API
-                        style: TextStyles.font16BlackBold.copyWith(fontSize: 18.sp)),
-                    Text(job.mainPlace, // الـ mainPlace من الـ API
-                        style: TextStyles.font14BlackRegular),
+                    Text(
+                      job.title, // العنوان من الـ API
+                      style: TextStyles.font16BlackBold.copyWith(
+                        fontSize: 18.sp,
+                      ),
+                    ),
+                    Text(
+                      job.mainPlace, // الـ mainPlace من الـ API
+                      style: TextStyles.font14BlackRegular,
+                    ),
                   ],
                 ),
               ),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
                 decoration: BoxDecoration(
-                  color: ColorsManager.info.withOpacity(0.1),
+                  color: ColorsManager.info.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Text('${job.requiredWorkers} عمال', style: TextStyles.font12PrimaryMedium),
+                child: Text(
+                  '${job.requiredWorkers} عمال',
+                  style: TextStyles.font12PrimaryMedium,
+                ),
               ),
             ],
           ),
@@ -79,12 +93,18 @@ class JobSummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Icon(Icons.location_on, color: ColorsManager.primary, size: 18.sp),
+              Icon(
+                Icons.location_on,
+                color: ColorsManager.primary,
+                size: 18.sp,
+              ),
               SizedBox(width: 4.w),
               Expanded(
                 child: Text(
                   job.address, // الـ address من الـ API
-                  style: TextStyles.font12BlackRegular.copyWith(color: Colors.grey),
+                  style: TextStyles.font12BlackRegular.copyWith(
+                    color: Colors.grey,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -96,7 +116,9 @@ class JobSummaryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildTag('${job.dailyWorkHours} ساعات'),
-              _buildTag(job.experienceLevel == 'junior' ? 'مبتدئ' : job.experienceLevel),
+              _buildTag(
+                job.experienceLevel == 'junior' ? 'مبتدئ' : job.experienceLevel,
+              ),
               _buildTag(formattedDay), // اليوم والشهر
               _buildTag(formattedTime), // الساعة
             ],
@@ -108,12 +130,21 @@ class JobSummaryCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('${job.price}',
-                      style: TextStyles.font24PrimaryBold.copyWith(color: ColorsManager.green)),
+                  Text(
+                    '${job.price}',
+                    style: TextStyles.font24PrimaryBold.copyWith(
+                      color: ColorsManager.green,
+                    ),
+                  ),
                   SizedBox(width: 4.w),
                   Padding(
                     padding: EdgeInsets.only(bottom: 4.h),
-                    child: Text('ج', style: TextStyles.font24PrimaryBold.copyWith(color: ColorsManager.green)),
+                    child: Text(
+                      'ج',
+                      style: TextStyles.font24PrimaryBold.copyWith(
+                        color: ColorsManager.green,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -121,7 +152,9 @@ class JobSummaryCard extends StatelessWidget {
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ColorsManager.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
                   minimumSize: Size(100.w, 40.h),
                 ),
                 child: Text('التفاصيل', style: TextStyles.font14WhiteBold),
@@ -138,7 +171,7 @@ class JobSummaryCard extends StatelessWidget {
       margin: EdgeInsets.only(left: 8.w), // تقليل الـ margin لتناسب الشاشة
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: ColorsManager.lightGrey.withOpacity(0.5),
+        color: ColorsManager.lightGrey.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(label, style: TextStyles.font12BlackMedium, maxLines: 1),

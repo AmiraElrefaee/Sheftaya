@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +9,8 @@ import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/features/worker/home/data/models/all_jobs/jobs_response.dart';
 import 'package:sheftaya/features/worker/home/data/models/review_model.dart';
+import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_cubit.dart';
+import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_state.dart';
 import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart';
 
 class JobDetails extends StatefulWidget {
@@ -31,59 +34,82 @@ class _JobDetailsState extends State<JobDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<JobDetailsCubit, JobDetailsState>(
-      builder: (context, state) {
-        return state.when(
-          initial: () =>
-              const Scaffold(body: Center(child: CircularProgressIndicator())),
-          loading: () =>
-              const Scaffold(body: Center(child: CircularProgressIndicator())),
-          success: (job) => _buildBody(context, job),
-          error: (message) => Scaffold(
-            appBar: AppBar(
-              title: Text('تفاصيل الوظيفة', style: TextStyles.font18BlackBold),
-              backgroundColor: Colors.white,
-              elevation: 0,
-              centerTitle: true,
-              iconTheme: const IconThemeData(color: Colors.black),
+    return BlocListener<ApplyJobCubit, ApplyJobState>(
+      listener: (context, state) {
+        state.whenOrNull(
+          success: (message) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message ?? 'تم التقديم على الوظيفة بنجاح'),
+              ),
+            );
+          },
+          error: (message) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          },
+        );
+      },
+      child: BlocBuilder<JobDetailsCubit, JobDetailsState>(
+        builder: (context, state) {
+          return state.when(
+            initial: () => const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
             ),
-            body: Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 48.r,
-                      color: Colors.redAccent,
-                    ),
-                    SizedBox(height: 12.h),
-                    Text(
-                      'فشل تحميل تفاصيل الوظيفة',
-                      style: TextStyles.font18BlackBold,
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      message,
-                      style: TextStyles.font14BlackMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 16.h),
-                    AppTextButton(
-                      onPressed: () => context.read<JobDetailsCubit>().fetch(
-                        jobId: widget.jobId,
+            loading: () => const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+            success: (job) => _buildBody(context, job),
+            error: (message) => Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  'تفاصيل الوظيفة',
+                  style: TextStyles.font18BlackBold,
+                ),
+                backgroundColor: Colors.white,
+                elevation: 0,
+                centerTitle: true,
+                iconTheme: const IconThemeData(color: Colors.black),
+              ),
+              body: Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48.r,
+                        color: Colors.redAccent,
                       ),
-                      buttonText: 'إعادة المحاولة',
-                    ),
-                  ],
+                      SizedBox(height: 12.h),
+                      Text(
+                        'فشل تحميل تفاصيل الوظيفة',
+                        style: TextStyles.font18BlackBold,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        message,
+                        style: TextStyles.font14BlackMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 16.h),
+                      AppTextButton(
+                        onPressed: () => context.read<JobDetailsCubit>().fetch(
+                          jobId: widget.jobId,
+                        ),
+                        buttonText: 'إعادة المحاولة',
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -106,7 +132,6 @@ class _JobDetailsState extends State<JobDetails> {
     final formattedStartTime = startDT != null
         ? _formatArabicTime(startDT)
         : '';
-
     final formattedEndTime = endDT != null ? _formatArabicTime(endDT) : '';
 
     final ownerName = job.employerId != null
@@ -373,7 +398,24 @@ class _JobDetailsState extends State<JobDetails> {
                     SizedBox(height: 20.h),
                     AppTextButton(
                       buttonText: 'التقديم على الوظيفة',
-                      onPressed: () {},
+                      onPressed: () {
+                        AwesomeDialog(
+                          context: context,
+                          dialogType: DialogType.question,
+                          animType: AnimType.scale,
+                          title: 'تأكيد التقديم',
+                          desc:
+                              'هل أنت متأكد أنك تريد التقديم على هذه الوظيفة؟',
+                          btnCancelText: 'إلغاء',
+                          btnOkText: 'تأكيد',
+                          btnCancelOnPress: () {},
+                          btnOkOnPress: () {
+                            context.read<ApplyJobCubit>().applyForJob(
+                              widget.jobId,
+                            );
+                          },
+                        ).show(); 
+                      },
                     ),
                     SizedBox(height: 20.h),
                   ],

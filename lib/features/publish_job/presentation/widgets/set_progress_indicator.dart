@@ -18,7 +18,9 @@ class StepProgressIndicator extends StatelessWidget {
       // تحديد عرض مخصص (مثلاً 70% من عرض الشاشة) ليكون في المنتصف
       width: double.infinity,
       alignment: Alignment.center,
-      padding: EdgeInsets.symmetric(horizontal: 100.w), // هذه المساحة هي التي تجعل الخط في المنتصف وبحجم "التلتربع"
+      padding: EdgeInsets.symmetric(
+        horizontal: 100.w,
+      ), // هذه المساحة هي التي تجعل الخط في المنتصف وبحجم "التلتربع"
       child: LayoutBuilder(
         builder: (context, constraints) {
           final double maxWidth = constraints.maxWidth;
@@ -33,7 +35,7 @@ class StepProgressIndicator extends StatelessWidget {
                   height: 2.h,
                   width: maxWidth,
                   decoration: BoxDecoration(
-                    color: ColorsManager.lightGrey.withOpacity(0.5),
+                    color: ColorsManager.lightGrey.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -81,7 +83,9 @@ class StepProgressIndicator extends StatelessWidget {
       width: 12.w, // حجم الدائرة كما في الصورة (أصغر قليلاً)
       height: 12.w,
       decoration: BoxDecoration(
-        color: active ? ColorsManager.primary : ColorsManager.lightGrey.withOpacity(0.5),
+        color: active
+            ? ColorsManager.primary
+            : ColorsManager.lightGrey.withValues(alpha: 0.5),
         shape: BoxShape.circle,
       ),
     );

@@ -16,10 +16,14 @@ import 'package:sheftaya/features/sign_up/data/repo/sign_up_repo.dart';
 import 'package:sheftaya/features/sign_up/data/repo/verify_sign_up_repo.dart';
 import 'package:sheftaya/features/sign_up/logic/sign_up/sign_up_cubit.dart';
 import 'package:sheftaya/features/sign_up/logic/verify_sign_up/verify_signup_cubit.dart';
+import 'package:sheftaya/features/worker/home/data/repos/apply_job_repo.dart';
+import 'package:sheftaya/features/worker/home/data/repos/job_recommendation_repo.dart';
 import 'package:sheftaya/features/worker/home/data/repos/jobs_repo.dart';
 import 'package:sheftaya/features/worker/home/logic/all_jobs/open_jobs_cubit.dart';
+import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_cubit.dart';
 import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart'
     as worker_cubit;
+import 'package:sheftaya/features/worker/home/logic/job_recommendation/job_recommendation_cubit.dart';
 
 import '../../features/publish_job/data/api_service/job_details_remote_data_source.dart';
 import '../../features/publish_job/data/api_service/publish_job_remote_data_source.dart';
@@ -110,4 +114,18 @@ void setupServiceLocator() {
   getIt.registerFactory<worker_cubit.JobDetailsCubit>(
     () => worker_cubit.JobDetailsCubit(getIt<JobsRepo>()),
   );
+
+  getIt.registerLazySingleton<JobsRecommendationsRepo>(
+  () => JobsRecommendationsRepo(getIt()),
+);
+getIt.registerFactory<JobsRecommendationsCubit>(
+  () => JobsRecommendationsCubit(getIt()),
+);
+
+getIt.registerLazySingleton<ApplyJobRepo>(
+  () => ApplyJobRepo(getIt()),
+);
+getIt.registerFactory<ApplyJobCubit>(
+  () => ApplyJobCubit(getIt()),
+);
 }

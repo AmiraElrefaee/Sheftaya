@@ -11,6 +11,8 @@ class ApiConstants {
   static const String publishJob = "jobs";
   static const String getOpenJobs = 'jobs/open';
   static const String getJobDetails = 'jobs/{jobId}';
+  static const String getRecommendations = 'jobs/recommendations';
+  static const String applyForJob = 'application/jobs/{jobId}/apply';
 }
 
 class ApiErrors {
