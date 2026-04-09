@@ -9,8 +9,8 @@ class ApiConstants {
   static const String resetPassword = "auth/password/reset";
   static const String verifyAccount = "auth/signup/verify";
   static const String publishJob = "jobs";
-  static const String getJobDetails = "jobs/{jobId}";
-  static const String  openJobs = "jobs/open";
+  static const String getOpenJobs = 'jobs/open';
+  static const String getJobDetails = 'jobs/{jobId}';
 }
 
 class ApiErrors {

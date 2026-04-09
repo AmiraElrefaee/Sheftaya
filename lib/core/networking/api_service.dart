@@ -13,7 +13,7 @@ import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_request_bo
 import 'package:sheftaya/features/sign_up/data/models/sign_up/sign_up_response.dart';
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_request_body.dart';
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_response.dart';
-import 'package:sheftaya/features/worker/home/data/models/all_jobs/open_jobs_response.dart';
+import 'package:sheftaya/features/worker/home/data/models/all_jobs/jobs_response.dart';
 import '../../features/publish_job/data/model/job_details_response.dart';
 import '../../features/publish_job/data/model/publish_job_request.dart';
 
@@ -46,6 +46,7 @@ abstract class ApiService {
   Future<VerifyPasswordResponse> verifyPassword(
     @Body() VerifyPasswordRequestBody verifyPasswordRequestBody,
   );
+
   @POST(ApiConstants.resetPassword)
   Future<CreateNewPasswordResponse> createNewPassword(
     @Header("Authorization") String token,
@@ -57,21 +58,30 @@ abstract class ApiService {
     @Header("Authorization") String token,
     @Body() Map<String, dynamic> job,
   );
+
   @GET(ApiConstants.getJobDetails)
-  Future<JobDetailsResponse> getJobDetails(
+  Future<EmployerJobDetailsResponse> getJobDetails(
     @Header("Authorization") String token,
     @Path("jobId") String jobId,
   );
-  // inside ApiService
+
   @PUT("${ApiConstants.publishJob}/{jobId}")
   Future<PublishJobResponse> updateJob(
     @Header("Authorization") String token,
     @Path("jobId") String jobId,
     @Body() Map<String, dynamic> job,
   );
-  
-  @GET(ApiConstants.openJobs)
-Future<OpenJobsResponse> getOpenJobs(
-  @Header('Authorization') String token,
-);
+
+  @GET(ApiConstants.getOpenJobs)
+  Future<JobsResponse> getOpenJobs({
+    @Header('Authorization') String? token,
+    @Query('page') int? page,
+    @Query('limit') int? limit,
+  });
+
+  @GET(ApiConstants.getJobDetails)
+  Future<WorkerJobDetailsResponse> getJobDetails2({
+    @Path('jobId') required String jobId,
+    @Header('Authorization') required String token,
+  });
 }

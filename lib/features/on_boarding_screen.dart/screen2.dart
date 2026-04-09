@@ -10,11 +10,12 @@ class Screen2 extends StatelessWidget {
     return Column(
       children: [
         SizedBox(height: 32.h),
-        Text('فرص متاحة وقت ما تحتاجها', style: TextStyles.font24PrimaryBold),
+        Text('فرص متاحة وقت ما تحتاجها', style: TextStyles.font24PrimaryBold, textAlign: TextAlign.center),
         SizedBox(height: 8.h),
         Text(
           'شغل يومي قريب منك، توصلك الفرص فور توفرها وتبدأ من غير تعقيد.',
           style: TextStyles.font16BlackMedium,
+          textAlign: TextAlign.center,
         ),
         SizedBox(height: 32.h),
         SizedBox(

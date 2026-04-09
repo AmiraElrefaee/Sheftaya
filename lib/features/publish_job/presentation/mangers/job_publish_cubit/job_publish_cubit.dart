@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 
 import '../../../data/model/publish_job.dart';
-import '../../../data/model/publish_job_request.dart';
 import '../../../domain/repo/job_post_repo.dart';
 
 part 'job_publish_state.dart';

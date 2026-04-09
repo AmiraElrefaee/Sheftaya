@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
-import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/home_job_card.dart';
 
 class AllJobsScreen extends StatelessWidget {
-  final List<JobModel> jobs;
   final String title;
+  final List<dynamic> jobs;
 
-  const AllJobsScreen({super.key, required this.jobs, required this.title});
+  const AllJobsScreen({super.key, required this.title, required this.jobs});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +15,6 @@ class AllJobsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(title, style: TextStyles.font18BlackBold),
         centerTitle: true,
-        elevation: 0,
         backgroundColor: Colors.white,
       ),
       body: ListView.separated(

@@ -6,10 +6,9 @@ import 'package:sheftaya/app/router.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/widgets/custom_text_form_field.dart';
-import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
 
 class HeaderWidget extends StatelessWidget {
-  final List<JobModel> jobs;
+  final List<dynamic> jobs;
 
   const HeaderWidget({super.key, required this.jobs});
 
@@ -31,7 +30,9 @@ class HeaderWidget extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 28.h,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
+                backgroundImage: const NetworkImage(
+                  'https://i.pravatar.cc/100',
+                ),
               ),
               SizedBox(width: 12.w),
               Column(

@@ -1,14 +1,14 @@
-class JobDetailsResponse {
+class EmployerJobDetailsResponse {
   final String status;
   final JobDetailsData data;
 
-  JobDetailsResponse({
+  EmployerJobDetailsResponse({
     required this.status,
     required this.data,
   });
 
-  factory JobDetailsResponse.fromJson(Map<String, dynamic> json) {
-    return JobDetailsResponse(
+  factory EmployerJobDetailsResponse.fromJson(Map<String, dynamic> json) {
+    return EmployerJobDetailsResponse(
       status: json['status'],
       data: JobDetailsData.fromJson(json['data']),
     );

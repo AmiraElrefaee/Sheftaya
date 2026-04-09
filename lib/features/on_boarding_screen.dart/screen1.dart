@@ -13,11 +13,13 @@ class Screen1 extends StatelessWidget {
         Text(
           'إدارة وقتك بذكاء',
           style: TextStyles.font24PrimaryBold,
+          textAlign: TextAlign.center,
         ),
         SizedBox(height: 8.h),
         Text(
           'وظايف يومية بفرص حقيقية، تختار الشيفت المناسب وتشتغل حسب وقتك والتزاماتك.',
           style: TextStyles.font16BlackMedium,
+          textAlign: TextAlign.center,
         ),
         SizedBox(height: 32.h),
         SizedBox(
@@ -25,8 +27,8 @@ class Screen1 extends StatelessWidget {
           width: 350.w,
           child: Image.asset(
             'assets/images/onboarding1.png',
-            
-            height: 0.35.sh,  
+
+            height: 0.35.sh,
             fit: BoxFit.contain,
           ),
         ),

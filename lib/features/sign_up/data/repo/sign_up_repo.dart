@@ -28,43 +28,53 @@ class SignupRepo {
         formData.fields.add(MapEntry('phone', signupRequestBody.phone!));
       }
       if (signupRequestBody.preferredLang != null) {
-        formData.fields.add(MapEntry('preferredLang', signupRequestBody.preferredLang!));
+        formData.fields.add(
+          MapEntry('preferredLang', signupRequestBody.preferredLang!),
+        );
       }
       if (signupRequestBody.city != null) {
         formData.fields.add(MapEntry('city', signupRequestBody.city!));
       }
       if (signupRequestBody.birthDate != null) {
-        formData.fields.add(MapEntry('birthDate', signupRequestBody.birthDate!));
+        formData.fields.add(
+          MapEntry('birthDate', signupRequestBody.birthDate!),
+        );
       }
 
       if (signupRequestBody.frontIdImage != null) {
-        formData.files.add(MapEntry(
-          'frontIdImage',
-          await MultipartFile.fromFile(
-            signupRequestBody.frontIdImage!,
-            filename: signupRequestBody.frontIdImage!.split('/').last,
+        formData.files.add(
+          MapEntry(
+            'frontIdImage',
+            await MultipartFile.fromFile(
+              signupRequestBody.frontIdImage!,
+              filename: signupRequestBody.frontIdImage!.split('/').last,
+            ),
           ),
-        ));
+        );
       }
 
       if (signupRequestBody.backIdImage != null) {
-        formData.files.add(MapEntry(
-          'backIdImage',
-          await MultipartFile.fromFile(
-            signupRequestBody.backIdImage!,
-            filename: signupRequestBody.backIdImage!.split('/').last,
+        formData.files.add(
+          MapEntry(
+            'backIdImage',
+            await MultipartFile.fromFile(
+              signupRequestBody.backIdImage!,
+              filename: signupRequestBody.backIdImage!.split('/').last,
+            ),
           ),
-        ));
+        );
       }
 
       if (signupRequestBody.selfieImage != null) {
-        formData.files.add(MapEntry(
-          'selfieImage',
-          await MultipartFile.fromFile(
-            signupRequestBody.selfieImage!,
-            filename: signupRequestBody.selfieImage!.split('/').last,
+        formData.files.add(
+          MapEntry(
+            'selfieImage',
+            await MultipartFile.fromFile(
+              signupRequestBody.selfieImage!,
+              filename: signupRequestBody.selfieImage!.split('/').last,
+            ),
           ),
-        ));
+        );
       }
 
       if (signupRequestBody.employerProfile != null) {
@@ -78,13 +88,15 @@ class SignupRepo {
 
         if (emp.companyImages != null && emp.companyImages!.isNotEmpty) {
           for (var image in emp.companyImages!) {
-            formData.files.add(MapEntry(
-              'companyImages',
-              await MultipartFile.fromFile(
-                image,
-                filename: image.split('/').last,
+            formData.files.add(
+              MapEntry(
+                'companyImages',
+                await MultipartFile.fromFile(
+                  image,
+                  filename: image.split('/').last,
+                ),
               ),
-            ));
+            );
           }
         }
       }
@@ -93,10 +105,22 @@ class SignupRepo {
         final worker = signupRequestBody.workerProfile!;
         formData.fields.addAll([
           MapEntry('workerProfile[education]', worker.education),
-          MapEntry('workerProfile[professionalStatus]', worker.professionalStatus),
-          MapEntry('workerProfile[experienceYears]', worker.experienceYears.toString()),
-          MapEntry('workerProfile[expectedHourlyRate][amount]', worker.expectedHourlyRate.amount.toString()),
-          MapEntry('workerProfile[expectedHourlyRate][currency]', worker.expectedHourlyRate.currency),
+          MapEntry(
+            'workerProfile[professionalStatus]',
+            worker.professionalStatus,
+          ),
+          MapEntry(
+            'workerProfile[experienceYears]',
+            worker.experienceYears.toString(),
+          ),
+          MapEntry(
+            'workerProfile[expectedHourlyRate][amount]',
+            worker.expectedHourlyRate.amount.toString(),
+          ),
+          MapEntry(
+            'workerProfile[expectedHourlyRate][currency]',
+            worker.expectedHourlyRate.currency,
+          ),
         ]);
 
         for (var exp in worker.pastExperience) {
@@ -117,18 +141,20 @@ class SignupRepo {
         }
 
         if (worker.healthCertificate != null) {
-          formData.files.add(MapEntry(
-            'healthCertificate',
-            await MultipartFile.fromFile(
-              worker.healthCertificate!,
-              filename: worker.healthCertificate!.split('/').last,
+          formData.files.add(
+            MapEntry(
+              'healthCertificate',
+              await MultipartFile.fromFile(
+                worker.healthCertificate!,
+                filename: worker.healthCertificate!.split('/').last,
+              ),
             ),
-          ));
+          );
         }
       }
 
       final response = await _dio.post(
-        'https://sheftaya.vercel.app/auth/signup',
+        'https://sheftaya-production.up.railway.app/auth/signup',
         data: formData,
       );
 

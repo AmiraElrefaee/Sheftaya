@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
-import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/home_job_card.dart';
 import 'package:sheftaya/features/worker/service/saved_jobs_service.dart';
 
@@ -17,10 +16,12 @@ class SavedJobsScreen extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.white,
       ),
-      body: FutureBuilder<List<JobModel>>(
+      body: FutureBuilder<List<dynamic>>(
+        // ✅ هنا التعديل
         future: SavedJobsService.getSavedJobs(),
         builder: (_, snapshot) {
           final jobs = snapshot.data ?? [];
+
           if (jobs.isEmpty) {
             return Center(
               child: Text(
@@ -29,6 +30,7 @@ class SavedJobsScreen extends StatelessWidget {
               ),
             );
           }
+
           return ListView.separated(
             padding: EdgeInsets.all(16.w),
             itemBuilder: (_, i) => HomeJobCard(job: jobs[i]),

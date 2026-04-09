@@ -11,11 +11,12 @@ class Screen3 extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(height: 32.h),
-        Text('ربط موثوق بين الطرفين', style: TextStyles.font24PrimaryBold),
+        Text('ربط موثوق بين الطرفين', style: TextStyles.font24PrimaryBold, textAlign: TextAlign.center),
         SizedBox(height: 8.h),
         Text(
           'ربط مباشر بين أصحاب الشغل والعمالة اليومية، بآلية واضحة تضمن الالتزام والجودة.',
           style: TextStyles.font16BlackMedium,
+          textAlign: TextAlign.center,
         ),
         SizedBox(height: 32.h),
         SizedBox(

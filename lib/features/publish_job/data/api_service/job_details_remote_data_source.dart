@@ -6,19 +6,20 @@ import '../../../../core/networking/dio_factory.dart';
 import '../model/job_details_response.dart';
 
 class JobDetailsRemoteDataSource {
-  final ApiService _apiService =
-  ApiService(DioFactory.getDio(), baseUrl: ApiConstants.apiBaseUrl);
+  final ApiService _apiService = ApiService(
+    DioFactory.getDio(),
+    baseUrl: ApiConstants.apiBaseUrl,
+  );
   // JobDetailsRemoteDataSource(this._apiService);
 
-  Future<JobDetailsResponse> getJobDetails(String jobId) async {
+  Future<EmployerJobDetailsResponse> getJobDetails(String jobId) async {
     final token = await SharedPrefHelper.getSecuredString(
       SharedPrefKeys.userToken,
     );
 
-    final formattedToken =
-    token.startsWith('Bearer') ? token : 'Bearer $token';
+    final formattedToken = token.startsWith('Bearer') ? token : 'Bearer $token';
 
-    final JobDetailsResponse response = await _apiService.getJobDetails(
+    final EmployerJobDetailsResponse response = await _apiService.getJobDetails(
       formattedToken,
       jobId,
     );

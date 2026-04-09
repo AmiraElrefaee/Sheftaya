@@ -8,15 +8,20 @@ import 'package:sheftaya/features/forget_password/presentation/forget_pass_scree
 import 'package:sheftaya/features/forget_password/presentation/verify_password_screen.dart';
 import 'package:sheftaya/features/login/presentation/login_screen.dart';
 import 'package:sheftaya/features/on_boarding_screen.dart/on_boarding_screen.dart';
-import 'package:sheftaya/features/publish_job/presentation/widgets/publish_job_view_body.dart';
 import 'package:sheftaya/features/sign_up/presentation/sign_up_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/verify_account_screen.dart';
+import 'package:sheftaya/features/worker/home/data/models/review_model.dart';
+import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart'
+    as worker_cubit;
 import 'package:sheftaya/features/worker/home/presentation/widgets/all_jobs_screen.dart';
+import 'package:sheftaya/features/worker/home/presentation/widgets/job_details.dart';
+import 'package:sheftaya/features/worker/home/presentation/widgets/job_reviews.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/search_screen.dart';
 import 'package:sheftaya/features/worker/home/presentation/worker_home_screen.dart';
 
 import '../core/di/service_locator.dart';
-import '../features/publish_job/data/model/job_details_response.dart';
+import '../features/publish_job/data/model/job_details_response.dart'
+    as publish_job;
 import '../features/publish_job/presentation/job_publish_success_screen.dart';
 import '../features/publish_job/presentation/mangers/job_details_cubit/job_details_cubit.dart';
 import '../features/publish_job/presentation/map_picker_screen.dart';
@@ -36,56 +41,46 @@ abstract class AppRouter {
   static const kVerifyAccountScreen = '/verifyAccountScreen';
   static const kSearchScreen = '/searchScreen';
   static const kAllJobsScreen = '/allJobsScreen';
+  static const kJobDetailsScreen = '/jobDetailsScreen';
+  static const kJobReviewsScreen = '/jobReviewsScreen';
   static const kMyPostedJobsScreen = '/myPostedJobsScreen';
   static const kPublishJobView = '/PublishJobView';
   static const kTermCondtionView = '/TermCondtionView';
   static const kPublishJobNewLocation = '/PublishJobNewLocation';
   static const kJobPublishSuccessScreen = '/JobPublishSuccessScreen';
-  static const kMapPickerScreen ='/MapPickerScreen';
-  static const kShiftDetailsView='/ShiftDetailsView';
+  static const kMapPickerScreen = '/MapPickerScreen';
+  static const kShiftDetailsView = '/ShiftDetailsView';
+
   static final router = GoRouter(
     routes: [
       GoRoute(
         path: kOnBoardingScreen,
-        builder: (context, state) {
-          return const OnBoardingScreen();
-        },
+        builder: (context, state) => const OnBoardingScreen(),
       ),
       GoRoute(
         path: kSignUpScreen,
-        builder: (context, state) {
-          return const SignUpScreen();
-        },
+        builder: (context, state) => const SignUpScreen(),
       ),
       GoRoute(
         path: kLoginScreen,
-        builder: (context, state) {
-          return const LoginScreen();
-        },
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: kEmployerHomeScreen,
-        builder: (context, state) {
-          return const EmployerHomeScreen();
-        },
+        builder: (context, state) => const EmployerHomeScreen(),
       ),
       GoRoute(
         path: kWorkerHomeScreen,
-        builder: (context, state) {
-          return const WorkerHomeScreen();
-        },
+        builder: (context, state) => const WorkerHomeScreen(),
       ),
-
       GoRoute(
-        path: AppRouter.kForgetPassScreen,
-        builder: (context, state) {
-          return const ForgetPassScreen();
-        },
+        path: kForgetPassScreen,
+        builder: (context, state) => const ForgetPassScreen(),
       ),
       GoRoute(
         path: kPublishJobView,
         builder: (context, state) {
-          final job = state.extra as JobDetails?; // ✅ استقبال الـ extra
+          final job = state.extra as publish_job.JobDetails?;
           return PublishJobView(existingJob: job);
         },
       ),
@@ -96,7 +91,6 @@ abstract class AppRouter {
           return VerifyPasswordScreen(email: email);
         },
       ),
-
       GoRoute(
         path: kCreateNewPasswordScreen,
         builder: (context, state) {
@@ -104,7 +98,6 @@ abstract class AppRouter {
           return CreateNewPasswordScreen(resetToken: token);
         },
       ),
-
       GoRoute(
         path: kVerifyAccountScreen,
         builder: (context, state) {
@@ -120,13 +113,27 @@ abstract class AppRouter {
         },
       ),
       GoRoute(
-        path: AppRouter.kAllJobsScreen,
+        path: kAllJobsScreen,
         builder: (context, state) {
-          final data = state.extra as Map<String, dynamic>;
-          final jobs = data['jobs'] as List<JobModel>;
-          final title = data['title'] as String;
-
-          return AllJobsScreen(jobs: jobs, title: title);
+          final data = state.extra as Map;
+          return AllJobsScreen(title: data['title'], jobs: data['jobs']);
+        },
+      ),
+      GoRoute(
+        path: AppRouter.kJobDetailsScreen,
+        builder: (context, state) {
+          final jobId = state.extra as String;
+          return BlocProvider(
+            create: (_) => getIt<worker_cubit.JobDetailsCubit>(),
+            child: JobDetails(jobId: jobId),
+          );
+        },
+      ),
+      GoRoute(
+        path: kJobReviewsScreen,
+        builder: (context, state) {
+          final reviews = state.extra as List<ReviewModel>;
+          return JobReviews(reviews: reviews);
         },
       ),
       GoRoute(
@@ -136,35 +143,28 @@ abstract class AppRouter {
           return MyPostedJobsScreen(jobs: jobs);
         },
       ),
-
       GoRoute(
         path: kTermCondtionView,
         builder: (context, state) => const TermCondtionView(),
       ),
       GoRoute(
-          path: kJobPublishSuccessScreen,
-          builder: (context, state) {
-            final String jobId = state.extra as String;
-            return BlocProvider(
-              create: (context) => getIt<JobDetailsCubit>(),
-              child: JobPublishSuccessScreen(jobId: jobId),
-            );
-          }
+        path: kJobPublishSuccessScreen,
+        builder: (context, state) {
+          final String jobId = state.extra as String;
+          return BlocProvider(
+            create: (_) => getIt<JobDetailsCubit>(), // ✅ publish_job cubit
+            child: JobPublishSuccessScreen(jobId: jobId),
+          );
+        },
       ),
-      //MapPickerScreen
       GoRoute(
         path: kMapPickerScreen,
-        builder: (context, state) =>  MapPickerScreen(),
+        builder: (context, state) => MapPickerScreen(),
       ),
-      // GoRoute(
-      //   path: kPublishJobNewLocation,
-      //   builder: (context, state) => const PublishJobNewLocation(),
-      // ),
       GoRoute(
         path: kShiftDetailsView,
-        builder: (context, state) =>  ShiftDetailsView(),
+        builder: (context, state) => ShiftDetailsView(),
       ),
-
     ],
   );
 }

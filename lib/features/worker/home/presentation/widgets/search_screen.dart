@@ -4,11 +4,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/widgets/custom_text_form_field.dart';
-import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
+import 'package:sheftaya/features/worker/home/data/models/all_jobs/jobs_response.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/home_job_card.dart';
 
 class SearchJobsScreen extends StatefulWidget {
-  final List<JobModel> jobs;
+  final List<dynamic> jobs;
 
   const SearchJobsScreen({super.key, required this.jobs});
 
@@ -23,7 +23,6 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
   bool showFilterDropdown = false;
 
   final GlobalKey _filterKey = GlobalKey();
-
   OverlayEntry? _overlayEntry;
 
   void _toggleDropdown() {
@@ -40,9 +39,9 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
   }
 
   OverlayEntry _createOverlay() {
-    RenderBox renderBox =
+    final renderBox =
         _filterKey.currentContext!.findRenderObject() as RenderBox;
-    Offset position = renderBox.localToGlobal(Offset.zero);
+    final position = renderBox.localToGlobal(Offset.zero);
 
     return OverlayEntry(
       builder: (context) => Positioned(
@@ -87,6 +86,34 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
     );
   }
 
+  String _titleOf(dynamic job) {
+    try {
+      return (job.title ?? '').toString();
+    } catch (_) {
+      return '';
+    }
+  }
+
+  double _salaryOf(dynamic job) {
+    try {
+      if (job is JobItem) {
+        return (job.pricePerHour?.amount ?? 0).toDouble();
+      }
+
+      final pricePerHour = job.pricePerHour;
+      if (pricePerHour != null) {
+        return (pricePerHour.amount ?? 0).toDouble();
+      }
+
+      final salary = job.salary;
+      if (salary != null) {
+        return (salary as num).toDouble();
+      }
+    } catch (_) {}
+
+    return 0;
+  }
+
   @override
   void dispose() {
     _overlayEntry?.remove();
@@ -96,12 +123,14 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
   @override
   Widget build(BuildContext context) {
     final filtered = widget.jobs
-        .where((j) => j.title.toLowerCase().contains(query.toLowerCase()))
+        .where((j) => _titleOf(j).toLowerCase().contains(query.toLowerCase()))
         .toList();
 
     filtered.sort((a, b) {
-      if (selectedFilter == 'الأعلى أجراً') return b.salary.compareTo(a.salary);
-      return a.salary.compareTo(b.salary);
+      if (selectedFilter == 'الأعلى أجراً') {
+        return _salaryOf(b).compareTo(_salaryOf(a));
+      }
+      return _salaryOf(a).compareTo(_salaryOf(b));
     });
 
     return Scaffold(

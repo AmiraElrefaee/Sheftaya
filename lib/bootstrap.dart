@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,7 +6,6 @@ import 'package:logger/logger.dart';
 import 'package:sheftaya/app/app.dart';
 import 'package:sheftaya/core/di/service_locator.dart';
 
-import 'core/helper/app_bloc_observer.dart';
 
 final Logger appLogger = Logger();
 

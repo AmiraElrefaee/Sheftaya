@@ -7,33 +7,51 @@ import 'package:sheftaya/features/worker/home/presentation/widgets/worker_home_s
 import 'package:sheftaya/features/worker/home/presentation/widgets/saved_jobs_screen.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/presentation/my_applications_jobs_screen.dart';
 
-class WorkerHomeScreen extends StatefulWidget {
+class WorkerHomeScreen extends StatelessWidget {
   const WorkerHomeScreen({super.key});
-
-  @override
-  State<WorkerHomeScreen> createState() => _WorkerHomeScreenState();
-}
-
-class _WorkerHomeScreenState extends State<WorkerHomeScreen> {
-  int currentIndex = 0;
-
-  final screens = const [
-    WorkerHomeScreenBody(),
-    MyApplicationsJobsScreen(),
-    SavedJobsScreen(),
-    Center(child: Text('الإعدادات')),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<OpenJobsCubit>(
-      create: (_) => getIt<OpenJobsCubit>()..fetchOpenJobs(),
-      child: Scaffold(
-        body: screens[currentIndex],
-        bottomNavigationBar: BottomNav(
-          currentIndex: currentIndex,
-          onTap: (i) => setState(() => currentIndex = i),
-        ),
+      create: (_) => getIt<OpenJobsCubit>(),
+      child: const _WorkerHomeScreenShell(),
+    );
+  }
+}
+
+class _WorkerHomeScreenShell extends StatefulWidget {
+  const _WorkerHomeScreenShell();
+
+  @override
+  State<_WorkerHomeScreenShell> createState() => _WorkerHomeScreenShellState();
+}
+
+class _WorkerHomeScreenShellState extends State<_WorkerHomeScreenShell> {
+  int currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<OpenJobsCubit>().fetchOpenJobs();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screens = [
+      const WorkerHomeScreenBody(),
+      const MyApplicationsJobsScreen(),
+      const SavedJobsScreen(),
+      const Center(child: Text('الإعدادات')),
+    ];
+
+    return Scaffold(
+      body: screens[currentIndex],
+      bottomNavigationBar: BottomNav(
+        currentIndex: currentIndex,
+        onTap: (i) => setState(() => currentIndex = i),
       ),
     );
   }

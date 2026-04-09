@@ -16,8 +16,10 @@ import 'package:sheftaya/features/sign_up/data/repo/sign_up_repo.dart';
 import 'package:sheftaya/features/sign_up/data/repo/verify_sign_up_repo.dart';
 import 'package:sheftaya/features/sign_up/logic/sign_up/sign_up_cubit.dart';
 import 'package:sheftaya/features/sign_up/logic/verify_sign_up/verify_signup_cubit.dart';
-import 'package:sheftaya/features/worker/home/data/repos/open_jobs_repo.dart';
+import 'package:sheftaya/features/worker/home/data/repos/jobs_repo.dart';
 import 'package:sheftaya/features/worker/home/logic/all_jobs/open_jobs_cubit.dart';
+import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart'
+    as worker_cubit;
 
 import '../../features/publish_job/data/api_service/job_details_remote_data_source.dart';
 import '../../features/publish_job/data/api_service/publish_job_remote_data_source.dart';
@@ -37,7 +39,7 @@ void setupServiceLocator() {
     () => ApiService(getIt(), baseUrl: ApiConstants.apiBaseUrl),
   );
 
-  // User Cubit - Singleton to maintain user state across the app
+  // User Cubit
   getIt.registerLazySingleton<UserCubit>(() => UserCubit());
 
   // login
@@ -80,8 +82,7 @@ void setupServiceLocator() {
     () => VerifySignupCubit(getIt(), getIt<UserCubit>()),
   );
 
-  //create job
-
+  // publish job
   getIt.registerLazySingleton<JobRemoteDataSource>(() => JobRemoteDataSource());
   getIt.registerLazySingleton<JobRepository>(
     () => JobRepository(getIt<JobRemoteDataSource>()),
@@ -90,19 +91,23 @@ void setupServiceLocator() {
     () => JobPublishCubit(getIt<JobRepository>()),
   );
 
-  //successs publish
+  // publish job - job details (للـ employer / publish flow)
   getIt.registerLazySingleton<JobDetailsRemoteDataSource>(
     () => JobDetailsRemoteDataSource(),
   );
-
   getIt.registerLazySingleton<JobDetailsRepo>(
     () => JobDetailsRepo(getIt<JobDetailsRemoteDataSource>()),
   );
-
   getIt.registerFactory<JobDetailsCubit>(
     () => JobDetailsCubit(getIt<JobDetailsRepo>()),
   );
 
-  getIt.registerLazySingleton<OpenJobsRepo>(() => OpenJobsRepo(getIt()));
+  // worker - jobs
+  getIt.registerLazySingleton<JobsRepo>(() => JobsRepo(getIt()));
   getIt.registerFactory<OpenJobsCubit>(() => OpenJobsCubit(getIt()));
+
+  // worker - job details
+  getIt.registerFactory<worker_cubit.JobDetailsCubit>(
+    () => worker_cubit.JobDetailsCubit(getIt<JobsRepo>()),
+  );
 }

@@ -55,12 +55,13 @@ extension OpenJobsStatePatterns on OpenJobsState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _Success value)?  success,TResult Function( _Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Initial value)?  initial,TResult Function( _Loading value)?  loading,TResult Function( _LoadingMore value)?  loadingMore,TResult Function( _Success value)?  success,TResult Function( _Error value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Success() when success != null:
+return loading(_that);case _LoadingMore() when loadingMore != null:
+return loadingMore(_that);case _Success() when success != null:
 return success(_that);case _Error() when error != null:
 return error(_that);case _:
   return orElse();
@@ -80,12 +81,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _Success value)  success,required TResult Function( _Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Initial value)  initial,required TResult Function( _Loading value)  loading,required TResult Function( _LoadingMore value)  loadingMore,required TResult Function( _Success value)  success,required TResult Function( _Error value)  error,}){
 final _that = this;
 switch (_that) {
 case _Initial():
 return initial(_that);case _Loading():
-return loading(_that);case _Success():
+return loading(_that);case _LoadingMore():
+return loadingMore(_that);case _Success():
 return success(_that);case _Error():
 return error(_that);case _:
   throw StateError('Unexpected subclass');
@@ -104,12 +106,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _Success value)?  success,TResult? Function( _Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Initial value)?  initial,TResult? Function( _Loading value)?  loading,TResult? Function( _LoadingMore value)?  loadingMore,TResult? Function( _Success value)?  success,TResult? Function( _Error value)?  error,}){
 final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial(_that);case _Loading() when loading != null:
-return loading(_that);case _Success() when success != null:
+return loading(_that);case _LoadingMore() when loadingMore != null:
+return loadingMore(_that);case _Success() when success != null:
 return success(_that);case _Error() when error != null:
 return error(_that);case _:
   return null;
@@ -128,12 +131,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( OpenJobsResponse data)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( JobsResponse previous,  int nextPage)?  loadingMore,TResult Function( JobsResponse data,  int page,  bool hasNextPage)?  success,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Success() when success != null:
-return success(_that.data);case _Error() when error != null:
+return loading();case _LoadingMore() when loadingMore != null:
+return loadingMore(_that.previous,_that.nextPage);case _Success() when success != null:
+return success(_that.data,_that.page,_that.hasNextPage);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -152,12 +156,13 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( OpenJobsResponse data)  success,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( JobsResponse previous,  int nextPage)  loadingMore,required TResult Function( JobsResponse data,  int page,  bool hasNextPage)  success,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
-return loading();case _Success():
-return success(_that.data);case _Error():
+return loading();case _LoadingMore():
+return loadingMore(_that.previous,_that.nextPage);case _Success():
+return success(_that.data,_that.page,_that.hasNextPage);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +180,13 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( OpenJobsResponse data)?  success,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( JobsResponse previous,  int nextPage)?  loadingMore,TResult? Function( JobsResponse data,  int page,  bool hasNextPage)?  success,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
-return loading();case _Success() when success != null:
-return success(_that.data);case _Error() when error != null:
+return loading();case _LoadingMore() when loadingMore != null:
+return loadingMore(_that.previous,_that.nextPage);case _Success() when success != null:
+return success(_that.data,_that.page,_that.hasNextPage);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -256,11 +262,81 @@ String toString() {
 /// @nodoc
 
 
-class _Success implements OpenJobsState {
-  const _Success(this.data);
+class _LoadingMore implements OpenJobsState {
+  const _LoadingMore({required this.previous, required this.nextPage});
   
 
- final  OpenJobsResponse data;
+ final  JobsResponse previous;
+ final  int nextPage;
+
+/// Create a copy of OpenJobsState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$LoadingMoreCopyWith<_LoadingMore> get copyWith => __$LoadingMoreCopyWithImpl<_LoadingMore>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoadingMore&&(identical(other.previous, previous) || other.previous == previous)&&(identical(other.nextPage, nextPage) || other.nextPage == nextPage));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,previous,nextPage);
+
+@override
+String toString() {
+  return 'OpenJobsState.loadingMore(previous: $previous, nextPage: $nextPage)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$LoadingMoreCopyWith<$Res> implements $OpenJobsStateCopyWith<$Res> {
+  factory _$LoadingMoreCopyWith(_LoadingMore value, $Res Function(_LoadingMore) _then) = __$LoadingMoreCopyWithImpl;
+@useResult
+$Res call({
+ JobsResponse previous, int nextPage
+});
+
+
+
+
+}
+/// @nodoc
+class __$LoadingMoreCopyWithImpl<$Res>
+    implements _$LoadingMoreCopyWith<$Res> {
+  __$LoadingMoreCopyWithImpl(this._self, this._then);
+
+  final _LoadingMore _self;
+  final $Res Function(_LoadingMore) _then;
+
+/// Create a copy of OpenJobsState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? previous = null,Object? nextPage = null,}) {
+  return _then(_LoadingMore(
+previous: null == previous ? _self.previous : previous // ignore: cast_nullable_to_non_nullable
+as JobsResponse,nextPage: null == nextPage ? _self.nextPage : nextPage // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _Success implements OpenJobsState {
+  const _Success({required this.data, required this.page, required this.hasNextPage});
+  
+
+ final  JobsResponse data;
+ final  int page;
+ final  bool hasNextPage;
 
 /// Create a copy of OpenJobsState
 /// with the given fields replaced by the non-null parameter values.
@@ -272,16 +348,16 @@ _$SuccessCopyWith<_Success> get copyWith => __$SuccessCopyWithImpl<_Success>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&(identical(other.data, data) || other.data == data));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&(identical(other.data, data) || other.data == data)&&(identical(other.page, page) || other.page == page)&&(identical(other.hasNextPage, hasNextPage) || other.hasNextPage == hasNextPage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,data);
+int get hashCode => Object.hash(runtimeType,data,page,hasNextPage);
 
 @override
 String toString() {
-  return 'OpenJobsState.success(data: $data)';
+  return 'OpenJobsState.success(data: $data, page: $page, hasNextPage: $hasNextPage)';
 }
 
 
@@ -292,7 +368,7 @@ abstract mixin class _$SuccessCopyWith<$Res> implements $OpenJobsStateCopyWith<$
   factory _$SuccessCopyWith(_Success value, $Res Function(_Success) _then) = __$SuccessCopyWithImpl;
 @useResult
 $Res call({
- OpenJobsResponse data
+ JobsResponse data, int page, bool hasNextPage
 });
 
 
@@ -309,10 +385,12 @@ class __$SuccessCopyWithImpl<$Res>
 
 /// Create a copy of OpenJobsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? data = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? data = null,Object? page = null,Object? hasNextPage = null,}) {
   return _then(_Success(
-null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
-as OpenJobsResponse,
+data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as JobsResponse,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,hasNextPage: null == hasNextPage ? _self.hasNextPage : hasNextPage // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
