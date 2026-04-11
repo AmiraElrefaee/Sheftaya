@@ -60,6 +60,11 @@ JobItem _$JobItemFromJson(Map<String, dynamic> json) => JobItem(
       : JobEmployerId.fromJson(json['employerId'] as Map<String, dynamic>),
   createdAt: json['createdAt'] as String?,
   updatedAt: json['updatedAt'] as String?,
+  companyDetails: json['companyDetails'] == null
+      ? null
+      : JobCompanyDetails.fromJson(
+          json['companyDetails'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$JobItemToJson(JobItem instance) => <String, dynamic>{
@@ -81,6 +86,7 @@ Map<String, dynamic> _$JobItemToJson(JobItem instance) => <String, dynamic>{
   'employerId': instance.employerId?.toJson(),
   'createdAt': instance.createdAt,
   'updatedAt': instance.updatedAt,
+  'companyDetails': instance.companyDetails?.toJson(),
 };
 
 JobEmployerId _$JobEmployerIdFromJson(Map<String, dynamic> json) =>
@@ -149,3 +155,25 @@ WorkerJobDetailsData _$WorkerJobDetailsDataFromJson(
 Map<String, dynamic> _$WorkerJobDetailsDataToJson(
   WorkerJobDetailsData instance,
 ) => <String, dynamic>{'job': instance.job?.toJson()};
+
+JobCompanyDetails _$JobCompanyDetailsFromJson(Map<String, dynamic> json) =>
+    JobCompanyDetails(
+      companyName: json['companyName'] as String?,
+      companyType: json['companyType'] as String?,
+      companyAddress: json['companyAddress'] as String?,
+      companyCity: json['companyCity'] as String?,
+      companyContactPersonName: json['companyContactPersonName'] as String?,
+      companyImages: (json['companyImages'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$JobCompanyDetailsToJson(JobCompanyDetails instance) =>
+    <String, dynamic>{
+      'companyName': instance.companyName,
+      'companyType': instance.companyType,
+      'companyAddress': instance.companyAddress,
+      'companyCity': instance.companyCity,
+      'companyContactPersonName': instance.companyContactPersonName,
+      'companyImages': instance.companyImages,
+    };

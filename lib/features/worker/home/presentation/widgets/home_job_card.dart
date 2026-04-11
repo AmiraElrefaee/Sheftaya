@@ -134,6 +134,7 @@ class HomeJobCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              _applicantsBadge(job.requiredWorkers ?? 0),
             ],
           ),
           SizedBox(height: 12.h),
@@ -192,6 +193,32 @@ class HomeJobCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(8.r),
     ),
     child: Text(text, style: TextStyles.font14BlackMedium),
+  );
+}
+
+Widget _applicantsBadge(int count) {
+  return Container(
+    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+    decoration: BoxDecoration(
+      color: ColorsManager.lightGrey.withValues(alpha: .4),
+      borderRadius: BorderRadius.circular(20.r),
+    ),
+    child: Row(
+      children: [
+        Icon(
+          Icons.people_alt_outlined,
+          size: 12.sp,
+          color: ColorsManager.darkGrey,
+        ),
+        SizedBox(width: 4.w),
+        Text(
+          '$count عمال مطلوبين',
+          style: TextStyles.font12BlackMedium.copyWith(
+            color: ColorsManager.darkGrey,
+          ),
+        ),
+      ],
+    ),
   );
 }
 

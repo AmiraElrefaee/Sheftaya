@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sheftaya/core/di/service_locator.dart';
+import 'package:sheftaya/features/setting/presentation/setting_screen.dart';
 import 'package:sheftaya/features/worker/home/logic/all_jobs/open_jobs_cubit.dart';
 import 'package:sheftaya/features/worker/home/logic/job_recommendation/job_recommendation_cubit.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/bottom_nav.dart';
@@ -50,7 +51,7 @@ class _WorkerHomeScreenShellState extends State<_WorkerHomeScreenShell> {
       const WorkerHomeScreenBody(),
       const MyApplicationsJobsScreen(),
       const SavedJobsScreen(),
-      const Center(child: Text('الإعدادات')),
+      const SettingScreen(),
     ];
 
     return Scaffold(

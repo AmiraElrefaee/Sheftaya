@@ -4,6 +4,8 @@ import 'package:sheftaya/features/employer/home/presentation/widgets/employer_ho
 import 'package:sheftaya/features/employer/home/presentation/widgets/placeholder_screen.dart';
 import 'package:sheftaya/features/employer/my_jobs/presentation/my_jobs_screen.dart';
 
+import '../../../setting/presentation/setting_screen.dart';
+
 class EmployerHomeScreen extends StatefulWidget {
   const EmployerHomeScreen({super.key});
 
@@ -18,7 +20,7 @@ class _EmployerHomeScreenBodyState extends State<EmployerHomeScreen> {
     const EmployerHomeScreenBody(),
     EmployerMyJobsScreen(),
     PlaceholderScreen(label: 'الجوائز'),
-    PlaceholderScreen(label: 'الإعدادات'),
+    SettingScreen(),
   ];
 
   @override

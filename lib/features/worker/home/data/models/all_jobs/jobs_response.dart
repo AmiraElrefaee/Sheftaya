@@ -74,6 +74,7 @@ class JobItem {
   final JobEmployerId? employerId;
   final String? createdAt;
   final String? updatedAt;
+  final JobCompanyDetails? companyDetails;
 
   JobItem({
     this.id,
@@ -93,7 +94,7 @@ class JobItem {
     this.details,
     this.employerId,
     this.createdAt,
-    this.updatedAt,
+    this.updatedAt, this.companyDetails,
   });
 
   factory JobItem.fromJson(Map<String, dynamic> json) =>
@@ -168,4 +169,27 @@ class WorkerJobDetailsData {
       _$WorkerJobDetailsDataFromJson(json);
 
   Map<String, dynamic> toJson() => _$WorkerJobDetailsDataToJson(this);
+}
+@JsonSerializable(explicitToJson: true)
+class JobCompanyDetails {
+  final String? companyName;
+  final String? companyType;
+  final String? companyAddress;
+  final String? companyCity;
+  final String? companyContactPersonName;
+  final List<String>? companyImages;
+
+  JobCompanyDetails({
+    this.companyName,
+    this.companyType,
+    this.companyAddress,
+    this.companyCity,
+    this.companyContactPersonName,
+    this.companyImages,
+  });
+
+  factory JobCompanyDetails.fromJson(Map<String, dynamic> json) =>
+      _$JobCompanyDetailsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$JobCompanyDetailsToJson(this);
 }

@@ -12,7 +12,7 @@ JobRecommendationResponse _$JobRecommendationResponseFromJson(
   status: json['status'] as String?,
   results: (json['results'] as num?)?.toInt(),
   data: (json['data'] as List<dynamic>?)
-      ?.map((e) => JobRecommendationModel.fromJson(e as Map<String, dynamic>))
+      ?.map((e) => JobItem.fromJson(e as Map<String, dynamic>))
       .toList(),
 );
 
@@ -24,39 +24,111 @@ Map<String, dynamic> _$JobRecommendationResponseToJson(
   'data': instance.data?.map((e) => e.toJson()).toList(),
 };
 
-JobRecommendationModel _$JobRecommendationModelFromJson(
-  Map<String, dynamic> json,
-) => JobRecommendationModel(
+JobItem _$JobItemFromJson(Map<String, dynamic> json) => JobItem(
   id: json['_id'] as String?,
   title: json['title'] as String?,
+  requiredSkills: (json['requiredSkills'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  jobImages: (json['JobImages'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  place: json['place'] as String?,
   location: json['location'] == null
       ? null
-      : RecommendationLocation.fromJson(
-          json['location'] as Map<String, dynamic>,
-        ),
+      : JobLocation.fromJson(json['location'] as Map<String, dynamic>),
+  startDateTime: json['startDateTime'] as String?,
+  startTime: json['startTime'] as String?,
+  endDateTime: json['endDateTime'] as String?,
+  dailyWorkHours: (json['dailyWorkHours'] as num?)?.toInt(),
+  workHours: (json['workHours'] as num?)?.toInt(),
+  requiredWorkers: (json['requiredWorkers'] as num?)?.toInt(),
+  acceptedWorkersCount: (json['acceptedWorkersCount'] as num?)?.toInt(),
   pricePerHour: json['pricePerHour'] == null
       ? null
-      : RecommendationPricePerHour.fromJson(
-          json['pricePerHour'] as Map<String, dynamic>,
-        ),
+      : PricePerHour.fromJson(json['pricePerHour'] as Map<String, dynamic>),
   experienceLevel: json['experienceLevel'] as String?,
+  status: json['status'] as String?,
   details: json['details'] as String?,
+  companyDetails: json['companyDetails'] == null
+      ? null
+      : JobCompanyDetails.fromJson(
+          json['companyDetails'] as Map<String, dynamic>,
+        ),
+  companyName: json['companyName'] as String?,
+  companyImage: json['companyImage'] as String?,
+  score: json['score'] as num?,
+  employerId: json['employerId'] == null
+      ? null
+      : JobEmployerId.fromJson(json['employerId'] as Map<String, dynamic>),
+  createdAt: json['createdAt'] as String?,
+  updatedAt: json['updatedAt'] as String?,
 );
 
-Map<String, dynamic> _$JobRecommendationModelToJson(
-  JobRecommendationModel instance,
-) => <String, dynamic>{
+Map<String, dynamic> _$JobItemToJson(JobItem instance) => <String, dynamic>{
   '_id': instance.id,
   'title': instance.title,
+  'requiredSkills': instance.requiredSkills,
+  'JobImages': instance.jobImages,
+  'place': instance.place,
   'location': instance.location?.toJson(),
+  'startDateTime': instance.startDateTime,
+  'startTime': instance.startTime,
+  'endDateTime': instance.endDateTime,
+  'dailyWorkHours': instance.dailyWorkHours,
+  'workHours': instance.workHours,
+  'requiredWorkers': instance.requiredWorkers,
+  'acceptedWorkersCount': instance.acceptedWorkersCount,
   'pricePerHour': instance.pricePerHour?.toJson(),
   'experienceLevel': instance.experienceLevel,
+  'status': instance.status,
   'details': instance.details,
+  'companyDetails': instance.companyDetails?.toJson(),
+  'companyName': instance.companyName,
+  'companyImage': instance.companyImage,
+  'score': instance.score,
+  'employerId': instance.employerId?.toJson(),
+  'createdAt': instance.createdAt,
+  'updatedAt': instance.updatedAt,
 };
 
-RecommendationLocation _$RecommendationLocationFromJson(
-  Map<String, dynamic> json,
-) => RecommendationLocation(
+JobCompanyDetails _$JobCompanyDetailsFromJson(Map<String, dynamic> json) =>
+    JobCompanyDetails(
+      companyName: json['companyName'] as String?,
+      companyType: json['companyType'] as String?,
+      companyAddress: json['companyAddress'] as String?,
+      companyCity: json['companyCity'] as String?,
+      companyContactPersonName: json['companyContactPersonName'] as String?,
+      companyImages: (json['companyImages'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$JobCompanyDetailsToJson(JobCompanyDetails instance) =>
+    <String, dynamic>{
+      'companyName': instance.companyName,
+      'companyType': instance.companyType,
+      'companyAddress': instance.companyAddress,
+      'companyCity': instance.companyCity,
+      'companyContactPersonName': instance.companyContactPersonName,
+      'companyImages': instance.companyImages,
+    };
+
+JobEmployerId _$JobEmployerIdFromJson(Map<String, dynamic> json) =>
+    JobEmployerId(
+      id: json['_id'] as String?,
+      firstName: json['firstName'] as String?,
+      lastName: json['lastName'] as String?,
+    );
+
+Map<String, dynamic> _$JobEmployerIdToJson(JobEmployerId instance) =>
+    <String, dynamic>{
+      '_id': instance.id,
+      'firstName': instance.firstName,
+      'lastName': instance.lastName,
+    };
+
+JobLocation _$JobLocationFromJson(Map<String, dynamic> json) => JobLocation(
   type: json['type'] as String?,
   coordinates: (json['coordinates'] as List<dynamic>?)
       ?.map((e) => e as num)
@@ -65,25 +137,46 @@ RecommendationLocation _$RecommendationLocationFromJson(
   address: json['address'] as String?,
 );
 
-Map<String, dynamic> _$RecommendationLocationToJson(
-  RecommendationLocation instance,
-) => <String, dynamic>{
-  'type': instance.type,
-  'coordinates': instance.coordinates,
-  'mainPlace': instance.mainPlace,
-  'address': instance.address,
-};
+Map<String, dynamic> _$JobLocationToJson(JobLocation instance) =>
+    <String, dynamic>{
+      'type': instance.type,
+      'coordinates': instance.coordinates,
+      'mainPlace': instance.mainPlace,
+      'address': instance.address,
+    };
 
-RecommendationPricePerHour _$RecommendationPricePerHourFromJson(
-  Map<String, dynamic> json,
-) => RecommendationPricePerHour(
+PricePerHour _$PricePerHourFromJson(Map<String, dynamic> json) => PricePerHour(
   amount: json['amount'] as num?,
   currency: json['currency'] as String?,
 );
 
-Map<String, dynamic> _$RecommendationPricePerHourToJson(
-  RecommendationPricePerHour instance,
+Map<String, dynamic> _$PricePerHourToJson(PricePerHour instance) =>
+    <String, dynamic>{'amount': instance.amount, 'currency': instance.currency};
+
+WorkerJobDetailsResponse _$WorkerJobDetailsResponseFromJson(
+  Map<String, dynamic> json,
+) => WorkerJobDetailsResponse(
+  status: json['status'] as String?,
+  data: json['data'] == null
+      ? null
+      : WorkerJobDetailsData.fromJson(json['data'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$WorkerJobDetailsResponseToJson(
+  WorkerJobDetailsResponse instance,
 ) => <String, dynamic>{
-  'amount': instance.amount,
-  'currency': instance.currency,
+  'status': instance.status,
+  'data': instance.data?.toJson(),
 };
+
+WorkerJobDetailsData _$WorkerJobDetailsDataFromJson(
+  Map<String, dynamic> json,
+) => WorkerJobDetailsData(
+  job: json['job'] == null
+      ? null
+      : JobItem.fromJson(json['job'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$WorkerJobDetailsDataToJson(
+  WorkerJobDetailsData instance,
+) => <String, dynamic>{'job': instance.job?.toJson()};

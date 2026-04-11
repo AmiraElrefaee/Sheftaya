@@ -95,11 +95,9 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
 
   double _salaryOf(dynamic job) {
     try {
-      // 1. check if it's a model with pricePerHour.amount
       if (job.pricePerHour != null && job.pricePerHour.amount != null) {
         return (job.pricePerHour.amount as num).toDouble();
       }
-      // 2. check if it's a map
       if (job is Map) {
         if (job['pricePerHour']?['amount'] != null) {
           return (job['pricePerHour']['amount'] as num).toDouble();
@@ -108,7 +106,6 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
           return (job['salary'] as num).toDouble();
         }
       }
-      // 3. check direct salary property
       if (job.salary != null) {
         return (job.salary as num).toDouble();
       }
@@ -124,7 +121,6 @@ class _SearchJobsScreenState extends State<SearchJobsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // نستخدم List<dynamic> لتجنب مشاكل الـ casting
     final List<dynamic> filtered = widget.jobs
         .where((j) => _titleOf(j).toLowerCase().contains(query.toLowerCase()))
         .toList();

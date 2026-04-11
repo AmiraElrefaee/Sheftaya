@@ -8,6 +8,10 @@ import 'package:sheftaya/features/forget_password/presentation/forget_pass_scree
 import 'package:sheftaya/features/forget_password/presentation/verify_password_screen.dart';
 import 'package:sheftaya/features/login/presentation/login_screen.dart';
 import 'package:sheftaya/features/on_boarding_screen.dart/on_boarding_screen.dart';
+import 'package:sheftaya/features/setting/change_password/presentation/change_password_screen.dart';
+import 'package:sheftaya/features/setting/my_profile/presentation/profile_screen.dart';
+import 'package:sheftaya/features/setting/presentation/faq_screen.dart';
+import 'package:sheftaya/features/setting/support_contact/presentation/support_contact_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/sign_up_screen.dart';
 import 'package:sheftaya/features/sign_up/presentation/verify_account_screen.dart';
 import 'package:sheftaya/features/worker/home/data/models/review_model.dart';
@@ -51,6 +55,10 @@ abstract class AppRouter {
   static const kJobPublishSuccessScreen = '/JobPublishSuccessScreen';
   static const kMapPickerScreen = '/MapPickerScreen';
   static const kShiftDetailsView = '/ShiftDetailsView';
+  static const kFaqScreen = '/FaqScreen';
+  static const kMyProfileScreen = '/MyProfileScreen';
+  static const kSupportContactScreen = '/SupportContactScreen';
+  static const kChangePasswordScreen = '/ChangePasswordScreen';
 
   static final router = GoRouter(
     routes: [
@@ -158,7 +166,7 @@ abstract class AppRouter {
         builder: (context, state) {
           final String jobId = state.extra as String;
           return BlocProvider(
-            create: (_) => getIt<JobDetailsCubit>(), // ✅ publish_job cubit
+            create: (_) => getIt<JobDetailsCubit>(),
             child: JobPublishSuccessScreen(jobId: jobId),
           );
         },
@@ -170,6 +178,19 @@ abstract class AppRouter {
       GoRoute(
         path: kShiftDetailsView,
         builder: (context, state) => ShiftDetailsView(),
+      ),
+      GoRoute(path: kFaqScreen, builder: (context, state) => FAQScreen()),
+      GoRoute(
+        path: kMyProfileScreen,
+        builder: (context, state) => const MyProfileScreen(),
+      ),
+      GoRoute(
+        path: kSupportContactScreen,
+        builder: (context, state) => const SupportContactScreen(),
+      ),
+      GoRoute(
+        path: kChangePasswordScreen,
+        builder: (context, state) => const ChangePasswordScreen(),
       ),
     ],
   );

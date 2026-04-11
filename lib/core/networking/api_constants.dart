@@ -12,7 +12,15 @@ class ApiConstants {
   static const String getOpenJobs = 'jobs/open';
   static const String getJobDetails = 'jobs/{jobId}';
   static const String getRecommendations = 'jobs/recommendations';
-  static const String applyForJob = 'application/jobs/{jobId}/apply';
+  static const String applyForJob = 'applications/jobs/{jobId}/apply';
+  static const String updateImageProfile = 'auth/updateImageProfile';
+  static const String updateProfile = 'auth/updateProfile';
+  static const String createSupportRequest = 'support';
+  static const String changePassword = 'auth/change-password';
+  static const String updateFcmToken = 'auth/updateFcmToken';
+  static const String getAllNotifications = 'notifications/all';
+  static const String deleteNotification = 'notifications/{id}';
+  static const String deleteAllNotifications = 'notifications/all';
 }
 
 class ApiErrors {

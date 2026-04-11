@@ -12,6 +12,14 @@ import 'package:sheftaya/features/forget_password/logic/forget_password_cubit/fo
 import 'package:sheftaya/features/forget_password/logic/verify_password_cubit/verify_password_cubit.dart';
 import 'package:sheftaya/features/login/data/repos/login_repo.dart';
 import 'package:sheftaya/features/login/logic/login_cubit.dart';
+import 'package:sheftaya/features/setting/change_password/data/repo/change_password_repo.dart';
+import 'package:sheftaya/features/setting/change_password/logic/change_password_cubit.dart';
+import 'package:sheftaya/features/setting/my_profile/data/repos/update_image_profile_repo.dart';
+import 'package:sheftaya/features/setting/my_profile/data/repos/update_profile_repo.dart';
+import 'package:sheftaya/features/setting/my_profile/logic/update_image_profile_cubit.dart';
+import 'package:sheftaya/features/setting/my_profile/logic/update_profile_cubit.dart';
+import 'package:sheftaya/features/setting/support_contact/data/repo/support_repo.dart';
+import 'package:sheftaya/features/setting/support_contact/logic/support_cubit.dart';
 import 'package:sheftaya/features/sign_up/data/repo/sign_up_repo.dart';
 import 'package:sheftaya/features/sign_up/data/repo/verify_sign_up_repo.dart';
 import 'package:sheftaya/features/sign_up/logic/sign_up/sign_up_cubit.dart';
@@ -128,4 +136,40 @@ getIt.registerLazySingleton<ApplyJobRepo>(
 getIt.registerFactory<ApplyJobCubit>(
   () => ApplyJobCubit(getIt()),
 );
+getIt.registerLazySingleton<UpdateImageProfileRepo>(
+    () => UpdateImageProfileRepo(getIt()),
+  );
+  getIt.registerFactory<UpdateImageProfileCubit>(
+    () => UpdateImageProfileCubit(getIt()),
+  );
+
+  getIt.registerLazySingleton<UpdateProfileRepo>(
+    () => UpdateProfileRepo(getIt()),
+  );
+  getIt.registerFactory<UpdateProfileCubit>(() => UpdateProfileCubit(getIt()));
+
+  getIt.registerLazySingleton<SupportRepo>(() => SupportRepo(getIt()));
+  getIt.registerFactory<SupportCubit>(() => SupportCubit(getIt()));
+
+
+  getIt.registerLazySingleton<ChangePasswordRepo>(
+    () => ChangePasswordRepo(getIt()),
+  );
+  getIt.registerFactory<ChangePasswordCubit>(
+    () => ChangePasswordCubit(getIt()),
+  );
+  // getIt.registerLazySingleton<UpdateFcmRepo>(() => UpdateFcmRepo(getIt()));
+  // getIt.registerFactory<UpdateFcmCubit>(() => UpdateFcmCubit(getIt()));
+
+  // getIt.registerLazySingleton<GetAllNotificationsRepo>(
+  //   () => GetAllNotificationsRepo(getIt()),
+  // );
+  // getIt.registerFactory<GetAllNotificationsCubit>(
+  //   () => GetAllNotificationsCubit(getIt()),
+  // );
+
+  // getIt.registerLazySingleton<NotificationsRepo>(
+  //   () => NotificationsRepo(getIt()),
+  // );
+  // getIt.registerFactory<NotificationsCubit>(() => NotificationsCubit(getIt()));
 }

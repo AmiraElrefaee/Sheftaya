@@ -45,12 +45,17 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
               HeaderWidget(jobs: openJobs),
               SizedBox(height: 12.h),
 
-              BlocBuilder<JobsRecommendationsCubit, JobsRecommendationsState<List<JobItem>>>(
+              BlocBuilder<
+                JobsRecommendationsCubit,
+                JobsRecommendationsState<List<JobItem>>
+              >(
                 builder: (context, recState) {
                   final recommendedJobs = _extractRecommendedJobs(recState);
                   final recIsLoading = _isRecommendedJobsLoading(recState);
                   final recIsError = _isRecommendedJobsError(recState);
-                  final recErrorMessage = _extractRecommendedJobsErrorMessage(recState);
+                  final recErrorMessage = _extractRecommendedJobsErrorMessage(
+                    recState,
+                  );
 
                   return _section(
                     context,
@@ -60,7 +65,9 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
                     isLoading: recIsLoading,
                     isError: recIsError,
                     errorMessage: recErrorMessage,
-                    onRetry: () => context.read<JobsRecommendationsCubit>().fetchRecommendations(),
+                    onRetry: () => context
+                        .read<JobsRecommendationsCubit>()
+                        .fetchRecommendations(),
                   );
                 },
               ),
@@ -124,7 +131,9 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
     );
   }
 
-  List<JobItem> _extractRecommendedJobs(JobsRecommendationsState<List<JobItem>> state) {
+  List<JobItem> _extractRecommendedJobs(
+    JobsRecommendationsState<List<JobItem>> state,
+  ) {
     return state.when(
       initial: () => <JobItem>[],
       loading: () => <JobItem>[],
@@ -133,7 +142,9 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
     );
   }
 
-  bool _isRecommendedJobsLoading(JobsRecommendationsState<List<JobItem>> state) {
+  bool _isRecommendedJobsLoading(
+    JobsRecommendationsState<List<JobItem>> state,
+  ) {
     return state.when(
       initial: () => true,
       loading: () => true,
@@ -151,7 +162,9 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
     );
   }
 
-  String _extractRecommendedJobsErrorMessage(JobsRecommendationsState<List<JobItem>> state) {
+  String _extractRecommendedJobsErrorMessage(
+    JobsRecommendationsState<List<JobItem>> state,
+  ) {
     return state.when(
       initial: () => '',
       loading: () => '',
@@ -189,7 +202,10 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
                       extra: {'jobs': jobs, 'title': title},
                     );
                   },
-                  child: Text('رؤية الكل', style: TextStyles.font12SecondaryBold),
+                  child: Text(
+                    'رؤية الكل',
+                    style: TextStyles.font12SecondaryBold,
+                  ),
                 ),
             ],
           ),
@@ -245,11 +261,24 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
           children: [
             Icon(Icons.error_outline, size: 34.r, color: Colors.redAccent),
             SizedBox(height: 10.h),
-            Text('فشل تحميل الوظائف', style: TextStyles.font16BlackMedium, textAlign: TextAlign.center),
+            Text(
+              'فشل تحميل الوظائف',
+              style: TextStyles.font16BlackMedium,
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: 6.h),
-            Text(errorMessage, style: TextStyles.font12BlackMedium.copyWith(color: ColorsManager.darkGrey), textAlign: TextAlign.center),
+            Text(
+              errorMessage,
+              style: TextStyles.font12BlackMedium.copyWith(
+                color: ColorsManager.darkGrey,
+              ),
+              textAlign: TextAlign.center,
+            ),
             SizedBox(height: 12.h),
-            ElevatedButton(onPressed: onRetry, child: const Text('أعد المحاولة')),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: const Text('أعد المحاولة'),
+            ),
           ],
         ),
       );
@@ -268,7 +297,11 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
           children: [
             Icon(Icons.work_outline, size: 34.r, color: ColorsManager.grey),
             SizedBox(height: 10.h),
-            Text(emptyMessage, style: TextStyles.font16BlackMedium, textAlign: TextAlign.center),
+            Text(
+              emptyMessage,
+              style: TextStyles.font16BlackMedium,
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       );
@@ -280,8 +313,11 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
         children: List.generate(
           jobs.length,
           (i) => Padding(
-            padding: EdgeInsets.only(right: i == jobs.length - 1 ? 0 : 12.w),
-            child: SizedBox(width: 380.w, child: HomeJobCard(job: jobs[i])),
+            padding: EdgeInsets.only(left: i == jobs.length - 1 ? 0 : 16.w),
+            child: SizedBox(
+              width: 380.w,
+              child: HomeJobCard(job: jobs[i]),
+            ),
           ),
         ),
       ),
