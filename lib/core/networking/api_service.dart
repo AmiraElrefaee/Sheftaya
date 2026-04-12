@@ -11,6 +11,7 @@ import 'package:sheftaya/features/login/data/models/login_request_body.dart';
 import 'package:sheftaya/features/login/data/models/login_response.dart';
 import 'package:sheftaya/features/setting/change_password/data/models/change_password_request_body.dart';
 import 'package:sheftaya/features/setting/change_password/data/models/change_password_response.dart';
+import 'package:sheftaya/features/setting/my_profile/data/models/auth_me_response.dart';
 import 'package:sheftaya/features/setting/my_profile/data/models/update_image_profile_response.dart';
 import 'package:sheftaya/features/setting/my_profile/data/models/update_profile_request_body.dart';
 import 'package:sheftaya/features/setting/my_profile/data/models/update_profile_response.dart';
@@ -127,6 +128,11 @@ abstract class ApiService {
     @Body() ChangePasswordRequestBody body,
     @Header('Authorization') String token,
   );
+
+  @GET(ApiConstants.getMe)
+Future<AuthMeResponse> getMe(
+  @Header('Authorization') String token,
+);
   // @POST(ApiConstants.updateFcmToken)
   // Future<UpdateFcmResponse> updateFcmToken(
   //   @Header('Authorization') String token,
