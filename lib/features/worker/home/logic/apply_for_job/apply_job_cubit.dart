@@ -24,8 +24,7 @@ class ApplyJobCubit extends Cubit<ApplyJobState> {
         emit(ApplyJobState.success(data));
       },
       failure: (errorHandler) {
-        log('ApplyJob Error: ${errorHandler
-.serverFailure.errmessage}');
+        log('ApplyJob Error: ${errorHandler.serverFailure.errmessage}');
         emit(
           ApplyJobState.error(
             error: errorHandler.serverFailure.errmessage,

@@ -10,7 +10,7 @@ ApplyJobResponse _$ApplyJobResponseFromJson(Map<String, dynamic> json) =>
     ApplyJobResponse(
       status: json['status'] as String?,
       message: json['message'] as String?,
-      data: json['data'],
+      data: json['data'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$ApplyJobResponseToJson(ApplyJobResponse instance) =>

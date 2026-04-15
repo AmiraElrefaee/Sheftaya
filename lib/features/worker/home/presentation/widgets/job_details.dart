@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sheftaya/app/router.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
+import 'package:sheftaya/core/utils/snackbar.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/features/worker/home/data/models/all_jobs/jobs_response.dart';
 import 'package:sheftaya/features/worker/home/data/models/review_model.dart';
@@ -37,17 +38,12 @@ class _JobDetailsState extends State<JobDetails> {
     return BlocListener<ApplyJobCubit, ApplyJobState>(
       listener: (context, state) {
         state.whenOrNull(
-          success: (message) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message ?? 'تم التقديم على الوظيفة بنجاح'),
-              ),
-            );
-          },
-          error: (message) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
+          success: (response) {
+            final message = 'تم التقديم على الوظيفة بنجاح';
+
+            customSnackBar(context, message, ColorsManager.success);
+
+            GoRouter.of(context).pop();
           },
         );
       },
@@ -414,7 +410,7 @@ class _JobDetailsState extends State<JobDetails> {
                               widget.jobId,
                             );
                           },
-                        ).show(); 
+                        ).show();
                       },
                     ),
                     SizedBox(height: 20.h),

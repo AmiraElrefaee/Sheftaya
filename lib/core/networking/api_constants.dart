@@ -22,6 +22,7 @@ class ApiConstants {
   static const String deleteNotification = 'notifications/{id}';
   static const String deleteAllNotifications = 'notifications/all';
   static const String getMe = 'auth/me';
+  static const String myJobs = 'jobs/my-jobs';
 }
 
 class ApiErrors {

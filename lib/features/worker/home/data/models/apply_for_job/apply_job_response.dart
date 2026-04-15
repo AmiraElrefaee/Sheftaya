@@ -6,13 +6,9 @@ part 'apply_job_response.g.dart';
 class ApplyJobResponse {
   final String? status;
   final String? message;
-  final dynamic data;
+  final Map<String, dynamic>? data;
 
-  ApplyJobResponse({
-    this.status,
-    this.message,
-    this.data,
-  });
+  ApplyJobResponse({this.status, this.message, this.data});
 
   factory ApplyJobResponse.fromJson(Map<String, dynamic> json) =>
       _$ApplyJobResponseFromJson(json);

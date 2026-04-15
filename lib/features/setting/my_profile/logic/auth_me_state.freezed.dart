@@ -272,12 +272,12 @@ _$SuccessCopyWith<_Success> get copyWith => __$SuccessCopyWithImpl<_Success>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&const DeepCollectionEquality().equals(other.data, data));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&(identical(other.data, data) || other.data == data));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(data));
+int get hashCode => Object.hash(runtimeType,data);
 
 @override
 String toString() {
@@ -309,9 +309,9 @@ class __$SuccessCopyWithImpl<$Res>
 
 /// Create a copy of AuthMeState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? data = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? data = null,}) {
   return _then(_Success(
-freezed == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
 as AuthMeResponse,
   ));
 }

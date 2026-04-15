@@ -34,6 +34,8 @@ import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_cubi
 import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart'
     as worker_cubit;
 import 'package:sheftaya/features/worker/home/logic/job_recommendation/job_recommendation_cubit.dart';
+import 'package:sheftaya/features/worker/my_application_jobs/data/repos/my_jobs_repo.dart';
+import 'package:sheftaya/features/worker/my_application_jobs/logic/my_jobs_cubit.dart';
 
 import '../../features/publish_job/data/api_service/job_details_remote_data_source.dart';
 import '../../features/publish_job/data/api_service/publish_job_remote_data_source.dart';
@@ -158,6 +160,9 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<AuthMeRepo>(() => AuthMeRepo(getIt()));
   getIt.registerFactory<AuthMeCubit>(() => AuthMeCubit(getIt()));
+
+  getIt.registerLazySingleton<MyJobsRepo>(() => MyJobsRepo(getIt()));
+  getIt.registerFactory<MyJobsCubit>(() => MyJobsCubit(getIt()));
   // getIt.registerLazySingleton<UpdateFcmRepo>(() => UpdateFcmRepo(getIt()));
   // getIt.registerFactory<UpdateFcmCubit>(() => UpdateFcmCubit(getIt()));
 

@@ -22,7 +22,9 @@ import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_sign
 import 'package:sheftaya/features/sign_up/data/models/verify_sign_up/verify_signup_response.dart';
 import 'package:sheftaya/features/worker/home/data/models/all_jobs/jobs_response.dart';
 import 'package:sheftaya/features/worker/home/data/models/apply_for_job/apply_job_response.dart';
-import 'package:sheftaya/features/worker/home/data/models/job_recommendation/job_recommendation_response.dart' hide WorkerJobDetailsResponse;
+import 'package:sheftaya/features/worker/home/data/models/job_recommendation/job_recommendation_response.dart'
+    hide WorkerJobDetailsResponse;
+import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart';
 import '../../features/publish_job/data/model/job_details_response.dart';
 import '../../features/publish_job/data/model/publish_job_request.dart';
 
@@ -103,7 +105,7 @@ abstract class ApiService {
     @Header('Authorization') String token,
   );
 
-    @MultiPart()
+  @MultiPart()
   @PATCH(ApiConstants.updateImageProfile)
   Future<UpdateImageProfileResponse> updateImageProfile(
     @Part(name: 'imageProfile') MultipartFile imageProfile,
@@ -130,9 +132,9 @@ abstract class ApiService {
   );
 
   @GET(ApiConstants.getMe)
-Future<AuthMeResponse> getMe(
-  @Header('Authorization') String token,
-);
+  Future<AuthMeResponse> getMe(@Header('Authorization') String token);
+  @GET(ApiConstants.myJobs)
+  Future<MyJobsResponse> getMyJobs(@Header('Authorization') String token);
   // @POST(ApiConstants.updateFcmToken)
   // Future<UpdateFcmResponse> updateFcmToken(
   //   @Header('Authorization') String token,

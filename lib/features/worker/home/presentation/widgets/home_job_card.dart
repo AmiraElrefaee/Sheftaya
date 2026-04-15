@@ -183,7 +183,7 @@ class HomeJobCard extends StatelessWidget {
     height: 80.h,
     width: 80.w,
     color: ColorsManager.lightGrey,
-    child: const Icon(Icons.image, color: ColorsManager.grey),
+    child: const Icon(Icons.business, color: ColorsManager.grey),
   );
 
   Widget _buildTag(String text) => Container(
