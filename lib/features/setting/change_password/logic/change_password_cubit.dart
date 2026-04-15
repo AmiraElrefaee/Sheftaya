@@ -16,7 +16,6 @@ class ChangePasswordCubit extends Cubit<ChangePasswordState> {
   Future<void> changePassword({
     required String currentPassword,
     required String newPassword,
-    required String passwordConfirm,
   }) async {
     emit(const ChangePasswordState.loading());
 
@@ -26,7 +25,6 @@ class ChangePasswordCubit extends Cubit<ChangePasswordState> {
     final body = ChangePasswordRequestBody(
       currentPassword: currentPassword,
       newPassword: newPassword,
-      passwordConfirm: passwordConfirm,
     );
 
     final response = await _repo.changePassword(

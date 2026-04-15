@@ -60,7 +60,7 @@ class _WorkerHomeScreenBodyState extends State<WorkerHomeScreenBody> {
                   return _section(
                     context,
                     title: 'وظائف مقترحه لك',
-                    jobs: recommendedJobs.take(2).toList(),
+                    jobs: recommendedJobs,
                     emptyMessage: 'لا توجد وظائف مقترحة حالياً',
                     isLoading: recIsLoading,
                     isError: recIsError,

@@ -11,70 +11,85 @@ import 'package:sheftaya/core/widgets/app_dropdown.dart';
 import 'package:sheftaya/core/widgets/app_multi_select_dropdown.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/core/widgets/custom_text_form_field.dart';
-import 'package:sheftaya/features/setting/my_profile/data/models/update_profile_request_body.dart';
 import 'package:sheftaya/features/setting/my_profile/logic/update_image_profile_cubit.dart';
 import 'package:sheftaya/features/setting/my_profile/logic/update_image_profile_state.dart';
 import 'package:sheftaya/features/setting/my_profile/logic/update_profile_cubit.dart';
 import 'package:sheftaya/features/setting/my_profile/logic/update_profile_state.dart';
-import 'package:sheftaya/features/setting/my_profile/presentation/widgets/profile_image.dart';
+import 'profile_image.dart';
 
-// ─────────────────────────── static options ───────────────────────────────
-const List<String> _educationSystems = [
-  'النظام الحكومى (National System)',
-  'نظام اللغات / التجريبي (Languages / Experimental System)',
-  'الدبلومة الأمريكية (American Diploma SAT/EST)',
+// ── خيارات ثابتة ───────────────────────────────────────────────────────────
+
+const _professionalStatuses = [
+  'طالب',
+  'موظف دوام كامل',
+  'موظف جزئي',
+  'لا أعمل',
 ];
 
-const List<String> _grades = [
-  'الصف الأول الإعدادي (Grade 7)',
-  'الصف الثاني الإعدادي (Grade 8)',
-  'الصف الثالث الإعدادي (Grade 9)',
-  'الصف الأول الثانوي (Grade 10)',
-  'الصف الثاني الثانوي (Grade 11)',
-  'الصف الثالث الثانوي (Grade 12)',
+const _jobOptions = [
+  'طباخ',
+  'مساعد طباخ',
+  'عامل مطبخ',
+  'غسال أطباق',
+  'عامل نظافة',
+  'عامل مخزن',
+  'عامل تحميل وتنزيل',
+  'سائق',
+  'عامل سوبر ماركت',
+  'كاشير',
+  'خدمة عملاء',
+  'استقبال',
+  'حارس',
+  'بواب',
+  'أمن',
+  'سباك',
+  'كهربائي',
+  'نجار',
+  'عامل دهانات',
+  'بائع',
+  'مندوب مبيعات',
+  'مساعد إداري',
+  'آخر',
 ];
 
-const List<String> _subjects = [
-  'اللغة العربية',
-  'اللغة الإنجليزية',
-  'الرياضيات',
-  'العلوم (فيزياء – كيمياء – أحياء)',
-  'الدراسات الاجتماعية (تاريخ – جغرافيا)',
-  'التربية الدينية',
-  'التربية الرياضية',
-  'اللغة الفرنسية',
-  'التربية الوطنية',
-  'اللغة الأجنبية الثانية',
-  'البرمجة وعلوم الحاسب',
-  'الأحياء',
-  'الكيمياء',
-  'الفيزياء',
-  'رياضيات متقدمة',
-  'إحصاء',
-  'الفلسفة والمنطق',
-  'علم النفس والاجتماع',
-  'التاريخ',
-  'الجغرافيا',
-  'Arabic Language',
-  'English Language',
-  'Mathematics',
-  'Physics',
-  'Chemistry',
-  'Biology',
-  'Integrated Science (Physics – Chemistry – Biology)',
-  'Social Studies (History – Geography)',
-  'Religious Education',
-  'Physical Education',
-  'French Language',
-  'Computer Science',
-  'English Language Arts',
-  'Mathematics (Algebra / Geometry / Calculus)',
-  'Science (Biology / Chemistry / Physics)',
-  'Social Studies',
-  'Foreign Languages',
-  'Computer / ICT',
-  'Physical Education',
-  'Art',
+const _companyTypes = [
+  'شركة',
+  'مزرعة',
+  'ورشة',
+  'محل تجاري',
+  'مطعم',
+  'كافيه',
+  'فندق',
+  'مصنع',
+  'مخزن',
+  'آخر',
+];
+
+const _governorates = [
+  'القاهرة',
+  'الجيزة',
+  'الإسكندرية',
+  'القليوبية',
+  'البحيرة',
+  'الدقهلية',
+  'الشرقية',
+  'الغربية',
+  'المنوفية',
+  'كفر الشيخ',
+  'دمياط',
+  'بورسعيد',
+  'الإسماعيلية',
+  'السويس',
+  'شمال سيناء',
+  'جنوب سيناء',
+  'بني سويف',
+  'الفيوم',
+  'المنيا',
+  'أسيوط',
+  'سوهاج',
+  'قنا',
+  'الأقصر',
+  'أسوان',
 ];
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -89,31 +104,26 @@ class ProfileScreenBody extends StatefulWidget {
 class _ProfileScreenBodyState extends State<ProfileScreenBody> {
   final _formKey = GlobalKey<FormState>();
 
-  // common controllers
+  // حقول مشتركة
   late TextEditingController _firstNameCtrl;
   late TextEditingController _lastNameCtrl;
   late TextEditingController _phoneCtrl;
 
-  // gender dropdown
-  String? _selectedGender;
+  // حقول الـ worker
+  late TextEditingController _educationCtrl;
+  late TextEditingController _experienceYearsCtrl;
+  late TextEditingController _hourlyRateCtrl;
+  String? _professionalStatus;
+  List<String> _pastExperience = [];
+  List<String> _jobsLookedFor = [];
 
-  // ─── student fields ───
-  String? _studentEducationSystem;
-  String? _studentGrade;
-  late TextEditingController _studentSchoolCtrl;
+  // حقول الـ employer
+  late TextEditingController _companyNameCtrl;
+  late TextEditingController _companyAddressCtrl;
+  String? _companyType;
+  String? _companyCity;
 
-  // ─── teacher fields ───
-  List<String> _teacherEducationSystems = [];
-  List<String> _teacherAcademicStages = [];
-  List<String> _teacherSubjects = [];
-  late TextEditingController _teacherSchoolCtrl;
-  late TextEditingController _teacherExperienceCtrl;
-  late TextEditingController _teacherBioCtrl;
-  late TextEditingController _teacherPriceCtrl;
-
-  // image
   String? _localImagePath;
-
   bool _initialized = false;
 
   @override
@@ -121,125 +131,113 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
     _phoneCtrl.dispose();
-    _studentSchoolCtrl.dispose();
-    _teacherSchoolCtrl.dispose();
-    _teacherExperienceCtrl.dispose();
-    _teacherBioCtrl.dispose();
-    _teacherPriceCtrl.dispose();
+    _educationCtrl.dispose();
+    _experienceYearsCtrl.dispose();
+    _hourlyRateCtrl.dispose();
+    _companyNameCtrl.dispose();
+    _companyAddressCtrl.dispose();
     super.dispose();
   }
 
-  void _initControllers() {
-    final user = context.read<UserCubit>().state.user!;
-
+  void _initControllers(UserModel user) {
     _firstNameCtrl = TextEditingController(text: user.firstname);
     _lastNameCtrl = TextEditingController(text: user.lastname);
     _phoneCtrl = TextEditingController(text: user.phone ?? '');
-    // _selectedGender = user.gender;
 
-    // // student
-    // _studentEducationSystem = user.studentEducationSystem;
-    // _studentGrade = user.studentGrade;
-    // _studentSchoolCtrl = TextEditingController(text: user.studentSchool ?? '');
+    // Worker
+    _educationCtrl = TextEditingController(text: user.education ?? '');
+    _experienceYearsCtrl = TextEditingController(
+      text: user.experienceYears?.toString() ?? '',
+    );
+    _hourlyRateCtrl = TextEditingController(
+      text: user.expectedHourlyRate?.toString() ?? '',
+    );
+    _professionalStatus = user.professionalStatus;
+    _pastExperience = List<String>.from(user.pastExperience ?? []);
+    _jobsLookedFor = List<String>.from(user.jobsLookedFor ?? []);
 
-    // // teacher
-    // _teacherEducationSystems = List<String>.from(user.educationSystem ?? []);
-    // _teacherAcademicStages = List<String>.from(user.academicStages ?? []);
-    // _teacherSubjects = List<String>.from(user.subjects ?? []);
-    // _teacherSchoolCtrl = TextEditingController(text: user.school ?? '');
-    // _teacherExperienceCtrl = TextEditingController(
-    //   text: user.experienceYears?.toString() ?? '',
-    // );
-    // _teacherBioCtrl = TextEditingController(text: user.bio ?? '');
-    // _teacherPriceCtrl = TextEditingController(
-    //   text: user.pricePerHour?.toString() ?? '',
-    // );
+    // Employer
+    _companyNameCtrl = TextEditingController(text: user.companyName ?? '');
+    _companyAddressCtrl = TextEditingController(
+      text: user.companyAddress ?? '',
+    );
+    _companyType = user.companyType;
+    _companyCity = user.companyCity;
 
     _localImagePath = user.profileImg;
     _initialized = true;
   }
 
-  // ── pick image ──────────────────────────────────────────────────────────
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null && mounted) {
       setState(() => _localImagePath = picked.path);
-      if (mounted) {
-        context.read<UpdateImageProfileCubit>().updateImageProfile(picked.path);
-      }
+      context.read<UpdateImageProfileCubit>().updateImageProfile(picked.path);
     }
   }
 
-  // ── save profile ────────────────────────────────────────────────────────
-  void _save(String role) {
+  void _save(String role, UserModel user) {
     if (!_formKey.currentState!.validate()) return;
-
-    final isTeacher = role == 'teacher';
-    final isStudent = role == 'student';
 
     context.read<UpdateProfileCubit>().updateProfile(
       firstName: _firstNameCtrl.text.trim(),
       lastName: _lastNameCtrl.text.trim(),
       phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
-      teacherProfile: isTeacher
-          ? UpdateTeacherProfileBody(
-              school: _teacherSchoolCtrl.text.trim().isEmpty
-                  ? null
-                  : _teacherSchoolCtrl.text.trim(),
-              pricePerHour: _teacherPriceCtrl.text.trim().isEmpty
-                  ? null
-                  : num.tryParse(_teacherPriceCtrl.text.trim()),
-              bio: _teacherBioCtrl.text.trim().isEmpty
-                  ? null
-                  : _teacherBioCtrl.text.trim(),
-              experienceYears: _teacherExperienceCtrl.text.trim().isEmpty
-                  ? null
-                  : int.tryParse(_teacherExperienceCtrl.text.trim()),
-              educationSystem: _teacherEducationSystems.isEmpty
-                  ? null
-                  : _teacherEducationSystems,
-              academicStages: _teacherAcademicStages.isEmpty
-                  ? null
-                  : _teacherAcademicStages,
-              subjects: _teacherSubjects.isEmpty ? null : _teacherSubjects,
-            )
+      // Worker
+      education: role == 'worker'
+          ? _educationCtrl.text.trim().isEmpty
+                ? null
+                : _educationCtrl.text.trim()
           : null,
-      studentProfile: isStudent
-          ? UpdateStudentProfileBody(
-              grade: _studentGrade,
-              educationSystem: _studentEducationSystem,
-              school: _studentSchoolCtrl.text.trim().isEmpty
-                  ? null
-                  : _studentSchoolCtrl.text.trim(),
-            )
+      professionalStatus: role == 'worker' ? _professionalStatus : null,
+      pastExperience: role == 'worker' && _pastExperience.isNotEmpty
+          ? _pastExperience
           : null,
+      jobsLookedFor: role == 'worker' && _jobsLookedFor.isNotEmpty
+          ? _jobsLookedFor
+          : null,
+      experienceYears: role == 'worker'
+          ? int.tryParse(_experienceYearsCtrl.text.trim())
+          : null,
+      expectedHourlyRate: role == 'worker'
+          ? double.tryParse(_hourlyRateCtrl.text.trim())
+          : null,
+      // Employer
+      companyName: role == 'employer'
+          ? _companyNameCtrl.text.trim().isEmpty
+                ? null
+                : _companyNameCtrl.text.trim()
+          : null,
+      companyType: role == 'employer' ? _companyType : null,
+      companyAddress: role == 'employer'
+          ? _companyAddressCtrl.text.trim().isEmpty
+                ? null
+                : _companyAddressCtrl.text.trim()
+          : null,
+      companyCity: role == 'employer' ? _companyCity : null,
     );
   }
 
-  // ── helpers ─────────────────────────────────────────────────────────────
-  Widget _label(String key) => Padding(
+  Widget _label(String text) => Padding(
     padding: EdgeInsets.only(bottom: 8.h),
-    child: Text(key, style: TextStyles.font14BlackRegular),
+    child: Text(text, style: TextStyles.font14BlackRegular),
   );
 
-  Widget _gap() => SizedBox(height: 16.h);
+  Widget _gap([double h = 16]) => SizedBox(height: h.h);
 
-  // ────────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final userCubit = context.watch<UserCubit>();
-    final user = userCubit.state.user;
+    final user = context.watch<UserCubit>().state.user;
 
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (!_initialized) _initControllers();
+    if (!_initialized) _initControllers(user);
 
     final role = (user.role ?? '').toLowerCase();
-    final isTeacher = role == 'teacher';
-    final isStudent = role == 'student';
+    final isWorker = role == 'worker';
+    final isEmployer = role == 'employer';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -250,51 +248,22 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
       ),
       body: MultiBlocListener(
         listeners: [
-          // image upload result
+          // تحديث الصورة
           BlocListener<UpdateImageProfileCubit, UpdateImageProfileState>(
             listener: (ctx, state) {
               state.whenOrNull(
                 success: (data) {
                   final newUrl = data.data?.imageProfile;
                   if (newUrl != null) {
-                    final updatedUser = UserModel(
-                      id: user.id,
-                      firstname: user.firstname,
-                      lastname: user.lastname,
-                      email: user.email,
-                      role: user.role,
-                      phone: user.phone,
-                      token: user.token,
-                      // status: user.status,
-                      // profileImg: newUrl,
-                      // preferredLang: user.preferredLang,
-                      // createdAt: user.createdAt,
-                      // updatedAt: user.updatedAt,
-                      // gender: user.gender,
-                      // fcmToken: user.fcmToken,
-                      // points: user.points,
-                      // level: user.level,
-                      // educationSystem: user.educationSystem,
-                      // academicStages: user.academicStages,
-                      // school: user.school,
-                      // subjects: user.subjects,
-                      // experienceYears: user.experienceYears,
-                      // bio: user.bio,
-                      // pricePerHour: user.pricePerHour,
-                      // verificationStatus: user.verificationStatus,
-                      // avgRating: user.avgRating,
-                      // totalReviews: user.totalReviews,
-                      // studentEducationSystem: user.studentEducationSystem,
-                      // studentGrade: user.studentGrade,
-                      // studentSchool: user.studentSchool,
-                      // createFeedback: user.createFeedback,
+                    final updated = ctx.read<UserCubit>().state.user!.copyWith(
+                      profileImg: newUrl,
                     );
-                    ctx.read<UserCubit>().setUser(updatedUser);
+                    ctx.read<UserCubit>().setUser(updated);
                     setState(() => _localImagePath = newUrl);
                   }
                   customSnackBar(
                     ctx,
-                    'تم تحديث صورة الملف الشخصي بنجاح',
+                    'تم تحديث صورة الملف بنجاح',
                     ColorsManager.success,
                   );
                 },
@@ -302,66 +271,51 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
               );
             },
           ),
-          // profile update result
+          // تحديث بيانات البروفايل
           BlocListener<UpdateProfileCubit, UpdateProfileState>(
             listener: (ctx, state) {
               state.whenOrNull(
                 success: (_) {
-                  final u = ctx.read<UserCubit>().state.user!;
-                  final updated = UserModel(
-                    id: u.id,
+                  // نحدّث UserCubit بالبيانات الجديدة
+                  final cubit = ctx.read<UserCubit>();
+                  final old = cubit.state.user!;
+                  final updated = old.copyWith(
                     firstname: _firstNameCtrl.text.trim(),
                     lastname: _lastNameCtrl.text.trim(),
-                    email: u.email,
-                    role: u.role,
                     phone: _phoneCtrl.text.trim().isEmpty
                         ? null
                         : _phoneCtrl.text.trim(),
-                    token: u.token,
-                    // status: u.status,
-                    // profileImg: u.profileImg,
-                    // preferredLang: u.preferredLang,
-                    // createdAt: u.createdAt,
-                    // updatedAt: u.updatedAt,
-                    // gender: _selectedGender,
-                    // fcmToken: u.fcmToken,
-                    // points: u.points,
-                    // level: u.level,
-                    // educationSystem: isTeacher
-                    //     ? _teacherEducationSystems
-                    //     : u.educationSystem,
-                    // academicStages: isTeacher
-                    //     ? _teacherAcademicStages
-                    //     : u.academicStages,
-                    // school: isTeacher
-                    //     ? _teacherSchoolCtrl.text.trim()
-                    //     : u.school,
-                    // subjects: isTeacher ? _teacherSubjects : u.subjects,
-                    // experienceYears: isTeacher
-                    //     ? int.tryParse(_teacherExperienceCtrl.text.trim())
-                    //     : u.experienceYears,
-                    // bio: isTeacher ? _teacherBioCtrl.text.trim() : u.bio,
-                    // pricePerHour: isTeacher
-                    //     ? num.tryParse(_teacherPriceCtrl.text.trim())
-                    //     : u.pricePerHour,
-                    // verificationStatus: u.verificationStatus,
-                    // avgRating: u.avgRating,
-                    // totalReviews: u.totalReviews,
-                    // studentEducationSystem: isStudent
-                    //     ? _studentEducationSystem
-                    //     : u.studentEducationSystem,
-                    // studentGrade: isStudent ? _studentGrade : u.studentGrade,
-                    // studentSchool: isStudent
-                    //     ? (_studentSchoolCtrl.text.trim().isEmpty
-                    //           ? null
-                    //           : _studentSchoolCtrl.text.trim())
-                    //     : u.studentSchool,
-                    // createFeedback: u.createFeedback,
+                    education: isWorker
+                        ? _educationCtrl.text.trim()
+                        : old.education,
+                    professionalStatus: isWorker
+                        ? _professionalStatus
+                        : old.professionalStatus,
+                    pastExperience: isWorker
+                        ? _pastExperience
+                        : old.pastExperience,
+                    jobsLookedFor: isWorker
+                        ? _jobsLookedFor
+                        : old.jobsLookedFor,
+                    experienceYears: isWorker
+                        ? int.tryParse(_experienceYearsCtrl.text.trim())
+                        : old.experienceYears,
+                    expectedHourlyRate: isWorker
+                        ? double.tryParse(_hourlyRateCtrl.text.trim())
+                        : old.expectedHourlyRate,
+                    companyName: isEmployer
+                        ? _companyNameCtrl.text.trim()
+                        : old.companyName,
+                    companyType: isEmployer ? _companyType : old.companyType,
+                    companyAddress: isEmployer
+                        ? _companyAddressCtrl.text.trim()
+                        : old.companyAddress,
+                    companyCity: isEmployer ? _companyCity : old.companyCity,
                   );
-                  ctx.read<UserCubit>().setUser(updated);
+                  cubit.setUser(updated);
                   customSnackBar(
                     ctx,
-                    'profile.saved',
+                    'تم حفظ التغييرات بنجاح',
                     ColorsManager.success,
                   );
                 },
@@ -384,9 +338,9 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 12.h),
+                    _gap(12),
 
-                    // ── Profile Image ──
+                    // ── صورة البروفايل ──────────────────────────────────
                     BlocBuilder<
                       UpdateImageProfileCubit,
                       UpdateImageProfileState
@@ -411,9 +365,9 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                       },
                     ),
 
-                    SizedBox(height: 24.h),
+                    _gap(24),
 
-                    // ── First & Last Name ──
+                    // ── الاسم ────────────────────────────────────────────
                     Row(
                       children: [
                         Expanded(
@@ -423,10 +377,10 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                               _label('الاسم الأول'),
                               AppTextFormField(
                                 controller: _firstNameCtrl,
-                                hintText: 'ادخل الاسم الأول',
+                                hintText: 'الاسم الأول',
                                 validator: (v) =>
                                     (v == null || v.trim().isEmpty)
-                                    ? 'الاسم الأول مطلوب'
+                                    ? 'مطلوب'
                                     : null,
                               ),
                             ],
@@ -440,10 +394,10 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                               _label('الاسم الأخير'),
                               AppTextFormField(
                                 controller: _lastNameCtrl,
-                                hintText: 'ادخل الاسم الأخير',
+                                hintText: 'الاسم الأخير',
                                 validator: (v) =>
                                     (v == null || v.trim().isEmpty)
-                                    ? 'الاسم الأخير مطلوب'
+                                    ? 'مطلوب'
                                     : null,
                               ),
                             ],
@@ -454,8 +408,8 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
 
                     _gap(),
 
-                    // ── Email (readonly) ──
-                    _label('profile.email'),
+                    // ── البريد (للقراءة فقط) ─────────────────────────────
+                    _label('البريد الإلكتروني'),
                     AppTextFormField(
                       controller: TextEditingController(text: user.email),
                       hintText: user.email,
@@ -464,126 +418,123 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
 
                     _gap(),
 
-                    // ── Phone ──
-                    _label('profile.phone'),
+                    // ── رقم الهاتف ───────────────────────────────────────
+                    _label('رقم الهاتف (اختياري)'),
                     AppTextFormField(
                       controller: _phoneCtrl,
-                      hintText: 'phone_hint',
+                      hintText: '01xxxxxxxxx',
                       keyboardType: TextInputType.phone,
                     ),
 
                     _gap(),
 
-                    // ══════════════ STUDENT ══════════════
-                    if (isStudent) ...[
-                      _label('profile.education_system'),
+                    // ══════════════ Worker ══════════════════════════════
+                    if (isWorker) ...[
+                      _label('التعليم / التخصص'),
+                      AppTextFormField(
+                        controller: _educationCtrl,
+                        hintText: 'مثال: تجارة، حاسبات، ثانوية عامة ...',
+                      ),
+
+                      _gap(),
+
+                      _label('الحالة المهنية'),
                       AppDropdown(
-                        items: _educationSystems,
-                        value: _studentEducationSystem,
-                        hint: 'select_education_system',
+                        items: _professionalStatuses,
+                        value: _professionalStatus,
+                        hint: 'اختر حالتك',
                         onChanged: (v) =>
-                            setState(() => _studentEducationSystem = v),
+                            setState(() => _professionalStatus = v),
                       ),
 
                       _gap(),
 
-                      _label('profile.grade'),
-                      AppDropdown(
-                        items: _grades,
-                        value: _studentGrade,
-                        hint: 'select_grade',
-                        onChanged: (v) => setState(() => _studentGrade = v),
-                      ),
-
-                      _gap(),
-
-                      _label('profile.school'),
-                      AppTextFormField(
-                        controller: _studentSchoolCtrl,
-                        hintText: 'enter_school_name',
-                      ),
-
-                      _gap(),
-                    ],
-
-                    // ══════════════ TEACHER ══════════════
-                    if (isTeacher) ...[
-                      _label('profile.education_system'),
+                      _label('الوظائف السابقة'),
                       AppMultiSelectDropdown(
-                        items: _educationSystems,
-                        selectedValues: _teacherEducationSystems,
-                        hint: 'select_education_systems',
-                        onChanged: (v) =>
-                            setState(() => _teacherEducationSystems = v),
+                        items: _jobOptions,
+                        selectedValues: _pastExperience,
+                        hint: 'اختر وظائفك السابقة',
+                        onChanged: (v) => setState(() => _pastExperience = v),
                       ),
 
                       _gap(),
 
-                      _label('profile.academic_stages'),
+                      _label('الوظائف التي تبحث عنها'),
                       AppMultiSelectDropdown(
-                        items: _grades,
-                        selectedValues: _teacherAcademicStages,
-                        hint: 'select_academic_stages',
-                        onChanged: (v) =>
-                            setState(() => _teacherAcademicStages = v),
+                        items: _jobOptions,
+                        selectedValues: _jobsLookedFor,
+                        hint: 'اختر الوظائف المطلوبة',
+                        onChanged: (v) => setState(() => _jobsLookedFor = v),
                       ),
 
                       _gap(),
 
-                      _label('profile.subjects'),
-                      AppMultiSelectDropdown(
-                        items: _subjects,
-                        selectedValues: _teacherSubjects,
-                        hint: 'select_subjects',
-                        onChanged: (v) => setState(() => _teacherSubjects = v),
-                      ),
-
-                      _gap(),
-
-                      _label('profile.school'),
+                      _label('سنوات الخبرة'),
                       AppTextFormField(
-                        controller: _teacherSchoolCtrl,
-                        hintText: 'enter_working_school',
-                      ),
-
-                      _gap(),
-
-                      _label('profile.experience_years'),
-                      AppTextFormField(
-                        controller: _teacherExperienceCtrl,
-                        hintText: 'enter_experience_years',
+                        controller: _experienceYearsCtrl,
+                        hintText: 'مثال: 2',
                         keyboardType: TextInputType.number,
                       ),
 
                       _gap(),
 
-                      _label('profile.price_per_hour'),
+                      _label('الأجر المتوقع في الساعة (جنيه)'),
                       AppTextFormField(
-                        controller: _teacherPriceCtrl,
-                        hintText: 'enter_hourly_rate',
+                        controller: _hourlyRateCtrl,
+                        hintText: 'مثال: 50',
                         keyboardType: TextInputType.number,
-                      ),
-
-                      _gap(),
-
-                      _label('profile.bio'),
-                      AppTextFormField(
-                        controller: _teacherBioCtrl,
-                        hintText: 'enter_bio',
-                        maxLines: 4,
                       ),
 
                       _gap(),
                     ],
 
-                    // ── Save Button ──
+                    // ══════════════ Employer ════════════════════════════
+                    if (isEmployer) ...[
+                      _label('اسم المؤسسة'),
+                      AppTextFormField(
+                        controller: _companyNameCtrl,
+                        hintText: 'اسم المؤسسة أو الشركة',
+                      ),
+
+                      _gap(),
+
+                      _label('نوع المؤسسة'),
+                      AppDropdown(
+                        items: _companyTypes,
+                        value: _companyType,
+                        hint: 'اختر نوع المؤسسة',
+                        onChanged: (v) => setState(() => _companyType = v),
+                      ),
+
+                      _gap(),
+
+                      _label('المحافظة'),
+                      AppDropdown(
+                        items: _governorates,
+                        value: _companyCity,
+                        hint: 'اختر المحافظة',
+                        onChanged: (v) => setState(() => _companyCity = v),
+                      ),
+
+                      _gap(),
+
+                      _label('عنوان المؤسسة التفصيلي'),
+                      AppTextFormField(
+                        controller: _companyAddressCtrl,
+                        hintText: 'الشارع والحي ...',
+                        maxLines: 2,
+                      ),
+
+                      _gap(28),
+                    ],
+
+                    // ── زر الحفظ ────────────────────────────────────────
                     AppTextButton(
                       buttonText: 'حفظ التغييرات',
                       isLoading: isSaving,
-                      onPressed: () => _save(role),
+                      onPressed: () => _save(role, user),
                     ),
-
-                    SizedBox(height: 100.h),
+                    _gap(28),
                   ],
                 ),
               ),

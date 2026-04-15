@@ -1,83 +1,89 @@
-import 'package:json_annotation/json_annotation.dart';
+/// نموذج تحديث البروفايل – مكتوب يدوياً بدون json_serializable
+/// لدعم حقول الـ worker والـ employer بدون إعادة توليد الكود
 
-part 'update_profile_request_body.g.dart';
-
-@JsonSerializable(explicitToJson: true)
 class UpdateProfileRequestBody {
   final String? firstName;
   final String? lastName;
   final String? phone;
-  final UpdateTeacherProfileBody? teacherProfile;
-  final UpdateStudentProfileBody? studentProfile;
+  final UpdateWorkerProfileBody? workerProfile;
+  final UpdateEmployerProfileBody? employerProfile;
 
-  UpdateProfileRequestBody({
+  const UpdateProfileRequestBody({
     this.firstName,
     this.lastName,
     this.phone,
-    this.teacherProfile,
-    this.studentProfile,
+    this.workerProfile,
+    this.employerProfile,
   });
 
-  factory UpdateProfileRequestBody.fromJson(Map<String, dynamic> json) =>
-      _$UpdateProfileRequestBodyFromJson(json);
-
-  Map<String, dynamic> toJson() => _$UpdateProfileRequestBodyToJson(this);
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    if (firstName != null) map['firstName'] = firstName;
+    if (lastName != null) map['lastName'] = lastName;
+    if (phone != null) map['phone'] = phone;
+    if (workerProfile != null) map['workerProfile'] = workerProfile!.toJson();
+    if (employerProfile != null) {
+      map['employerProfile'] = employerProfile!.toJson();
+    }
+    return map;
+  }
 }
 
-@JsonSerializable(explicitToJson: true)
-class UpdateTeacherProfileBody {
-  @JsonKey(name: 'school')
-  final String? school;
-
-  @JsonKey(name: 'pricePerHour')
-  final num? pricePerHour;
-
-  final String? bio;
-
-  @JsonKey(name: 'experienceYears')
+class UpdateWorkerProfileBody {
+  final String? education;
+  final String? professionalStatus;
+  final List<String>? pastExperience;
+  final List<String>? jobsLookedFor;
   final int? experienceYears;
+  final double? expectedHourlyRate;
 
-  @JsonKey(name: 'education_system')
-  final List<String>? educationSystem;
-
-  @JsonKey(name: 'academic_stages')
-  final List<String>? academicStages;
-
-  final List<String>? subjects;
-
-  UpdateTeacherProfileBody({
-    this.school,
-    this.pricePerHour,
-    this.bio,
+  const UpdateWorkerProfileBody({
+    this.education,
+    this.professionalStatus,
+    this.pastExperience,
+    this.jobsLookedFor,
     this.experienceYears,
-    this.educationSystem,
-    this.academicStages,
-    this.subjects,
+    this.expectedHourlyRate,
   });
 
-  factory UpdateTeacherProfileBody.fromJson(Map<String, dynamic> json) =>
-      _$UpdateTeacherProfileBodyFromJson(json);
-
-  Map<String, dynamic> toJson() => _$UpdateTeacherProfileBodyToJson(this);
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    if (education != null) map['education'] = education;
+    if (professionalStatus != null) {
+      map['professionalStatus'] = professionalStatus;
+    }
+    if (pastExperience != null) map['pastExperience'] = pastExperience;
+    if (jobsLookedFor != null) map['jobsLookedFor'] = jobsLookedFor;
+    if (experienceYears != null) map['experienceYears'] = experienceYears;
+    if (expectedHourlyRate != null) {
+      map['expectedHourlyRate'] = {
+        'amount': expectedHourlyRate,
+        'currency': 'EGP',
+      };
+    }
+    return map;
+  }
 }
 
-@JsonSerializable()
-class UpdateStudentProfileBody {
-  final String? grade;
+class UpdateEmployerProfileBody {
+  final String? companyName;
+  final String? companyType;
+  final String? companyAddress;
+  final String? city;
 
-  @JsonKey(name: 'education_system')
-  final String? educationSystem;
-
-  final String? school;
-
-  UpdateStudentProfileBody({
-    this.grade,
-    this.educationSystem,
-    this.school,
+  const UpdateEmployerProfileBody({
+    this.companyName,
+    this.companyType,
+    this.companyAddress,
+    this.city,
   });
 
-  factory UpdateStudentProfileBody.fromJson(Map<String, dynamic> json) =>
-      _$UpdateStudentProfileBodyFromJson(json);
-
-  Map<String, dynamic> toJson() => _$UpdateStudentProfileBodyToJson(this);
+  Map<String, dynamic> toJson() {
+    final map = <String, dynamic>{};
+    if (companyName != null) map['companyName'] = companyName;
+    if (companyType != null) map['companyType'] = companyType;
+    if (companyAddress != null) map['companyAddress'] = companyAddress;
+    if (city != null) map['city'] = city;
+    return map;
+  }
 }

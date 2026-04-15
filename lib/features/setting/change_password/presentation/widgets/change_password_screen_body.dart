@@ -45,7 +45,6 @@ class _ChangePasswordScreenBodyState extends State<ChangePasswordScreenBody> {
     context.read<ChangePasswordCubit>().changePassword(
       currentPassword: _oldPassCtrl.text.trim(),
       newPassword: _newPassCtrl.text.trim(),
-      passwordConfirm: _confirmPassCtrl.text.trim(),
     );
   }
 

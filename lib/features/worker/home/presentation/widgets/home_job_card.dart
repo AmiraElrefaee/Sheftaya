@@ -102,7 +102,8 @@ class HomeJobCard extends StatelessWidget {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      (job.place ?? '').toString(),
+                      (job.place ?? job.companyDetails?.companyName ?? '')
+                          .toString(),
                       style: TextStyles.font14BlackSemiBold.copyWith(
                         color: ColorsManager.darkGrey,
                       ),

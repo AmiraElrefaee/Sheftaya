@@ -9,6 +9,11 @@ import 'package:sheftaya/features/forget_password/data/models/verify_password_mo
 import 'package:sheftaya/features/forget_password/data/models/verify_password_model/verify_password_response.dart';
 import 'package:sheftaya/features/login/data/models/login_request_body.dart';
 import 'package:sheftaya/features/login/data/models/login_response.dart';
+import 'package:sheftaya/features/notification/data/models/delete_all_notifications/delete_all_notifications_response.dart';
+import 'package:sheftaya/features/notification/data/models/delete_notification/delete_notification_response.dart';
+import 'package:sheftaya/features/notification/data/models/get_all_notifications/get_all_notifications_response.dart';
+import 'package:sheftaya/features/notification/data/models/update_fcm/update_fcm_response.dart';
+import 'package:sheftaya/features/notification/data/models/update_fcm/update_fcm_token_request_body.dart';
 import 'package:sheftaya/features/setting/change_password/data/models/change_password_request_body.dart';
 import 'package:sheftaya/features/setting/change_password/data/models/change_password_response.dart';
 import 'package:sheftaya/features/setting/my_profile/data/models/auth_me_response.dart';
@@ -135,24 +140,24 @@ abstract class ApiService {
   Future<AuthMeResponse> getMe(@Header('Authorization') String token);
   @GET(ApiConstants.myJobs)
   Future<MyJobsResponse> getMyJobs(@Header('Authorization') String token);
-  // @POST(ApiConstants.updateFcmToken)
-  // Future<UpdateFcmResponse> updateFcmToken(
-  //   @Header('Authorization') String token,
-  //   @Body() UpdateFcmTokenRequestBody updateFcmTokenRequestBody,
-  // );
-  // @GET(ApiConstants.getAllNotifications)
-  // Future<GetAllNotificationsResponse> getAllNotifications(
-  //   @Header('Authorization') String token,
-  // );
+  @POST(ApiConstants.updateFcmToken)
+  Future<UpdateFcmResponse> updateFcmToken(
+    @Header('Authorization') String token,
+    @Body() UpdateFcmTokenRequestBody updateFcmTokenRequestBody,
+  );
+  @GET(ApiConstants.getAllNotifications)
+  Future<GetAllNotificationsResponse> getAllNotifications(
+    @Header('Authorization') String token,
+  );
 
-  // @DELETE(ApiConstants.deleteNotification)
-  // Future<DeleteNotificationResponse> deleteNotification(
-  //   @Header('Authorization') String token,
-  //   @Path("id") String id,
-  // );
+  @DELETE(ApiConstants.deleteNotification)
+  Future<DeleteNotificationResponse> deleteNotification(
+    @Header('Authorization') String token,
+    @Path("id") String id,
+  );
 
-  // @DELETE(ApiConstants.deleteAllNotifications)
-  // Future<DeleteAllNotificationsResponse> deleteAllNotifications(
-  //   @Header('Authorization') String token,
-  // );
+  @DELETE(ApiConstants.deleteAllNotifications)
+  Future<DeleteAllNotificationsResponse> deleteAllNotifications(
+    @Header('Authorization') String token,
+  );
 }

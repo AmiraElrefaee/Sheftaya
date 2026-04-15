@@ -14,7 +14,7 @@ class ApiConstants {
   static const String getRecommendations = 'jobs/recommendations';
   static const String applyForJob = 'applications/jobs/{jobId}/apply';
   static const String updateImageProfile = 'auth/updateImageProfile';
-  static const String updateProfile = 'auth/updateProfile';
+  static const String updateProfile = 'auth/updateUserProfile';
   static const String createSupportRequest = 'support';
   static const String changePassword = 'auth/change-password';
   static const String updateFcmToken = 'auth/updateFcmToken';

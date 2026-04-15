@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sheftaya/features/employer/home/presentation/widgets/bottom_nav.dart';
 import 'package:sheftaya/features/employer/home/presentation/widgets/employer_home_screen_body.dart';
 import 'package:sheftaya/features/employer/home/presentation/widgets/placeholder_screen.dart';
-import 'package:sheftaya/features/employer/my_jobs/presentation/my_jobs_screen.dart';
+import 'package:sheftaya/features/employer/my_jobs/my_jobs_screen.dart';
 
 import '../../../setting/presentation/setting_screen.dart';
 

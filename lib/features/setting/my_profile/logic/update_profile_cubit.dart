@@ -16,38 +16,58 @@ class UpdateProfileCubit extends Cubit<UpdateProfileState> {
     String? firstName,
     String? lastName,
     String? phone,
-    UpdateTeacherProfileBody? teacherProfile,
-    UpdateStudentProfileBody? studentProfile,
+    // Worker
+    String? education,
+    String? professionalStatus,
+    List<String>? pastExperience,
+    List<String>? jobsLookedFor,
+    int? experienceYears,
+    double? expectedHourlyRate,
+    // Employer
+    String? companyName,
+    String? companyType,
+    String? companyAddress,
+    String? companyCity,
   }) async {
     emit(const UpdateProfileState.loading());
 
     final token =
         await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+    final role =
+        await SharedPrefHelper.getSecuredString(SharedPrefKeys.userRole);
 
     final body = UpdateProfileRequestBody(
       firstName: firstName,
       lastName: lastName,
       phone: phone,
-      teacherProfile: teacherProfile,
-      studentProfile: studentProfile,
+      workerProfile: role == 'worker'
+          ? UpdateWorkerProfileBody(
+              education: education,
+              professionalStatus: professionalStatus,
+              pastExperience: pastExperience,
+              jobsLookedFor: jobsLookedFor,
+              experienceYears: experienceYears,
+              expectedHourlyRate: expectedHourlyRate,
+            )
+          : null,
+      employerProfile: role == 'employer'
+          ? UpdateEmployerProfileBody(
+              companyName: companyName,
+              companyType: companyType,
+              companyAddress: companyAddress,
+              city: companyCity,
+            )
+          : null,
     );
 
-    final response = await _repo.updateProfile(
-      body,
-      'Bearer $token',
-    );
+    final response = await _repo.updateProfile(body, 'Bearer $token');
 
     response.when(
-      success: (data) {
-        emit(UpdateProfileState.success(data));
-      },
+      success: (data) => emit(UpdateProfileState.success(data)),
       failure: (errorHandler) {
-        log("UpdateProfile Error: ${errorHandler.serverFailure.errmessage}");
-        emit(
-          UpdateProfileState.error(
-            error: errorHandler.serverFailure.errmessage,
-          ),
-        );
+        log('UpdateProfile Error: ${errorHandler.serverFailure.errmessage}');
+        emit(UpdateProfileState.error(
+            error: errorHandler.serverFailure.errmessage));
       },
     );
   }

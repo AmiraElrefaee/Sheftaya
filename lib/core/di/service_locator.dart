@@ -12,6 +12,12 @@ import 'package:sheftaya/features/forget_password/logic/forget_password_cubit/fo
 import 'package:sheftaya/features/forget_password/logic/verify_password_cubit/verify_password_cubit.dart';
 import 'package:sheftaya/features/login/data/repos/login_repo.dart';
 import 'package:sheftaya/features/login/logic/login_cubit.dart';
+import 'package:sheftaya/features/notification/data/repos/get_all_notifications_repo.dart';
+import 'package:sheftaya/features/notification/data/repos/notification_repo.dart';
+import 'package:sheftaya/features/notification/data/repos/update_fcm_repo.dart';
+import 'package:sheftaya/features/notification/logic/get_all_notifications_cubit/get_all_notifications_cubit.dart';
+import 'package:sheftaya/features/notification/logic/notification_cubit/notification_cubit.dart';
+import 'package:sheftaya/features/notification/logic/update_fcm_cubit/update_fcm_cubit.dart';
 import 'package:sheftaya/features/setting/change_password/data/repo/change_password_repo.dart';
 import 'package:sheftaya/features/setting/change_password/logic/change_password_cubit.dart';
 import 'package:sheftaya/features/setting/my_profile/data/repos/auth_me_repo.dart';
@@ -47,50 +53,29 @@ import '../../features/publish_job/presentation/mangers/job_publish_cubit/job_pu
 final getIt = GetIt.instance;
 
 void setupServiceLocator() {
-  // Register Dio instance
+  // ── Infrastructure ───────────────────────────────────────────────────────
   getIt.registerLazySingleton<Dio>(() => DioFactory.getDio());
-
-  // Register ApiService
   getIt.registerLazySingleton<ApiService>(
     () => ApiService(getIt(), baseUrl: ApiConstants.apiBaseUrl),
   );
 
-  // User Cubit
-  getIt.registerLazySingleton<UserCubit>(() => UserCubit());
+  // ── Profile repos (registered first – needed by UserCubit) ───────────────
+  getIt.registerLazySingleton<AuthMeRepo>(() => AuthMeRepo(getIt()));
 
-  // login
+  // ── UserCubit (singleton – single source of truth for logged-in user) ────
+  getIt.registerLazySingleton<UserCubit>(
+    () => UserCubit(getIt<AuthMeRepo>()),
+  );
+
+  // ── Auth ─────────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<LoginRepo>(() => LoginRepo(getIt()));
   getIt.registerFactory<LoginCubit>(
     () => LoginCubit(getIt(), getIt<UserCubit>()),
   );
 
-  // signup
   getIt.registerLazySingleton<SignupRepo>(() => SignupRepo(getIt<Dio>()));
   getIt.registerFactory<SignupCubit>(() => SignupCubit(getIt()));
 
-  // forget password
-  getIt.registerLazySingleton<ForgetPassRepo>(() => ForgetPassRepo(getIt()));
-  getIt.registerFactory<ForgetPasswordCubit>(
-    () => ForgetPasswordCubit(getIt()),
-  );
-
-  // verify password
-  getIt.registerLazySingleton<VerifyPasswordRepo>(
-    () => VerifyPasswordRepo(getIt()),
-  );
-  getIt.registerFactoryParam<VerifyPasswordCubit, String, void>(
-    (email, _) => VerifyPasswordCubit(getIt(), email),
-  );
-
-  // create new password
-  getIt.registerLazySingleton<CreateNewPasswordRepo>(
-    () => CreateNewPasswordRepo(getIt()),
-  );
-  getIt.registerFactoryParam<CreateNewPasswordCubit, String, void>(
-    (resetToken, _) => CreateNewPasswordCubit(getIt(), resetToken),
-  );
-
-  // verify account
   getIt.registerLazySingleton<VerifySignupRepo>(
     () => VerifySignupRepo(getIt()),
   );
@@ -98,7 +83,27 @@ void setupServiceLocator() {
     () => VerifySignupCubit(getIt(), getIt<UserCubit>()),
   );
 
-  // publish job
+  // ── Forget password ───────────────────────────────────────────────────────
+  getIt.registerLazySingleton<ForgetPassRepo>(() => ForgetPassRepo(getIt()));
+  getIt.registerFactory<ForgetPasswordCubit>(
+    () => ForgetPasswordCubit(getIt()),
+  );
+
+  getIt.registerLazySingleton<VerifyPasswordRepo>(
+    () => VerifyPasswordRepo(getIt()),
+  );
+  getIt.registerFactoryParam<VerifyPasswordCubit, String, void>(
+    (email, _) => VerifyPasswordCubit(getIt(), email),
+  );
+
+  getIt.registerLazySingleton<CreateNewPasswordRepo>(
+    () => CreateNewPasswordRepo(getIt()),
+  );
+  getIt.registerFactoryParam<CreateNewPasswordCubit, String, void>(
+    (resetToken, _) => CreateNewPasswordCubit(getIt(), resetToken),
+  );
+
+  // ── Publish job ──────────────────────────────────────────────────────────
   getIt.registerLazySingleton<JobRemoteDataSource>(() => JobRemoteDataSource());
   getIt.registerLazySingleton<JobRepository>(
     () => JobRepository(getIt<JobRemoteDataSource>()),
@@ -107,7 +112,6 @@ void setupServiceLocator() {
     () => JobPublishCubit(getIt<JobRepository>()),
   );
 
-  // publish job - job details (للـ employer / publish flow)
   getIt.registerLazySingleton<JobDetailsRemoteDataSource>(
     () => JobDetailsRemoteDataSource(),
   );
@@ -118,11 +122,10 @@ void setupServiceLocator() {
     () => JobDetailsCubit(getIt<JobDetailsRepo>()),
   );
 
-  // worker - jobs
+  // ── Worker – jobs ────────────────────────────────────────────────────────
   getIt.registerLazySingleton<JobsRepo>(() => JobsRepo(getIt()));
   getIt.registerFactory<OpenJobsCubit>(() => OpenJobsCubit(getIt()));
 
-  // worker - job details
   getIt.registerFactory<worker_cubit.JobDetailsCubit>(
     () => worker_cubit.JobDetailsCubit(getIt<JobsRepo>()),
   );
@@ -136,6 +139,14 @@ void setupServiceLocator() {
 
   getIt.registerLazySingleton<ApplyJobRepo>(() => ApplyJobRepo(getIt()));
   getIt.registerFactory<ApplyJobCubit>(() => ApplyJobCubit(getIt()));
+
+  // ── My Jobs (shared between worker & employer) ───────────────────────────
+  getIt.registerLazySingleton<MyJobsRepo>(() => MyJobsRepo(getIt()));
+  getIt.registerFactory<MyJobsCubit>(() => MyJobsCubit(getIt()));
+
+  // ── Profile ───────────────────────────────────────────────────────────────
+  getIt.registerFactory<AuthMeCubit>(() => AuthMeCubit(getIt()));
+
   getIt.registerLazySingleton<UpdateImageProfileRepo>(
     () => UpdateImageProfileRepo(getIt()),
   );
@@ -148,6 +159,7 @@ void setupServiceLocator() {
   );
   getIt.registerFactory<UpdateProfileCubit>(() => UpdateProfileCubit(getIt()));
 
+  // ── Support & settings ───────────────────────────────────────────────────
   getIt.registerLazySingleton<SupportRepo>(() => SupportRepo(getIt()));
   getIt.registerFactory<SupportCubit>(() => SupportCubit(getIt()));
 
@@ -158,23 +170,18 @@ void setupServiceLocator() {
     () => ChangePasswordCubit(getIt()),
   );
 
-  getIt.registerLazySingleton<AuthMeRepo>(() => AuthMeRepo(getIt()));
-  getIt.registerFactory<AuthMeCubit>(() => AuthMeCubit(getIt()));
+  getIt.registerLazySingleton<UpdateFcmRepo>(() => UpdateFcmRepo(getIt()));
+  getIt.registerFactory<UpdateFcmCubit>(() => UpdateFcmCubit(getIt()));
 
-  getIt.registerLazySingleton<MyJobsRepo>(() => MyJobsRepo(getIt()));
-  getIt.registerFactory<MyJobsCubit>(() => MyJobsCubit(getIt()));
-  // getIt.registerLazySingleton<UpdateFcmRepo>(() => UpdateFcmRepo(getIt()));
-  // getIt.registerFactory<UpdateFcmCubit>(() => UpdateFcmCubit(getIt()));
+  getIt.registerLazySingleton<GetAllNotificationsRepo>(
+    () => GetAllNotificationsRepo(getIt()),
+  );
+  getIt.registerFactory<GetAllNotificationsCubit>(
+    () => GetAllNotificationsCubit(getIt()),
+  );
 
-  // getIt.registerLazySingleton<GetAllNotificationsRepo>(
-  //   () => GetAllNotificationsRepo(getIt()),
-  // );
-  // getIt.registerFactory<GetAllNotificationsCubit>(
-  //   () => GetAllNotificationsCubit(getIt()),
-  // );
-
-  // getIt.registerLazySingleton<NotificationsRepo>(
-  //   () => NotificationsRepo(getIt()),
-  // );
-  // getIt.registerFactory<NotificationsCubit>(() => NotificationsCubit(getIt()));
+  getIt.registerLazySingleton<NotificationsRepo>(
+    () => NotificationsRepo(getIt()),
+  );
+  getIt.registerFactory<NotificationsCubit>(() => NotificationsCubit(getIt()));
 }

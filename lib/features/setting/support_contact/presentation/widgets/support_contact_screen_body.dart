@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,12 +42,22 @@ class _SupportScreenBodyState extends State<_SupportScreenBody> {
   bool showDropdownError = false;
   final TextEditingController _descriptionController = TextEditingController();
 
-  final problemOptions = [
-    'support.problem_booking',
-    'support.problem_payment',
-    'support.problem_partner_no_show',
-    'support.problem_technical',
-    'support.problem_suggestion',
+  final List<String> problemOptions = [
+    'لم أستلم تفاصيل الشيفت',
+    'تم إلغاء الشيفت بشكل مفاجئ',
+    'مكان العمل غير صحيح',
+    'تفاصيل العمل غير واضحة',
+    'لم يتم التواصل بين الطرفين',
+    'مشكلة في الأجر أو الدفع',
+    'لم يتم تأكيد الحضور أو الانصراف',
+    'عدم حضور أحد الأطراف',
+    'تأخير عن موعد الشيفت',
+    'عدم الالتزام بالتعليمات',
+    'عدد العمالة غير كافٍ',
+    'مشكلة في إدارة أو نشر الشيفت',
+    'مشكلة في السداد',
+    'مشكلة فنية في التطبيق',
+    'اقتراح أو ملاحظة',
   ];
 
   @override
@@ -58,6 +69,7 @@ class _SupportScreenBodyState extends State<_SupportScreenBody> {
   Future<void> _pickAttachment() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
+
     if (picked != null) {
       setState(() => attachmentFile = File(picked.path));
     }
@@ -82,8 +94,8 @@ class _SupportScreenBodyState extends State<_SupportScreenBody> {
       dialogType: DialogType.question,
       animType: AnimType.scale,
       dismissOnTouchOutside: true,
-      title: '',
-      desc: '',
+      title: 'تأكيد إرسال الطلب',
+      desc: 'هل تريد إرسال طلب الدعم الآن؟',
       btnCancelText: 'إلغاء',
       btnOkText: 'تأكيد',
       btnCancelColor: ColorsManager.lightGrey,
@@ -108,113 +120,110 @@ class _SupportScreenBodyState extends State<_SupportScreenBody> {
       dialogType: DialogType.success,
       animType: AnimType.scale,
       dismissOnTouchOutside: false,
-      title: 'support.success_title',
-      desc: 'support.success_desc',
-      btnOkText: 'ok',
+      title: 'تم إرسال الطلب بنجاح',
+      desc: 'تم استلام طلبك، وسيتم التواصل معك في أقرب وقت.',
+      btnOkText: 'حسنًا',
       btnOkColor: ColorsManager.primary,
       titleTextStyle: TextStyles.font18BlackBold,
       descTextStyle: TextStyles.font14BlackRegular,
       buttonsTextStyle: TextStyles.font14WhiteBold,
-      btnOkOnPress: () {},
+      btnOkOnPress: () {
+        Navigator.pop(context);
+      },
     ).show();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SupportCubit, SupportState>(
-      listener: (context, state) {
-        state.whenOrNull(
-          success: (_) => _showSuccessDialog(),
-          error: (err) => customSnackBar(context, err, ColorsManager.error),
-        );
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('', style: TextStyles.font18BlackBold),
-          centerTitle: true,
-        ),
-        body: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 10.h),
-                  Center(
-                    child: Text(
-                      'support.headline_1',
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: BlocListener<SupportCubit, SupportState>(
+        listener: (context, state) {
+          state.whenOrNull(
+            success: (_) => _showSuccessDialog(),
+            error: (err) => customSnackBar(context, err, ColorsManager.error),
+          );
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('الدعم الفني', style: TextStyles.font18BlackBold),
+            centerTitle: true,
+          ),
+          body: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 8.h),
+                    Text(
+                      'يسعدنا مساعدتك في أي مشكلة تواجهك',
                       style: TextStyles.font24PrimaryBold,
                     ),
-                  ),
-                  SizedBox(height: 28.h),
-                  Text(
-                    'support.problem_type',
-                    style: TextStyles.font14BlackBold,
-                  ),
-                  SizedBox(height: 8.h),
-                  AppDropdown(
-                    items: problemOptions.map((k) => k).toList(),
-                    value: selectedProblem,
-                    hint: 'support.problem_type_hint',
-                    hasError: showDropdownError && selectedProblem == null,
-                    errorMessage: 'required_field',
-                    onChanged: (val) {
-                      setState(() {
-                        selectedProblem = val;
-                        showDropdownError = false;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'support.describe_problem',
-                    style: TextStyles.font14BlackBold,
-                  ),
-                  SizedBox(height: 8.h),
-                  AppTextFormField(
-                    hintText: 'support.description_hint',
-                    controller: _descriptionController,
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'required_field';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'support.attach_file',
-                    style: TextStyles.font14BlackBold,
-                  ),
-                  SizedBox(height: 8.h),
-                  UploadTile(
-                    acceptPdf: true,
-                    label: attachmentFile == null
-                        ? 'support.upload_here'
-                        : 'support.attachment_uploaded',
-                    onPick: _pickAttachment,
-                    file: attachmentFile,
-                  ),
-                  SizedBox(height: 28.h),
-                  BlocBuilder<SupportCubit, SupportState>(
-                    builder: (context, state) {
-                      final isLoading = state.maybeWhen(
-                        loading: () => true,
-                        orElse: () => false,
-                      );
+                    SizedBox(height: 24.h),
+                    Text('نوع المشكلة', style: TextStyles.font14BlackBold),
+                    SizedBox(height: 8.h),
+                    AppDropdown(
+                      items: problemOptions,
+                      value: selectedProblem,
+                      hint: 'اختر نوع المشكلة',
+                      hasError: showDropdownError && selectedProblem == null,
+                      errorMessage: 'هذا الحقل مطلوب',
+                      onChanged: (val) {
+                        setState(() {
+                          selectedProblem = val;
+                          showDropdownError = false;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    Text('وصف المشكلة', style: TextStyles.font14BlackBold),
+                    SizedBox(height: 8.h),
+                    AppTextFormField(
+                      hintText: 'اكتب تفاصيل المشكلة هنا',
+                      controller: _descriptionController,
+                      maxLines: 3,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'هذا الحقل مطلوب';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'إرفاق صوره (إختياري)',
+                      style: TextStyles.font14BlackBold,
+                    ),
+                    SizedBox(height: 8.h),
+                    UploadTile(
+                      acceptPdf: true,
+                      label: attachmentFile == null
+                          ? 'اضغط لرفع صورة'
+                          : 'تم رفع الصوره بنجاح',
+                      onPick: _pickAttachment,
+                      file: attachmentFile,
+                    ),
+                    SizedBox(height: 28.h),
+                    BlocBuilder<SupportCubit, SupportState>(
+                      builder: (context, state) {
+                        final isLoading = state.maybeWhen(
+                          loading: () => true,
+                          orElse: () => false,
+                        );
 
-                      return AppTextButton(
-                        buttonText: 'support.send_request',
-                        isLoading: isLoading,
-                        onPressed: _onSubmitPressed,
-                      );
-                    },
-                  ),
-                  SizedBox(height: 28.h),
-                ],
+                        return AppTextButton(
+                          buttonText: 'إرسال الطلب',
+                          isLoading: isLoading,
+                          onPressed: _onSubmitPressed,
+                        );
+                      },
+                    ),
+                    SizedBox(height: 28.h),
+                  ],
+                ),
               ),
             ),
           ),

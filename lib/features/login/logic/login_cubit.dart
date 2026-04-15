@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,9 @@ import 'package:sheftaya/core/constants/shared_pref_helper.dart';
 import 'package:sheftaya/core/constants/shared_pref_keys.dart';
 import 'package:sheftaya/core/constants/user_cubit.dart';
 import 'package:sheftaya/core/constants/user_model.dart';
+import 'package:sheftaya/core/di/service_locator.dart';
 import 'package:sheftaya/core/networking/server_result.dart';
+import 'package:sheftaya/features/notification/logic/update_fcm_cubit/update_fcm_cubit.dart';
 import '../data/models/login_request_body.dart';
 import '../data/models/login_response.dart';
 import '../data/repos/login_repo.dart';
@@ -24,7 +27,6 @@ class LoginCubit extends Cubit<LoginState> {
 
   Future<void> emitLoginStates() async {
     if (!formKey.currentState!.validate()) return;
-
     emit(const LoginState.loading());
 
     final response = await _loginRepo.login(
@@ -36,12 +38,16 @@ class LoginCubit extends Cubit<LoginState> {
 
     response.when(
       success: (loginResponse) async {
-        await _saveUserData(loginResponse);
-                if (loginResponse.user != null) {
-          final userModel = _createUserModelFromResponse(loginResponse);
-          userCubit.setUser(userModel);
-        }
+        await _saveBasicUserData(loginResponse);
 
+        if (loginResponse.user != null) {
+          final basicModel = _buildBasicModel(loginResponse);
+          userCubit.setUser(basicModel);
+          // نجيب البروفايل الكامل في الخلفية بدون انتظار
+          unawaited(userCubit.refreshProfile());
+        }
+  final updateFcmCubit = getIt<UpdateFcmCubit>();
+  await updateFcmCubit.initializeAndSendToken();
         emit(LoginState.success(loginResponse));
       },
       failure: (errorHandler) {
@@ -50,9 +56,8 @@ class LoginCubit extends Cubit<LoginState> {
     );
   }
 
-  UserModel _createUserModelFromResponse(LoginResponse response) {
+  UserModel _buildBasicModel(LoginResponse response) {
     final user = response.user!;
-    
     return UserModel(
       id: user.id ?? '',
       firstname: user.firstName ?? '',
@@ -62,64 +67,45 @@ class LoginCubit extends Cubit<LoginState> {
       phone: user.phone,
       token: response.token,
       profileImg: user.imageProfile,
-      
-    
     );
   }
 
-  Future<void> _saveUserData(LoginResponse response) async {
+  Future<void> _saveBasicUserData(LoginResponse response) async {
     try {
       final user = response.user;
-
-      if ((response.token?.isNotEmpty ?? false)) {
+      if (response.token?.isNotEmpty == true) {
         await SharedPrefHelper.setSecuredString(
-          SharedPrefKeys.userToken,
-          response.token!,
-        );
+            SharedPrefKeys.userToken, response.token!);
       }
-
       if (user != null) {
-        if ((user.firstName?.isNotEmpty ?? false)) {
+        if (user.firstName?.isNotEmpty == true) {
           await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userFirstName,
-            user.firstName!,
-          );
+              SharedPrefKeys.userFirstName, user.firstName!);
         }
-        if ((user.lastName?.isNotEmpty ?? false)) {
+        if (user.lastName?.isNotEmpty == true) {
           await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userLastName,
-            user.lastName!,
-          );
+              SharedPrefKeys.userLastName, user.lastName!);
         }
-        if ((user.email?.isNotEmpty ?? false)) {
+        if (user.email?.isNotEmpty == true) {
           await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userEmail,
-            user.email!,
-          );
+              SharedPrefKeys.userEmail, user.email!);
         }
-        if ((user.role?.isNotEmpty ?? false)) {
+        if (user.role?.isNotEmpty == true) {
           await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userRole,
-            user.role!,
-          );
+              SharedPrefKeys.userRole, user.role!);
         }
-        if ((user.phone?.isNotEmpty ?? false)) {
+        if (user.phone?.isNotEmpty == true) {
           await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userPhone,
-            user.phone!,
-          );
+              SharedPrefKeys.userPhone, user.phone!);
         }
-        if ((user.imageProfile?.isNotEmpty ?? false)) {
+        if (user.imageProfile?.isNotEmpty == true) {
           await SharedPrefHelper.setSecuredString(
-            SharedPrefKeys.userProfileImage,
-            user.imageProfile!,
-          );
+              SharedPrefKeys.userProfileImage, user.imageProfile!);
         }
       }
-
-      log('✅ Login Success - Data saved locally');
+      log('✅ Login – basic data saved');
     } catch (e) {
-      log('❌ Error saving user data locally: $e');
+      log('❌ Error saving login data: $e');
     }
   }
 
