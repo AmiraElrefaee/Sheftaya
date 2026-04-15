@@ -10,27 +10,31 @@ import 'package:sheftaya/core/di/service_locator.dart';
 import 'package:sheftaya/features/notification/logic/update_fcm_cubit/update_fcm_cubit.dart';
 import 'package:sheftaya/firebase_options.dart';
 
+final Logger appLogger = Logger();
+
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
-final Logger appLogger = Logger();
-
 Future<void> bootstrap() async {
-  runZonedGuarded(
+  await runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
       await dotenv.load(fileName: 'assets/.env');
 
-      setupServiceLocator();
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+
       FirebaseMessaging.onBackgroundMessage(
         _firebaseMessagingBackgroundHandler,
       );
+
       setupServiceLocator();
+
       await _requestNotificationPermission();
 
       await ScreenUtil.ensureScreenSize();
