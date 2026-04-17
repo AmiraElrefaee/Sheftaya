@@ -3,10 +3,16 @@ import 'package:go_router/go_router.dart';
 import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
 import 'package:sheftaya/features/employer/home/presentation/employer_home_screen.dart';
 import 'package:sheftaya/features/employer/home/presentation/widgets/my_posted_jobs_screen.dart';
+import 'package:sheftaya/features/employer/my_jobs/logic/job_applications_cubit.dart';
+import 'package:sheftaya/features/employer/my_jobs/presentation/employer_job_details_screen.dart';
+import 'package:sheftaya/features/employer/my_jobs/presentation/job_application_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/create_new_password_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/forget_pass_screen.dart';
 import 'package:sheftaya/features/forget_password/presentation/verify_password_screen.dart';
 import 'package:sheftaya/features/login/presentation/login_screen.dart';
+import 'package:sheftaya/features/notification/logic/get_all_notifications_cubit/get_all_notifications_cubit.dart';
+import 'package:sheftaya/features/notification/logic/notification_cubit/notification_cubit.dart';
+import 'package:sheftaya/features/notification/presentation/notifications_screen.dart';
 import 'package:sheftaya/features/on_boarding_screen.dart/on_boarding_screen.dart';
 import 'package:sheftaya/features/setting/change_password/presentation/change_password_screen.dart';
 import 'package:sheftaya/features/setting/my_profile/presentation/profile_screen.dart';
@@ -23,6 +29,8 @@ import 'package:sheftaya/features/worker/home/presentation/widgets/job_details.d
 import 'package:sheftaya/features/worker/home/presentation/widgets/job_reviews.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/search_screen.dart';
 import 'package:sheftaya/features/worker/home/presentation/worker_home_screen.dart';
+import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart'
+    hide JobDetails;
 
 import '../core/di/service_locator.dart';
 import '../features/publish_job/data/model/job_details_response.dart'
@@ -59,6 +67,9 @@ abstract class AppRouter {
   static const kMyProfileScreen = '/MyProfileScreen';
   static const kSupportContactScreen = '/SupportContactScreen';
   static const kChangePasswordScreen = '/ChangePasswordScreen';
+  static const kNotificationsScreen = '/NotificationsScreen';
+  static const kJobApplicationsScreen = '/JobApplicationsScreen';
+  static const kEmployerJobDetailsScreen = '/EmployerJobDetailsScreen';
 
   static final router = GoRouter(
     routes: [
@@ -191,6 +202,35 @@ abstract class AppRouter {
       GoRoute(
         path: kChangePasswordScreen,
         builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      GoRoute(
+        path: kNotificationsScreen,
+        builder: (context, state) {
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(create: (_) => getIt<GetAllNotificationsCubit>()),
+              BlocProvider(create: (_) => getIt<NotificationsCubit>()),
+            ],
+            child: const NotificationsScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: kEmployerJobDetailsScreen,
+        builder: (context, state) {
+          final item = state.extra as MyJobItem;
+          return EmployerJobDetailsScreen(jobItem: item);
+        },
+      ),
+      GoRoute(
+        path: kJobApplicationsScreen,
+        builder: (context, state) {
+          final jobId = state.extra as String;
+          return BlocProvider(
+            create: (_) => getIt<JobApplicationsCubit>(),
+            child: JobApplicationsScreen(jobId: jobId),
+          );
+        },
       ),
     ],
   );

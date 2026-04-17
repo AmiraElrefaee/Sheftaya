@@ -19,6 +19,7 @@ class UserModel {
   final List<String>? jobsLookedFor;
   final int? experienceYears;
   final double? expectedHourlyRate;
+  final String? healthCertificate;
 
   // Employer profile
   final String? companyName;
@@ -44,6 +45,7 @@ class UserModel {
     this.jobsLookedFor,
     this.experienceYears,
     this.expectedHourlyRate,
+    this.healthCertificate,
     this.companyName,
     this.companyType,
     this.companyAddress,
@@ -106,6 +108,7 @@ class UserModel {
     List<String>? jobsLookedFor,
     int? experienceYears,
     double? expectedHourlyRate,
+    String? healthCertificate,
     String? companyName,
     String? companyType,
     String? companyAddress,
@@ -129,6 +132,7 @@ class UserModel {
         jobsLookedFor: jobsLookedFor ?? this.jobsLookedFor,
         experienceYears: experienceYears ?? this.experienceYears,
         expectedHourlyRate: expectedHourlyRate ?? this.expectedHourlyRate,
+        healthCertificate: healthCertificate ?? this.healthCertificate,
         companyName: companyName ?? this.companyName,
         companyType: companyType ?? this.companyType,
         companyAddress: companyAddress ?? this.companyAddress,

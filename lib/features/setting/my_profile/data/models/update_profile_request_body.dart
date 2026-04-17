@@ -1,10 +1,9 @@
-/// نموذج تحديث البروفايل – مكتوب يدوياً بدون json_serializable
-/// لدعم حقول الـ worker والـ employer بدون إعادة توليد الكود
-
 class UpdateProfileRequestBody {
   final String? firstName;
   final String? lastName;
   final String? phone;
+  final String? city;
+  final String? birthday;
   final UpdateWorkerProfileBody? workerProfile;
   final UpdateEmployerProfileBody? employerProfile;
 
@@ -12,6 +11,8 @@ class UpdateProfileRequestBody {
     this.firstName,
     this.lastName,
     this.phone,
+    this.city,
+    this.birthday,
     this.workerProfile,
     this.employerProfile,
   });
@@ -21,6 +22,8 @@ class UpdateProfileRequestBody {
     if (firstName != null) map['firstName'] = firstName;
     if (lastName != null) map['lastName'] = lastName;
     if (phone != null) map['phone'] = phone;
+    if (city != null) map['city'] = city;
+    if (birthday != null) map['birthday'] = birthday;
     if (workerProfile != null) map['workerProfile'] = workerProfile!.toJson();
     if (employerProfile != null) {
       map['employerProfile'] = employerProfile!.toJson();
@@ -70,12 +73,14 @@ class UpdateEmployerProfileBody {
   final String? companyType;
   final String? companyAddress;
   final String? city;
+  final String? taxNumber;
 
   const UpdateEmployerProfileBody({
     this.companyName,
     this.companyType,
     this.companyAddress,
     this.city,
+    this.taxNumber,
   });
 
   Map<String, dynamic> toJson() {
@@ -84,6 +89,7 @@ class UpdateEmployerProfileBody {
     if (companyType != null) map['companyType'] = companyType;
     if (companyAddress != null) map['companyAddress'] = companyAddress;
     if (city != null) map['city'] = city;
+    if (taxNumber != null) map['taxNumber'] = taxNumber;
     return map;
   }
 }

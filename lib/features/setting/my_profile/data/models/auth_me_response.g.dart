@@ -51,12 +51,14 @@ AuthMeUser _$AuthMeUserFromJson(Map<String, dynamic> json) => AuthMeUser(
   preferredLang: json['preferredLang'] as String?,
   city: json['city'] as String?,
   status: json['status'] as String?,
-  fcmTokens: (json['fcmTokens'] as List<dynamic>?)
-      ?.map((e) => e as String)
-      .toList(),
+  fcmTokens: json['fcmTokens'] as List<dynamic>?,
   createdAt: json['createdAt'] as String?,
   updatedAt: json['updatedAt'] as String?,
   v: (json['v'] as num?)?.toInt(),
+  imageProfile: json['imageProfile'] as String?,
+  birthday: json['birthday'] as String?,
+  rating: (json['rating'] as num?)?.toDouble(),
+  ratingAverage: (json['ratingAverage'] as num?)?.toDouble(),
 );
 
 Map<String, dynamic> _$AuthMeUserToJson(AuthMeUser instance) =>
@@ -74,6 +76,10 @@ Map<String, dynamic> _$AuthMeUserToJson(AuthMeUser instance) =>
       'createdAt': instance.createdAt,
       'updatedAt': instance.updatedAt,
       'v': instance.v,
+      'imageProfile': instance.imageProfile,
+      'birthday': instance.birthday,
+      'rating': instance.rating,
+      'ratingAverage': instance.ratingAverage,
     };
 
 Discipline _$DisciplineFromJson(Map<String, dynamic> json) => Discipline(

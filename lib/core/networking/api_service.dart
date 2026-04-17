@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'package:sheftaya/core/networking/api_constants.dart';
+import 'package:sheftaya/features/employer/my_jobs/data/models/accept_worker_response.dart';
+import 'package:sheftaya/features/employer/my_jobs/data/models/job_applications_response.dart';
 import 'package:sheftaya/features/forget_password/data/models/create_new_password_model/create_new_password_request_body.dart';
 import 'package:sheftaya/features/forget_password/data/models/create_new_password_model/create_new_password_response.dart';
 import 'package:sheftaya/features/forget_password/data/models/forget_password_model/forget_pass_request_body.dart';
@@ -117,7 +119,7 @@ abstract class ApiService {
     @Header('Authorization') String token,
   );
 
-  @PATCH(ApiConstants.updateProfile)
+  @PUT(ApiConstants.updateProfile)
   Future<UpdateProfileResponse> updateProfile(
     @Body() UpdateProfileRequestBody body,
     @Header('Authorization') String token,
@@ -160,4 +162,21 @@ abstract class ApiService {
   Future<DeleteAllNotificationsResponse> deleteAllNotifications(
     @Header('Authorization') String token,
   );
+
+  @GET(ApiConstants.getApplicationsForJob)
+Future<JobApplicationsResponse> getApplicationsForJob(
+  @Path('jobId') String jobId,
+  @Query('page') int page,
+  @Query('limit') int limit,
+  @Query('status') String? status,
+  @Header('Authorization') String token,
+);
+
+@PATCH(ApiConstants.acceptWorker)
+Future<AcceptWorkerResponse> acceptWorker(
+  @Path('jobId') String jobId,
+  @Path('applicationId') String applicationId,
+  @Header('Authorization') String token,
+  );
+  
 }

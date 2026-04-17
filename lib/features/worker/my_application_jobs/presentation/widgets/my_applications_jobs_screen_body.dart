@@ -53,64 +53,57 @@ class _MyApplicationsJobsScreenBodyState
                   return TabBarView(
                     controller: _controller,
                     children: [
-                      _ApplicationsList(items: all, notice: null),
-                      _ApplicationsList(
+                      _AppList(
+                        items: all,
+                        emptyTitle: 'لم تقدم على أي وظيفة',
+                        emptySubtitle: 'ابحث عن وظائف وقدم عليها الآن',
+                        emptyIcon: Icons.work_outline_rounded,
+                      ),
+                      _AppList(
                         items: all
                             .where((e) => e.applicationStatus == 'pending')
                             .toList(),
+                        emptyTitle: 'لا توجد طلبات قيد الانتظار',
+                        emptySubtitle: 'طلباتك المنتظرة قرار صاحب العمل ستظهر هنا',
+                        emptyIcon: Icons.hourglass_empty_rounded,
                         notice:
                             '⚠️ سيتم إشعارك فور اتخاذ صاحب العمل قراراً بشأن طلبك',
                       ),
-                      _ApplicationsList(
+                      _AppList(
                         items: all
                             .where((e) => e.applicationStatus == 'completed')
                             .toList(),
-                        notice: null,
+                        emptyTitle: 'لا توجد وظائف مكتملة',
+                        emptySubtitle: 'وظائفك المكتملة ستظهر هنا',
+                        emptyIcon: Icons.check_circle_outline_rounded,
                       ),
-                      _ApplicationsList(
+                      _AppList(
                         items: all
                             .where((e) => e.applicationStatus == 'rejected')
                             .toList(),
-                        notice: null,
+                        emptyTitle: 'لا توجد طلبات مرفوضة',
+                        emptySubtitle: 'ليس لديك طلبات مرفوضة حالياً',
+                        emptyIcon: Icons.cancel_outlined,
                       ),
-                      _ApplicationsList(
+                      _AppList(
                         items: all
-                            .where(
-                              (e) => [
-                                'reportUnderReview',
-                                'reportResolved',
-                              ].contains(e.applicationStatus),
-                            )
+                            .where((e) => [
+                                  'reportUnderReview',
+                                  'reportResolved',
+                                ].contains(e.applicationStatus))
                             .toList(),
+                        emptyTitle: 'لا توجد بلاغات',
+                        emptySubtitle: 'ليس لديك بلاغات مقدمة حالياً',
+                        emptyIcon: Icons.report_outlined,
                         notice:
-                            '⚠️ سيتم مراجعة الشكاوى والرد في أقرب وقت. يمكنك متابعة حالة طلبك هنا أو التواصل مع الدعم الفني.',
+                            '⚠️ سيتم مراجعة الشكاوى والرد في أقرب وقت.',
                       ),
                     ],
                   );
                 },
-                error: (msg) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 48.r,
-                        color: Colors.redAccent,
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        msg,
-                        style: TextStyles.font14BlackMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 16.h),
-                      ElevatedButton(
-                        onPressed: () =>
-                            context.read<MyJobsCubit>().fetchMyJobs(),
-                        child: const Text('إعادة المحاولة'),
-                      ),
-                    ],
-                  ),
+                error: (msg) => _ErrorWidget(
+                  msg: msg,
+                  onRetry: () => context.read<MyJobsCubit>().fetchMyJobs(),
                 ),
               );
             },
@@ -155,19 +148,52 @@ class _MyApplicationsJobsScreenBodyState
   }
 }
 
-// ─── قائمة التقديمات ──────────────────────────────────────────────────────
-
-class _ApplicationsList extends StatelessWidget {
+class _AppList extends StatelessWidget {
   final List<MyJobItem> items;
+  final String emptyTitle;
+  final String emptySubtitle;
+  final IconData emptyIcon;
   final String? notice;
 
-  const _ApplicationsList({required this.items, this.notice});
+  const _AppList({
+    required this.items,
+    required this.emptyTitle,
+    required this.emptySubtitle,
+    required this.emptyIcon,
+    this.notice,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
       return Center(
-        child: Text('لا توجد تقديمات', style: TextStyles.font16SecondaryMedium),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 32.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 80.w,
+                height: 80.w,
+                decoration: BoxDecoration(
+                  color: ColorsManager.primary.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(emptyIcon,
+                    size: 40.sp, color: ColorsManager.primary),
+              ),
+              SizedBox(height: 16.h),
+              Text(emptyTitle,
+                  style: TextStyles.font16BlackBold,
+                  textAlign: TextAlign.center),
+              SizedBox(height: 8.h),
+              Text(emptySubtitle,
+                  style: TextStyles.font14BlackRegular
+                      .copyWith(color: ColorsManager.grey),
+                  textAlign: TextAlign.center),
+            ],
+          ),
+        ),
       );
     }
 
@@ -176,12 +202,10 @@ class _ApplicationsList extends StatelessWidget {
       itemCount: items.length + (notice != null ? 1 : 0),
       itemBuilder: (_, index) {
         if (notice != null && index == 0) {
-          return Column(
-            children: [
-              _NoticeCard(text: notice!),
-              SizedBox(height: 12.h),
-            ],
-          );
+          return Column(children: [
+            _NoticeCard(text: notice!),
+            SizedBox(height: 12.h),
+          ]);
         }
         final item = items[notice != null ? index - 1 : index];
         return Padding(
@@ -189,6 +213,33 @@ class _ApplicationsList extends StatelessWidget {
           child: WorkerApplicationCard(item: item),
         );
       },
+    );
+  }
+}
+
+class _ErrorWidget extends StatelessWidget {
+  final String msg;
+  final VoidCallback onRetry;
+  const _ErrorWidget({required this.msg, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 48.r, color: Colors.redAccent),
+          SizedBox(height: 12.h),
+          Text(msg,
+              style: TextStyles.font14BlackMedium,
+              textAlign: TextAlign.center),
+          SizedBox(height: 16.h),
+          ElevatedButton(
+            onPressed: onRetry,
+            child: const Text('إعادة المحاولة'),
+          ),
+        ],
+      ),
     );
   }
 }

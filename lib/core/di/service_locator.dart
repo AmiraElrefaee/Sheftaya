@@ -4,6 +4,8 @@ import 'package:sheftaya/core/constants/user_cubit.dart';
 import 'package:sheftaya/core/networking/api_constants.dart';
 import 'package:sheftaya/core/networking/api_service.dart';
 import 'package:sheftaya/core/networking/dio_factory.dart';
+import 'package:sheftaya/features/employer/my_jobs/data/repos/job_applications_repo.dart';
+import 'package:sheftaya/features/employer/my_jobs/logic/job_applications_cubit.dart';
 import 'package:sheftaya/features/forget_password/data/repos/create_new_password.dart';
 import 'package:sheftaya/features/forget_password/data/repos/forget_pass_repo.dart';
 import 'package:sheftaya/features/forget_password/data/repos/verify_password_repo.dart';
@@ -63,9 +65,7 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<AuthMeRepo>(() => AuthMeRepo(getIt()));
 
   // ── UserCubit (singleton – single source of truth for logged-in user) ────
-  getIt.registerLazySingleton<UserCubit>(
-    () => UserCubit(getIt<AuthMeRepo>()),
-  );
+  getIt.registerLazySingleton<UserCubit>(() => UserCubit(getIt<AuthMeRepo>()));
 
   // ── Auth ─────────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<LoginRepo>(() => LoginRepo(getIt()));
@@ -140,9 +140,17 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<ApplyJobRepo>(() => ApplyJobRepo(getIt()));
   getIt.registerFactory<ApplyJobCubit>(() => ApplyJobCubit(getIt()));
 
-  // ── My Jobs (shared between worker & employer) ───────────────────────────
+  // ── My Jobs ───────────────────────────────────────────────────────────────
   getIt.registerLazySingleton<MyJobsRepo>(() => MyJobsRepo(getIt()));
   getIt.registerFactory<MyJobsCubit>(() => MyJobsCubit(getIt()));
+
+  // ── Job Applications (Employer) ───────────────────────────────────────────
+  getIt.registerLazySingleton<JobApplicationsRepo>(
+    () => JobApplicationsRepo(getIt()),
+  );
+  getIt.registerFactory<JobApplicationsCubit>(
+    () => JobApplicationsCubit(getIt<JobApplicationsRepo>()),
+  );
 
   // ── Profile ───────────────────────────────────────────────────────────────
   getIt.registerFactory<AuthMeCubit>(() => AuthMeCubit(getIt()));

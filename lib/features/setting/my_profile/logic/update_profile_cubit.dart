@@ -16,6 +16,8 @@ class UpdateProfileCubit extends Cubit<UpdateProfileState> {
     String? firstName,
     String? lastName,
     String? phone,
+    String? city,
+    String? birthday,
     // Worker
     String? education,
     String? professionalStatus,
@@ -28,6 +30,7 @@ class UpdateProfileCubit extends Cubit<UpdateProfileState> {
     String? companyType,
     String? companyAddress,
     String? companyCity,
+    String? taxNumber,
   }) async {
     emit(const UpdateProfileState.loading());
 
@@ -40,6 +43,8 @@ class UpdateProfileCubit extends Cubit<UpdateProfileState> {
       firstName: firstName,
       lastName: lastName,
       phone: phone,
+      city: city,
+      birthday: birthday,
       workerProfile: role == 'worker'
           ? UpdateWorkerProfileBody(
               education: education,
@@ -56,6 +61,7 @@ class UpdateProfileCubit extends Cubit<UpdateProfileState> {
               companyType: companyType,
               companyAddress: companyAddress,
               city: companyCity,
+              taxNumber: taxNumber,
             )
           : null,
     );

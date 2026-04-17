@@ -32,7 +32,6 @@ class UserCubit extends Cubit<UserState> {
   Future<void> _initializeUser() async {
     await _loadFromStorage();
     emit(state.copyWith(isLoading: false));
-    // بعد تحميل البيانات الأساسية، نجيب الـ profile الكامل من السيرفر
     if (state.user != null) {
       await refreshProfile();
     }
@@ -47,7 +46,6 @@ class UserCubit extends Cubit<UserState> {
     }
   }
 
-  /// يجيب البيانات الكاملة من /auth/me ويحدّث الـ state
   Future<void> refreshProfile() async {
     try {
       final token = await SharedPrefHelper.getSecuredString(
@@ -67,7 +65,6 @@ class UserCubit extends Cubit<UserState> {
     log('User set: ${user.firstname} ${user.lastname} (${user.role})');
   }
 
-  /// يحدّث الـ UserModel بالبيانات الكاملة الجاية من AuthMe
   void updateFromAuthMe(AuthMeResponse response) {
     final authUser = response.data?.user;
     final wp = response.data?.workerProfile;
@@ -84,8 +81,10 @@ class UserCubit extends Cubit<UserState> {
       role: authUser?.role ?? current?.role,
       phone: current?.phone,
       token: current?.token,
-      profileImg: current?.profileImg,
+      // imageProfile from auth/me user object
+      profileImg: authUser?.imageProfile ?? current?.profileImg,
       city: authUser?.city ?? current?.city,
+      birthday: authUser?.birthday ?? current?.birthday,
       // Worker profile
       education: wp?.education ?? current?.education,
       professionalStatus: wp?.professionalStatus ?? current?.professionalStatus,
@@ -95,6 +94,7 @@ class UserCubit extends Cubit<UserState> {
       expectedHourlyRate:
           wp?.expectedHourlyRate?.amount?.toDouble() ??
           current?.expectedHourlyRate,
+      healthCertificate: wp?.healthCertificate ?? current?.healthCertificate,
       // Employer profile
       companyName: ep?.companyName ?? current?.companyName,
       companyType: ep?.companyType ?? current?.companyType,
@@ -125,7 +125,7 @@ class UserCubit extends Cubit<UserState> {
   }
 }
 
-// ─── helpers (global) ─────────────────────────────────────────────────────
+// ─── helpers ─────────────────────────────────────────────────────────────────
 
 Future<void> saveUserDataLocally(UserModel user) async {
   try {

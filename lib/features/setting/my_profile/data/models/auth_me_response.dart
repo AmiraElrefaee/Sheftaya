@@ -7,10 +7,7 @@ class AuthMeResponse {
   final String? status;
   final AuthMeData? data;
 
-  AuthMeResponse({
-    this.status,
-    this.data,
-  });
+  AuthMeResponse({this.status, this.data});
 
   factory AuthMeResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthMeResponseFromJson(json);
@@ -24,11 +21,7 @@ class AuthMeData {
   final WorkerProfile? workerProfile;
   final EmployerProfile? profile;
 
-  AuthMeData({
-    this.user,
-    this.workerProfile,
-    this.profile,
-  });
+  AuthMeData({this.user, this.workerProfile, this.profile});
 
   factory AuthMeData.fromJson(Map<String, dynamic> json) =>
       _$AuthMeDataFromJson(json);
@@ -48,10 +41,15 @@ class AuthMeUser {
   final String? preferredLang;
   final String? city;
   final String? status;
-  final List<String>? fcmTokens;
+  final List<dynamic>? fcmTokens;
   final String? createdAt;
   final String? updatedAt;
   final int? v;
+  // Fields that may be present
+  final String? imageProfile;
+  final String? birthday;
+  final double? rating;
+  final double? ratingAverage;
 
   AuthMeUser({
     this.discipline,
@@ -67,6 +65,10 @@ class AuthMeUser {
     this.createdAt,
     this.updatedAt,
     this.v,
+    this.imageProfile,
+    this.birthday,
+    this.rating,
+    this.ratingAverage,
   });
 
   factory AuthMeUser.fromJson(Map<String, dynamic> json) =>
@@ -81,11 +83,7 @@ class Discipline {
   final int? cancellations;
   final int? noShows;
 
-  Discipline({
-    this.warnings,
-    this.cancellations,
-    this.noShows,
-  });
+  Discipline({this.warnings, this.cancellations, this.noShows});
 
   factory Discipline.fromJson(Map<String, dynamic> json) =>
       _$DisciplineFromJson(json);
@@ -137,10 +135,7 @@ class ExpectedHourlyRate {
   final num? amount;
   final String? currency;
 
-  ExpectedHourlyRate({
-    this.amount,
-    this.currency,
-  });
+  ExpectedHourlyRate({this.amount, this.currency});
 
   factory ExpectedHourlyRate.fromJson(Map<String, dynamic> json) =>
       _$ExpectedHourlyRateFromJson(json);
