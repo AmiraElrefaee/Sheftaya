@@ -14,6 +14,7 @@ import 'package:sheftaya/features/employer/my_jobs/data/models/job_applications_
 import 'package:sheftaya/features/employer/my_jobs/logic/job_applications_cubit.dart';
 import 'package:sheftaya/features/employer/my_jobs/logic/job_applications_state.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EmployerJobDetailsScreen extends StatelessWidget {
   final MyJobItem jobItem;
@@ -356,7 +357,7 @@ class _EmployerJobDetailsBodyState extends State<_EmployerJobDetailsBody> {
                         ),
                         if (job?.location?.address != null) ...[
                           SizedBox(height: 10.h),
-                          _LocationBox(locationText: locationText),
+                          _LocationBox(locationText: locationText, job: job),
                         ],
                       ],
                     ),
@@ -445,7 +446,7 @@ class _EmployerJobDetailsBodyState extends State<_EmployerJobDetailsBody> {
                           },
                         ),
                   ),
-                  SizedBox(height: 110.h),
+                  SizedBox(height: 20.h),
                 ],
               ),
             ),
@@ -643,6 +644,44 @@ class _EmployerJobDetailsBodyState extends State<_EmployerJobDetailsBody> {
       child: Icon(Icons.business, size: 42.sp, color: ColorsManager.grey),
     );
   }
+
+  Uri? _buildMapsUri(JobDetails job) {
+    final coords = job.location?.coordinates;
+
+    if (coords == null || coords.length < 2) {
+      final address = job.location?.address ?? job.place;
+      if (address != null && address.trim().isNotEmpty) {
+        return Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}',
+        );
+      }
+      return null;
+    }
+
+    final lng = _asDouble(coords[0]);
+    final lat = _asDouble(coords[1]);
+
+    if (lat != null && lng != null) {
+      return Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+      );
+    }
+
+    final address = job.location?.address ?? job.place;
+    if (address != null && address.trim().isNotEmpty) {
+      return Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}',
+      );
+    }
+
+    return null;
+  }
+
+  double? _asDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
 }
 
 class _InfoChip extends StatelessWidget {
@@ -699,43 +738,78 @@ class _InfoChip extends StatelessWidget {
 
 class _LocationBox extends StatelessWidget {
   final String locationText;
+  final JobDetails? job;
 
-  const _LocationBox({required this.locationText});
+  const _LocationBox({required this.locationText, required this.job});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.lightGrey.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8.r),
-            child: SizedBox(
-              width: 52.w,
-              height: 42.h,
-              child: CustomPaint(painter: _MapPainter()),
+    final uri = job == null
+        ? null
+        : (context
+              .findAncestorStateOfType<_EmployerJobDetailsBodyState>()
+              ?._buildMapsUri(job!));
+
+    return InkWell(
+      onTap: uri == null
+          ? null
+          : () async {
+              try {
+                final launched = await launchUrl(
+                  uri,
+                  mode: LaunchMode.externalApplication,
+                );
+
+                if (!launched && context.mounted) {
+                  customSnackBar(
+                    context,
+                    'تعذر فتح الخريطة',
+                    ColorsManager.error,
+                  );
+                }
+              } catch (_) {
+                if (!context.mounted) return;
+                customSnackBar(
+                  context,
+                  'تعذر فتح Google Maps',
+                  ColorsManager.error,
+                );
+              }
+            },
+      borderRadius: BorderRadius.circular(8.r),
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: ColorsManager.lightGrey.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: SizedBox(
+                width: 52.w,
+                height: 42.h,
+                child: CustomPaint(painter: _MapPainter()),
+              ),
             ),
-          ),
-          SizedBox(width: 8.w),
-          Icon(
-            Icons.location_on_rounded,
-            size: 22.sp,
-            color: ColorsManager.primary,
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              locationText,
-              textAlign: TextAlign.right,
-              style: TextStyles.font16BlackMedium,
-              overflow: TextOverflow.ellipsis,
+            SizedBox(width: 8.w),
+            Icon(
+              Icons.location_on_rounded,
+              size: 22.sp,
+              color: ColorsManager.primary,
             ),
-          ),
-        ],
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                locationText,
+                textAlign: TextAlign.right,
+                style: TextStyles.font16BlackMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -897,7 +971,6 @@ class _MapPainter extends CustomPainter {
       ..color = const Color(0xFFB8D4EE)
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
-
     canvas.drawLine(
       Offset(0, size.height * 0.4),
       Offset(size.width, size.height * 0.4),
