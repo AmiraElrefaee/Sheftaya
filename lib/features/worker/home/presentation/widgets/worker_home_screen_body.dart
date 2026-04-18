@@ -194,7 +194,7 @@ class _Section extends StatelessWidget {
                     extra: {'jobs': jobs, 'title': title},
                   ),
                   child: Text('رؤية الكل',
-                      style: TextStyles.font12SecondaryBold),
+                      style: TextStyles.font14SecondaryBold),
                 ),
             ],
           ),

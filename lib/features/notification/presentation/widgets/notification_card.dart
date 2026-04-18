@@ -68,7 +68,7 @@ class NotificationCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             notification.title,
-                            maxLines: 2,
+                            maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyles.font16BlackBold,
                           ),
@@ -85,7 +85,7 @@ class NotificationCard extends StatelessWidget {
                     SizedBox(height: 8.h),
                     Text(
                       notification.body,
-                      maxLines: 4,
+                      maxLines: 6,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyles.font14BlackRegular.copyWith(
                         color: ColorsManager.darkGrey,

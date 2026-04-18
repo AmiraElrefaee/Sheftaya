@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
 import 'package:sheftaya/features/employer/home/presentation/employer_home_screen.dart';
 import 'package:sheftaya/features/employer/home/presentation/widgets/my_posted_jobs_screen.dart';
 import 'package:sheftaya/features/employer/my_jobs/logic/job_applications_cubit.dart';
@@ -31,6 +30,7 @@ import 'package:sheftaya/features/worker/home/presentation/widgets/search_screen
 import 'package:sheftaya/features/worker/home/presentation/worker_home_screen.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart'
     hide JobDetails;
+import 'package:sheftaya/features/worker/my_application_jobs/logic/my_jobs_cubit.dart';
 
 import '../core/di/service_locator.dart';
 import '../features/publish_job/data/model/job_details_response.dart'
@@ -164,8 +164,10 @@ abstract class AppRouter {
       GoRoute(
         path: kMyPostedJobsScreen,
         builder: (context, state) {
-          final jobs = state.extra as List<JobModel>;
-          return MyPostedJobsScreen(jobs: jobs);
+          return BlocProvider(
+            create: (_) => getIt<MyJobsCubit>()..fetchMyJobs(),
+            child: const MyPostedJobsScreen(),
+          );
         },
       ),
       GoRoute(

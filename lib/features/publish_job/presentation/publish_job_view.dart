@@ -5,8 +5,6 @@ import 'package:sheftaya/features/publish_job/presentation/widgets/publish_job_v
 
 import '../../../core/di/service_locator.dart';
 import '../../../core/theme/colors_manager.dart';
-import '../../../core/theme/text_styles.dart';
-import '../../employer/home/data/models/job_model.dart';
 import '../data/model/job_details_response.dart';
 import 'mangers/job_publish_cubit/job_publish_cubit.dart';
 

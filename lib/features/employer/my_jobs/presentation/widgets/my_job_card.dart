@@ -94,7 +94,7 @@ class EmployerJobCard extends StatelessWidget {
               ),
               child: Text(
                 statusInfo.label,
-                style: TextStyles.font12BlackMedium.copyWith(
+                style: TextStyles.font12BlackBold.copyWith(
                   color: statusInfo.color,
                 ),
               ),
@@ -135,7 +135,7 @@ class EmployerJobCard extends StatelessWidget {
   _StatusInfo _statusOf(String status) {
     switch (status) {
       case 'active':
-        return _StatusInfo('نشط', ColorsManager.primary);
+        return _StatusInfo('عرض التفاصيل', ColorsManager.primary);
       case 'completed':
         return _StatusInfo('مكتملة', ColorsManager.success);
       case 'cancelled':

@@ -79,23 +79,27 @@ class _EmployerMyJobsScreenBodyState extends State<EmployerMyJobsScreenBody>
                         items: all,
                         emptyTitle: 'لا توجد وظائف',
                         emptySubtitle: 'لم تنشر أي وظائف حتى الآن',
+                        emptyIcon: Icons.work_outline_rounded,
                       ),
                       _JobsList(
                         items: active,
                         emptyTitle: 'لا توجد وظائف نشطة',
                         emptySubtitle: 'ستظهر وظائفك النشطة هنا',
                         notice: '⚠️ سيتم إشعارك بطلبات العمال لاختيار الأنسب',
+                        emptyIcon: Icons.hourglass_empty_rounded,
                       ),
                       _JobsList(
                         items: completed,
                         emptyTitle: 'لا توجد وظائف مكتملة',
                         emptySubtitle: 'ستظهر وظائفك المكتملة هنا',
+                        emptyIcon: Icons.check_circle_outline_rounded,
                       ),
                       _JobsList(
                         items: reports,
                         emptyTitle: 'لا توجد بلاغات',
                         emptySubtitle: 'ستظهر البلاغات المقدمة هنا',
                         notice: '⚠️ سيتم مراجعة الشكاوى والرد في أقرب وقت.',
+                        emptyIcon: Icons.report_outlined,
                       ),
                     ],
                   );
@@ -148,6 +152,8 @@ class _JobsList extends StatelessWidget {
   final List<MyJobItem> items;
   final String emptyTitle;
   final String emptySubtitle;
+  final IconData emptyIcon;
+
   final String? notice;
 
   const _JobsList({
@@ -155,12 +161,17 @@ class _JobsList extends StatelessWidget {
     required this.emptyTitle,
     required this.emptySubtitle,
     this.notice,
+    required this.emptyIcon,
   });
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return _EmptyState(title: emptyTitle, subtitle: emptySubtitle);
+      return _EmptyState(
+        title: emptyTitle,
+        subtitle: emptySubtitle,
+        emptyIcon: emptyIcon,
+      );
     }
 
     return ListView.builder(
@@ -195,8 +206,13 @@ class _JobsList extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   final String title;
   final String subtitle;
+  final IconData emptyIcon;
 
-  const _EmptyState({required this.title, required this.subtitle});
+  const _EmptyState({
+    required this.title,
+    required this.subtitle,
+    required this.emptyIcon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -213,11 +229,7 @@ class _EmptyState extends StatelessWidget {
                 color: ColorsManager.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.work_outline_rounded,
-                size: 40.sp,
-                color: ColorsManager.primary,
-              ),
+              child: Icon(emptyIcon, size: 40.sp, color: ColorsManager.primary),
             ),
             SizedBox(height: 16.h),
             Text(

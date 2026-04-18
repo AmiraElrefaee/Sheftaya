@@ -172,7 +172,7 @@ Future<JobApplicationsResponse> getApplicationsForJob(
   @Header('Authorization') String token,
 );
 
-@PATCH(ApiConstants.acceptWorker)
+@POST(ApiConstants.acceptWorker)
 Future<AcceptWorkerResponse> acceptWorker(
   @Path('jobId') String jobId,
   @Path('applicationId') String applicationId,

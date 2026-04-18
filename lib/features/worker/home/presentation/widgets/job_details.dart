@@ -13,6 +13,7 @@ import 'package:sheftaya/features/worker/home/data/models/review_model.dart';
 import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_cubit.dart';
 import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_state.dart';
 import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class JobDetails extends StatefulWidget {
   final String jobId;
@@ -39,10 +40,11 @@ class _JobDetailsState extends State<JobDetails> {
       listener: (context, state) {
         state.whenOrNull(
           success: (response) {
-            final message = 'تم التقديم على الوظيفة بنجاح';
-
-            customSnackBar(context, message, ColorsManager.success);
-
+            customSnackBar(
+              context,
+              'تم التقديم على الوظيفة بنجاح',
+              ColorsManager.success,
+            );
             GoRouter.of(context).pop();
           },
         );
@@ -229,18 +231,18 @@ class _JobDetailsState extends State<JobDetails> {
                                   children: [
                                     TextSpan(
                                       text: ownerName ?? 'صاحب الوظيفة',
-                                      style: TextStyle(
-                                        color: ColorsManager.primary,
-                                        fontSize: 12.sp,
-                                        decoration: TextDecoration.underline,
-                                      ),
+                                      style: TextStyles.font14PrimarySemiBold
+                                          .copyWith(
+                                            decoration:
+                                                TextDecoration.underline,
+                                          ),
                                     ),
                                     TextSpan(
                                       text: ' (صاحب الوظيفة)',
-                                      style: TextStyle(
-                                        color: ColorsManager.darkGrey,
-                                        fontSize: 12.sp,
-                                      ),
+                                      style: TextStyles.font14BlackMedium
+                                          .copyWith(
+                                            color: ColorsManager.darkGrey,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -286,15 +288,13 @@ class _JobDetailsState extends State<JobDetails> {
                               child: _infoChip(
                                 icon: Icons.attach_money_sharp,
                                 label:
-                                    '${job.pricePerHour?.amount?.toStringAsFixed(0) ?? '0'} جنيه',
+                                    '${job.pricePerHour?.amount?.toStringAsFixed(0) ?? '0'} ج/ساعة',
                               ),
                             ),
                           ],
                         ),
                         SizedBox(height: 10.h),
-                        _locationChip(
-                          job.location?.address ?? 'جاري تحديد العنوان...',
-                        ),
+                        _locationSection(job),
                       ],
                     ),
                   ],
@@ -424,6 +424,104 @@ class _JobDetailsState extends State<JobDetails> {
     );
   }
 
+  Widget _locationSection(JobItem job) {
+    final uri = _buildMapsUri(job);
+    final locationText = job.location?.address ?? 'جاري تحديد العنوان...';
+
+    return InkWell(
+      onTap: uri == null ? null : () => _openMaps(uri),
+      borderRadius: BorderRadius.circular(8.r),
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: ColorsManager.lightGrey.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: SizedBox(
+                width: 52.w,
+                height: 42.h,
+                child: CustomPaint(painter: _MapPainter()),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Icon(
+              Icons.location_on_rounded,
+              size: 22.sp,
+              color: ColorsManager.primary,
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                locationText,
+                textAlign: TextAlign.right,
+                style: TextStyles.font16BlackMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Uri? _buildMapsUri(JobItem job) {
+    final coords = job.location?.coordinates;
+
+    if (coords == null || coords.length < 2) {
+      final address = job.location?.address ?? job.place;
+      if (address != null && address.trim().isNotEmpty) {
+        return Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}',
+        );
+      }
+      return null;
+    }
+
+    final lng = _asDouble(coords[0]);
+    final lat = _asDouble(coords[1]);
+
+    if (lat != null && lng != null) {
+      return Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+      );
+    }
+
+    final address = job.location?.address ?? job.place;
+    if (address != null && address.trim().isNotEmpty) {
+      return Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}',
+      );
+    }
+
+    return null;
+  }
+
+  double? _asDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  Future<void> _openMaps(Uri uri) async {
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched && mounted) {
+        customSnackBar(context, 'تعذر فتح الخريطة', ColorsManager.error);
+      }
+    } catch (_) {
+      if (!mounted) return;
+      customSnackBar(context, 'تعذر فتح Google Maps', ColorsManager.error);
+    }
+  }
+
   String _arabicMonth(int month) {
     const months = [
       '',
@@ -498,43 +596,6 @@ class _JobDetailsState extends State<JobDetails> {
               overflow: TextOverflow.ellipsis,
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _locationChip(String location) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: ColorsManager.lightGrey.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8.r),
-            child: SizedBox(
-              width: 52.w,
-              height: 42.h,
-              child: CustomPaint(painter: _MapPainter()),
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Icon(
-            Icons.location_on_rounded,
-            size: 22.sp,
-            color: ColorsManager.primary,
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              location,
-              textAlign: TextAlign.right,
-              style: TextStyles.font16BlackMedium,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
         ],
       ),
     );

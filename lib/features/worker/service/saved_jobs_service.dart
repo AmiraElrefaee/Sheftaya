@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sheftaya/features/employer/home/data/models/job_model.dart';
 import 'package:sheftaya/features/worker/home/data/models/all_jobs/jobs_response.dart';
 
 class SavedJobsService {
@@ -30,7 +29,6 @@ class SavedJobsService {
 
   static dynamic _fromMap(Map<String, dynamic> map) {
     try {
-      if (map.containsKey('salary')) return JobModel.fromJson(map);
       return JobItem.fromJson(map);
     } catch (_) {
       return map;

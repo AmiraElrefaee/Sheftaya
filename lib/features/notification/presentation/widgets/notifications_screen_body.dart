@@ -90,7 +90,7 @@ class _NotificationsScreenBodyState extends State<NotificationsScreenBody> {
                 customSnackBar(
                   context,
                   'تم حذف الاشعار بنجاح',
-                  ColorsManager.primary,
+                  ColorsManager.success,
                 );
               },
               error: (error) {

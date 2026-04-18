@@ -40,8 +40,8 @@ class BottomNav extends StatelessWidget {
             label: 'وظائفي',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.trophy),
-            label: 'الجوائز',
+            icon: Icon(FontAwesomeIcons.bullhorn),
+            label: 'نشر الوظائف',
           ),
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.gear),

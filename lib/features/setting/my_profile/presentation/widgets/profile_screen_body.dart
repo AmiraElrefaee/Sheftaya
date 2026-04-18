@@ -22,28 +22,78 @@ import 'profile_image.dart';
 // ── Constants ─────────────────────────────────────────────────────────────
 
 const _professionalStatuses = [
-  'طالب', 'موظف دوام كامل', 'موظف جزئي', 'لا أعمل',
+  'طالب',
+  'موظف دوام كامل',
+  'موظف جزئي',
+  'لا أعمل',
 ];
 
 const _jobOptions = [
-  'طباخ', 'مساعد طباخ', 'عامل مطبخ', 'غسال أطباق', 'عامل نظافة',
-  'عامل مخزن', 'عامل تحميل وتنزيل', 'سائق', 'عامل توصيل',
-  'عامل سوبر ماركت', 'عامل مطعم', 'كاشير', 'خدمة عملاء', 'استقبال',
-  'سباك', 'كهربائي', 'نجار', 'عامل دهانات', 'بائع',
-  'مندوب مبيعات', 'مساعد إداري', 'حارس', 'بواب', 'أمن', 'آخر',
+  'طباخ',
+  'مساعد طباخ',
+  'عامل مطبخ',
+  'غسال أطباق',
+  'عامل نظافة',
+  'عامل مخزن',
+  'عامل تحميل وتنزيل',
+  'سائق',
+  'عامل توصيل',
+  'عامل سوبر ماركت',
+  'عامل مطعم',
+  'كاشير',
+  'خدمة عملاء',
+  'استقبال',
+  'سباك',
+  'كهربائي',
+  'نجار',
+  'عامل دهانات',
+  'بائع',
+  'مندوب مبيعات',
+  'مساعد إداري',
+  'حارس',
+  'بواب',
+  'أمن',
+  'آخر',
 ];
 
 const _companyTypes = [
-  'شركة', 'مزرعة', 'ورشة', 'محل تجاري', 'مطعم', 'كافيه',
-  'فندق', 'مصنع', 'مخزن', 'آخر',
+  'شركة',
+  'مزرعة',
+  'ورشة',
+  'محل تجاري',
+  'مطعم',
+  'كافيه',
+  'فندق',
+  'مصنع',
+  'مخزن',
+  'آخر',
 ];
 
 const _governorates = [
-  'القاهرة', 'الجيزة', 'الإسكندرية', 'القليوبية', 'البحيرة',
-  'الدقهلية', 'الشرقية', 'الغربية', 'المنوفية', 'كفر الشيخ',
-  'دمياط', 'بورسعيد', 'الإسماعيلية', 'السويس', 'شمال سيناء',
-  'جنوب سيناء', 'بني سويف', 'الفيوم', 'المنيا', 'أسيوط',
-  'سوهاج', 'قنا', 'الأقصر', 'أسوان',
+  'القاهرة',
+  'الجيزة',
+  'الإسكندرية',
+  'القليوبية',
+  'البحيرة',
+  'الدقهلية',
+  'الشرقية',
+  'الغربية',
+  'المنوفية',
+  'كفر الشيخ',
+  'دمياط',
+  'بورسعيد',
+  'الإسماعيلية',
+  'السويس',
+  'شمال سيناء',
+  'جنوب سيناء',
+  'بني سويف',
+  'الفيوم',
+  'المنيا',
+  'أسيوط',
+  'سوهاج',
+  'قنا',
+  'الأقصر',
+  'أسوان',
 ];
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -120,10 +170,12 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
 
     // Worker
     _educationCtrl = TextEditingController(text: user.education ?? '');
-    _experienceYearsCtrl =
-        TextEditingController(text: user.experienceYears?.toString() ?? '');
-    _hourlyRateCtrl =
-        TextEditingController(text: user.expectedHourlyRate?.toString() ?? '');
+    _experienceYearsCtrl = TextEditingController(
+      text: user.experienceYears?.toString() ?? '',
+    );
+    _hourlyRateCtrl = TextEditingController(
+      text: user.expectedHourlyRate?.toString() ?? '',
+    );
     _professionalStatus = user.professionalStatus;
     _pastExperience = List<String>.from(user.pastExperience ?? []);
     _jobsLookedFor = List<String>.from(user.jobsLookedFor ?? []);
@@ -131,11 +183,16 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
 
     // Employer
     _companyNameCtrl = TextEditingController(text: user.companyName ?? '');
-    _companyAddressCtrl =
-        TextEditingController(text: user.companyAddress ?? '');
+    _companyAddressCtrl = TextEditingController(
+      text: user.companyAddress ?? '',
+    );
     _taxNumberCtrl = TextEditingController();
-    _companyType = user.companyType?.isNotEmpty == true ? user.companyType : null;
-    _companyCity = user.companyCity?.isNotEmpty == true ? user.companyCity : null;
+    _companyType = user.companyType?.isNotEmpty == true
+        ? user.companyType
+        : null;
+    _companyCity = user.companyCity?.isNotEmpty == true
+        ? user.companyCity
+        : null;
     _existingCompanyImages = List<String>.from(user.companyImages ?? []);
 
     _localImagePath = user.profileImg;
@@ -163,7 +220,8 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
   }
 
   Future<void> _showDatePicker() async {
-    final initial = _selectedDate ??
+    final initial =
+        _selectedDate ??
         DateTime.now().subtract(const Duration(days: 365 * 25));
     final picked = await showDatePicker(
       context: context,
@@ -190,62 +248,67 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<UpdateProfileCubit>().updateProfile(
-          firstName: _firstNameCtrl.text.trim(),
-          lastName: _lastNameCtrl.text.trim(),
-          phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
-          city: _selectedCity,
-          birthday: _birthdayCtrl.text.trim().isEmpty
-              ? null
-              : _birthdayCtrl.text.trim(),
-          // Worker
-          education: role == 'worker'
-              ? (_educationCtrl.text.trim().isEmpty
-                  ? null
-                  : _educationCtrl.text.trim())
-              : null,
-          professionalStatus: role == 'worker' ? _professionalStatus : null,
-          pastExperience:
-              role == 'worker' && _pastExperience.isNotEmpty ? _pastExperience : null,
-          jobsLookedFor:
-              role == 'worker' && _jobsLookedFor.isNotEmpty ? _jobsLookedFor : null,
-          experienceYears: role == 'worker'
-              ? int.tryParse(_experienceYearsCtrl.text.trim())
-              : null,
-          expectedHourlyRate: role == 'worker'
-              ? double.tryParse(_hourlyRateCtrl.text.trim())
-              : null,
-          // Employer
-          companyName: role == 'employer'
-              ? (_companyNameCtrl.text.trim().isEmpty
-                  ? null
-                  : _companyNameCtrl.text.trim())
-              : null,
-          companyType: role == 'employer' ? _companyType : null,
-          companyAddress: role == 'employer'
-              ? (_companyAddressCtrl.text.trim().isEmpty
-                  ? null
-                  : _companyAddressCtrl.text.trim())
-              : null,
-          companyCity: role == 'employer' ? _companyCity : null,
-          taxNumber: role == 'employer'
-              ? (_taxNumberCtrl.text.trim().isEmpty
-                  ? null
-                  : _taxNumberCtrl.text.trim())
-              : null,
-        );
+      firstName: _firstNameCtrl.text.trim(),
+      lastName: _lastNameCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
+      city: _selectedCity,
+      birthday: _birthdayCtrl.text.trim().isEmpty
+          ? null
+          : _birthdayCtrl.text.trim(),
+      // Worker
+      education: role == 'worker'
+          ? (_educationCtrl.text.trim().isEmpty
+                ? null
+                : _educationCtrl.text.trim())
+          : null,
+      professionalStatus: role == 'worker' ? _professionalStatus : null,
+      pastExperience: role == 'worker' && _pastExperience.isNotEmpty
+          ? _pastExperience
+          : null,
+      jobsLookedFor: role == 'worker' && _jobsLookedFor.isNotEmpty
+          ? _jobsLookedFor
+          : null,
+      experienceYears: role == 'worker'
+          ? int.tryParse(_experienceYearsCtrl.text.trim())
+          : null,
+      expectedHourlyRate: role == 'worker'
+          ? double.tryParse(_hourlyRateCtrl.text.trim())
+          : null,
+      // Employer
+      companyName: role == 'employer'
+          ? (_companyNameCtrl.text.trim().isEmpty
+                ? null
+                : _companyNameCtrl.text.trim())
+          : null,
+      companyType: role == 'employer' ? _companyType : null,
+      companyAddress: role == 'employer'
+          ? (_companyAddressCtrl.text.trim().isEmpty
+                ? null
+                : _companyAddressCtrl.text.trim())
+          : null,
+      companyCity: role == 'employer' ? _companyCity : null,
+      taxNumber: role == 'employer'
+          ? (_taxNumberCtrl.text.trim().isEmpty
+                ? null
+                : _taxNumberCtrl.text.trim())
+          : null,
+    );
   }
 
   Widget _label(String text) => Padding(
-        padding: EdgeInsets.only(bottom: 8.h),
-        child: Text(text, style: TextStyles.font14BlackRegular),
-      );
+    padding: EdgeInsets.only(bottom: 8.h),
+    child: Text(text, style: TextStyles.font14BlackRegular),
+  );
 
   Widget _gap([double h = 16]) => SizedBox(height: h.h);
 
   Widget _sectionHeader(String title) => Padding(
-        padding: EdgeInsets.only(bottom: 12.h, top: 4.h),
-        child: Text(title, style: TextStyles.font16BlackBold.copyWith(fontSize: 18.sp)),
-      );
+    padding: EdgeInsets.only(bottom: 12.h, top: 4.h),
+    child: Text(
+      title,
+      style: TextStyles.font16BlackBold.copyWith(fontSize: 18.sp),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -275,12 +338,17 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                 success: (data) {
                   final newUrl = data.data?.imageProfile;
                   if (newUrl != null) {
-                    final updated =
-                        ctx.read<UserCubit>().state.user!.copyWith(profileImg: newUrl);
+                    final updated = ctx.read<UserCubit>().state.user!.copyWith(
+                      profileImg: newUrl,
+                    );
                     ctx.read<UserCubit>().setUser(updated);
                     setState(() => _localImagePath = newUrl);
                   }
-                  customSnackBar(ctx, 'تم تحديث صورة الملف بنجاح', ColorsManager.success);
+                  customSnackBar(
+                    ctx,
+                    'تم تحديث صورة الملف بنجاح',
+                    ColorsManager.success,
+                  );
                 },
                 error: (e) => customSnackBar(ctx, e, ColorsManager.error),
               );
@@ -302,29 +370,40 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                     birthday: _birthdayCtrl.text.trim().isEmpty
                         ? null
                         : _birthdayCtrl.text.trim(),
-                    education: isWorker ? _educationCtrl.text.trim() : old.education,
-                    professionalStatus:
-                        isWorker ? _professionalStatus : old.professionalStatus,
-                    pastExperience:
-                        isWorker ? _pastExperience : old.pastExperience,
-                    jobsLookedFor:
-                        isWorker ? _jobsLookedFor : old.jobsLookedFor,
+                    education: isWorker
+                        ? _educationCtrl.text.trim()
+                        : old.education,
+                    professionalStatus: isWorker
+                        ? _professionalStatus
+                        : old.professionalStatus,
+                    pastExperience: isWorker
+                        ? _pastExperience
+                        : old.pastExperience,
+                    jobsLookedFor: isWorker
+                        ? _jobsLookedFor
+                        : old.jobsLookedFor,
                     experienceYears: isWorker
                         ? int.tryParse(_experienceYearsCtrl.text.trim())
                         : old.experienceYears,
                     expectedHourlyRate: isWorker
                         ? double.tryParse(_hourlyRateCtrl.text.trim())
                         : old.expectedHourlyRate,
-                    companyName:
-                        isEmployer ? _companyNameCtrl.text.trim() : old.companyName,
+                    companyName: isEmployer
+                        ? _companyNameCtrl.text.trim()
+                        : old.companyName,
                     companyType: isEmployer ? _companyType : old.companyType,
                     companyAddress: isEmployer
                         ? _companyAddressCtrl.text.trim()
                         : old.companyAddress,
                     companyCity: isEmployer ? _companyCity : old.companyCity,
                   );
-                  cubit.setUser(updated);
-                  customSnackBar(ctx, 'تم حفظ التغييرات بنجاح', ColorsManager.success);
+                  cubit.setUser(updated); // optimistic UI update
+                  cubit.refreshProfile(); // ← sync fresh data from server
+                  customSnackBar(
+                    ctx,
+                    'تم حفظ التغييرات بنجاح',
+                    ColorsManager.success,
+                  );
                 },
                 error: (e) => customSnackBar(ctx, e, ColorsManager.error),
               );
@@ -347,7 +426,10 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                     _gap(12),
 
                     // ── Profile Image ──────────────────────────────────────
-                    BlocBuilder<UpdateImageProfileCubit, UpdateImageProfileState>(
+                    BlocBuilder<
+                      UpdateImageProfileCubit,
+                      UpdateImageProfileState
+                    >(
                       builder: (_, imgState) {
                         final uploading = imgState.maybeWhen(
                           loading: () => true,
@@ -361,8 +443,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                                 imageUrl: _localImagePath,
                                 onTap: uploading ? null : _pickImage,
                               ),
-                              if (uploading)
-                                const CircularProgressIndicator(),
+                              if (uploading) const CircularProgressIndicator(),
                             ],
                           ),
                         );
@@ -385,7 +466,9 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                                 controller: _firstNameCtrl,
                                 hintText: 'الاسم الأول',
                                 validator: (v) =>
-                                    (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                                    (v == null || v.trim().isEmpty)
+                                    ? 'مطلوب'
+                                    : null,
                               ),
                             ],
                           ),
@@ -400,7 +483,9 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                                 controller: _lastNameCtrl,
                                 hintText: 'الاسم الأخير',
                                 validator: (v) =>
-                                    (v == null || v.trim().isEmpty) ? 'مطلوب' : null,
+                                    (v == null || v.trim().isEmpty)
+                                    ? 'مطلوب'
+                                    : null,
                               ),
                             ],
                           ),
@@ -438,8 +523,11 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                       hintText: 'YYYY-MM-DD',
                       readOnly: true,
                       onTap: _showDatePicker,
-                      suffixIcon: Icon(Icons.calendar_today,
-                          size: 20.w, color: ColorsManager.grey),
+                      suffixIcon: Icon(
+                        Icons.calendar_today,
+                        size: 20.w,
+                        color: ColorsManager.grey,
+                      ),
                     ),
 
                     _gap(),
@@ -471,7 +559,8 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> {
                         items: _professionalStatuses,
                         value: _professionalStatus,
                         hint: 'اختر حالتك',
-                        onChanged: (v) => setState(() => _professionalStatus = v),
+                        onChanged: (v) =>
+                            setState(() => _professionalStatus = v),
                       ),
 
                       _gap(),
@@ -646,7 +735,8 @@ class _HealthCertField extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyles.font14BlackRegular.copyWith(
-                  color: selectedFile != null || (existingUrl?.isNotEmpty == true)
+                  color:
+                      selectedFile != null || (existingUrl?.isNotEmpty == true)
                       ? ColorsManager.primary
                       : ColorsManager.grey,
                 ),

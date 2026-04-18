@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
+import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart';
 
 class WorkerApplicationCard extends StatelessWidget {
   final MyJobItem item;
+  final VoidCallback? onTapDetails;
 
-  const WorkerApplicationCard({super.key, required this.item});
+  const WorkerApplicationCard({
+    super.key,
+    required this.item,
+    this.onTapDetails,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +25,7 @@ class WorkerApplicationCard extends StatelessWidget {
     final title = job?.title ?? '';
     final appliedAt = _formatDate(item.appliedAt);
     final statusInfo = _statusOf(item.applicationStatus);
+    final showDetailsButton = _canShowDetailsButton(item.applicationStatus);
 
     return Container(
       padding: EdgeInsets.all(16.w),
@@ -42,7 +49,6 @@ class WorkerApplicationCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // صورة الوظيفة
               ClipRRect(
                 borderRadius: BorderRadius.circular(12.r),
                 child: imageUrl != null
@@ -77,18 +83,38 @@ class WorkerApplicationCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: statusInfo.color.withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Text(
-                  statusInfo.label,
-                  style: TextStyles.font12BlackMedium.copyWith(
-                    color: statusInfo.color,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: statusInfo.color.withValues(alpha: .12),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      statusInfo.label,
+                      style: TextStyles.font12BlackBold.copyWith(
+                        color: statusInfo.color,
+                      ),
+                    ),
                   ),
-                ),
+                  if (showDetailsButton && onTapDetails != null) ...[
+                    SizedBox(height: 4.h),
+                    SizedBox(
+                      width: 76.w,
+                      child: AppTextButton(
+                        borderRadius: 8.r,
+                        buttonText: 'التفاصيل',
+                        textStyle: TextStyles.font12WhiteBold,
+                        buttonHeight: 20.h,
+                        onPressed: onTapDetails!,
+                        backgroundColor: ColorsManager.primary,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
@@ -121,6 +147,16 @@ class WorkerApplicationCard extends StatelessWidget {
       return 'منذ ${relativeDays(dt)}';
     } catch (_) {
       return dateStr;
+    }
+  }
+
+  bool _canShowDetailsButton(String? status) {
+    switch (status) {
+      case 'pending':
+      case 'accepted':
+        return true;
+      default:
+        return false;
     }
   }
 
