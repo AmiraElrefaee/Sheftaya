@@ -12,6 +12,8 @@ import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/features/login/logic/login_cubit.dart';
 import 'package:sheftaya/features/login/presentation/widgets/login_screen_body.dart';
 
+import '../../../core/services/socket_service.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -55,13 +57,16 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (!mounted) return;
+    getIt<SocketService>().connect();
     _navigateByRole(user.role);
   }
 
   void _navigateByRole(String? role) {
     if (role == 'employer') {
+
       GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
     } else {
+
       GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
     }
   }

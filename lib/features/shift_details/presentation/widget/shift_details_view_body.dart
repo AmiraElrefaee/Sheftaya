@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sheftaya/core/constants/shared_pref_keys.dart';
 import 'package:sheftaya/features/shift_details/presentation/widget/shift_job_summary_card.dart';
 import 'package:sheftaya/features/shift_details/presentation/widget/shift_status_time_line.dart';
 
@@ -107,7 +108,6 @@ class ShiftDetailsViewBody extends StatelessWidget {
   Widget _buildActionButton(BuildContext context, ShiftModel shift) {
     bool isFullyConfirmed = shift.isWorkerArrived && shift.isEmployerConfirmed;
 
-    // الحالة 1: تم التأكيد من الطرفين (زرار بدء العمل)
     if (isFullyConfirmed) {
       return AppTextButton(
         textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
@@ -119,24 +119,27 @@ class ShiftDetailsViewBody extends StatelessWidget {
       );
     }
 
-    // الحالة 2: العامل داس تأكيد وبانتظار صاحب العمل (زرار مطفأ)
     if (role == UserRole.worker && shift.isWorkerArrived) {
       return AppTextButton(
         textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
         backgroundColor: const Color(0xffD9D9D9),
         buttonText: "بانتظار صاحب العمل",
-        onPressed: () {}, // Disabled
+        onPressed: () {},
       );
     }
 
-    // الحالة 3: زرار التأكيد الفعلي (للعامل أو صاحب العمل)
+    // ✅ التغيير الوحيد هنا — بدل confirmArrival القديم
     return AppTextButton(
       textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
       backgroundColor: ColorsManager.primary,
       buttonText: role == UserRole.worker ? "تأكيد وصولى" : "تأكيد وصول العامل",
       onPressed: () {
-        context.read<ShiftCubit>().confirmArrival(shift.id, role);
+        final cubit = context.read<ShiftCubit>();
+        if (role == UserRole.worker) {
+          cubit.workerArrived(SharedPrefKeys.userId, ); // ✅ Socket
+        } else {
+          cubit.approveArrival('appId'); // ✅ Socket
+        }
       },
     );
-  }
-}
+  }}

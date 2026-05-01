@@ -14,6 +14,7 @@ import 'package:sheftaya/features/on_boarding_screen.dart/screen2.dart';
 import 'package:sheftaya/features/on_boarding_screen.dart/screen3.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import '../../core/services/socket_service.dart';
 import '../shift_details/presentation/widget/enums.dart';
 
 class OnBoardingScreen extends StatefulWidget {
@@ -57,7 +58,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
       // if (!mounted) return;
 
-
+      getIt<SocketService>().connect();
       _navigateByRole(userCubit.state.user?.role);
     } else {
       await prefs.setBool('hasOpenedBefore', true);
@@ -69,6 +70,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   void _navigateByRole(String? role) {
     if (role == 'employer') {
       // GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
+
       context.push(
         AppRouter.kShiftDetailsView,
         extra: {
@@ -78,6 +80,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
       );
     } else {
      // GoRouter.of(context).pushReplacement(AppRouter.kShiftDetailsView);
+
       context.push(
         AppRouter.kShiftDetailsView,
         extra: {
@@ -85,7 +88,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           'jobId': 'job_001',      // الـ ID اللي هيتكرت في Firebase
         },
       );
-      GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
+      // GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
     }
   }
 

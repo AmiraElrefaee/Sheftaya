@@ -25,6 +25,7 @@ import '../../features/publish_job/presentation/mangers/job_details_cubit/job_de
 import '../../features/publish_job/presentation/mangers/job_publish_cubit/job_publish_cubit.dart';
 import '../../features/shift_details/domain/repo/shift_repo.dart';
 import '../../features/shift_details/presentation/managers/shift_cubit.dart';
+import '../services/socket_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -76,7 +77,7 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<VerifySignupRepo>(
     () => VerifySignupRepo(getIt()),
   );
-  getIt.registerFactory<VerifySignupCubit>(
+  getIt.registerFactory<VerifySignupCubit>( 
     () => VerifySignupCubit(getIt(), getIt<UserCubit>()),
   );
 
@@ -108,9 +109,10 @@ void setupServiceLocator() {
   getIt.registerLazySingleton<ShiftRepository>(
         () => ShiftRepository(),
   );
+  getIt.registerLazySingleton<SocketService>(() => SocketService());
 
   getIt.registerFactory<ShiftCubit>(
-        () => ShiftCubit(getIt<ShiftRepository>()),
+        () => ShiftCubit(getIt<SocketService>()),
   );
 
 }

@@ -20,10 +20,6 @@ Future<void> bootstrap() async {
       await dotenv.load(fileName: 'assets/.env');
 
       setupServiceLocator();
-      // Bloc.observer = MyBlocObserver();
-      // await Firebase.initializeApp(
-      //   options: DefaultFirebaseOptions.currentPlatform,
-      // );
 
       await ScreenUtil.ensureScreenSize();
 
