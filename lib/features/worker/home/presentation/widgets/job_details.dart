@@ -14,7 +14,6 @@ import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_cubi
 import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_state.dart';
 import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 class JobDetails extends StatefulWidget {
   final String jobId;
 

@@ -22,7 +22,7 @@ import 'package:sheftaya/features/sign_up/presentation/verify_account_screen.dar
 import 'package:sheftaya/features/worker/home/data/models/review_model.dart';
 import 'package:sheftaya/features/worker/home/logic/apply_for_job/apply_job_cubit.dart';
 import 'package:sheftaya/features/worker/home/logic/job_details/job_details_cubit.dart'
-    as worker_cubit;
+as worker_cubit;
 import 'package:sheftaya/features/worker/home/presentation/widgets/all_jobs_screen.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/job_details.dart';
 import 'package:sheftaya/features/worker/home/presentation/widgets/job_reviews.dart';
@@ -34,12 +34,13 @@ import 'package:sheftaya/features/worker/my_application_jobs/logic/my_jobs_cubit
 
 import '../core/di/service_locator.dart';
 import '../features/publish_job/data/model/job_details_response.dart'
-    as publish_job;
+as publish_job;
 import '../features/publish_job/presentation/job_publish_success_screen.dart';
 import '../features/publish_job/presentation/mangers/job_details_cubit/job_details_cubit.dart';
 import '../features/publish_job/presentation/map_picker_screen.dart';
 import '../features/publish_job/presentation/publish_job_view.dart';
 import '../features/shift_details/presentation/shift_details_view.dart';
+import '../features/shift_details/presentation/widget/enums.dart';
 import '../features/term_condition/presentation/term_condtion_view.dart';
 
 abstract class AppRouter {
@@ -190,7 +191,19 @@ abstract class AppRouter {
       ),
       GoRoute(
         path: kShiftDetailsView,
-        builder: (context, state) => ShiftDetailsView(),
+        builder: (context, state) {
+          final Map<String, dynamic> data =
+              state.extra as Map<String, dynamic>? ??
+                  {
+                    'role': UserRole.worker,
+                    'jobId': 'test_job_123',
+                  };
+
+          return ShiftDetailsView(
+            role: data['role'] as UserRole,
+            shiftId: data['jobId'] as String,
+          );
+        },
       ),
       GoRoute(path: kFaqScreen, builder: (context, state) => FAQScreen()),
       GoRoute(

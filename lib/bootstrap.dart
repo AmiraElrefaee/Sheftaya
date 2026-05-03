@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:bloc/bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -19,25 +21,18 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> bootstrap() async {
-  await runZonedGuarded(
+  runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-
+      await Firebase.initializeApp();
       await dotenv.load(fileName: 'assets/.env');
-
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
-
-      FirebaseMessaging.onBackgroundMessage(
-        _firebaseMessagingBackgroundHandler,
-      );
 
       setupServiceLocator();
 
       await _requestNotificationPermission();
 
       await ScreenUtil.ensureScreenSize();
+
 
       runApp(const Sheftaya());
     },
