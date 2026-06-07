@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sheftaya/app/router.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
+import 'package:sheftaya/features/shift_details/presentation/widget/enums.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart';
+
+import '../../../../shift_details/data/model/shift_model.dart';
 
 class EmployerJobCard extends StatelessWidget {
   final MyJobItem item;
@@ -22,7 +27,10 @@ class EmployerJobCard extends StatelessWidget {
     final statusInfo = _statusOf(rawStatus);
     final postedAt = _formatDate(job?.createdAt ?? item.postedAt);
 
+    final isActive = rawStatus == 'active' || rawStatus == 'open';
+
     return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -38,70 +46,159 @@ class EmployerJobCard extends StatelessWidget {
           right: BorderSide(color: statusInfo.color, width: 6.w),
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // صورة الوظيفة
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12.r),
-            child: imageUrl != null
-                ? Image.network(
-                    imageUrl,
-                    height: 72.h,
-                    width: 72.w,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => _placeholder(),
-                  )
-                : _placeholder(),
-          ),
-          SizedBox(width: 12.w),
-          // البيانات
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyles.font16BlackBold),
-                SizedBox(height: 2.h),
-                if (company.isNotEmpty)
-                  Text(
-                    company,
-                    style: TextStyles.font14BlackMedium.copyWith(
-                      color: ColorsManager.darkGrey,
-                    ),
-                  ),
-
-                if (postedAt.isNotEmpty) ...[
-                  SizedBox(height: 2.h),
-                  Text(
-                    postedAt,
-                    style: TextStyles.font12BlackMedium.copyWith(
-                      color: ColorsManager.grey,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          // باج الحالة
-          InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(8.r),
-            child: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: statusInfo.color.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(8.r),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12.r),
+                child: imageUrl != null
+                    ? Image.network(
+                  imageUrl,
+                  height: 72.h,
+                  width: 72.w,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => _placeholder(),
+                )
+                    : _placeholder(),
               ),
-              child: Text(
-                statusInfo.label,
-                style: TextStyles.font12BlackBold.copyWith(
-                  color: statusInfo.color,
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: TextStyles.font16BlackBold),
+                    SizedBox(height: 2.h),
+                    if (company.isNotEmpty)
+                      Text(
+                        company,
+                        style: TextStyles.font14BlackMedium.copyWith(
+                          color: ColorsManager.darkGrey,
+                        ),
+                      ),
+                    if (postedAt.isNotEmpty) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        postedAt,
+                        style: TextStyles.font12BlackMedium.copyWith(
+                          color: ColorsManager.grey,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: statusInfo.color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  statusInfo.label,
+                  style: TextStyles.font12BlackBold.copyWith(
+                    color: statusInfo.color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildButton(
+                  context: context,
+                  text: 'عرض التفاصيل',
+                  icon: Icons.visibility_outlined,
+                  onPressed: () => _navigateToJobDetails(context),
+                  isPrimary: false,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildButton(
+                  context: context,
+                  text: isActive ? 'بدء العمل' : 'عرض الوردية',
+                  icon: isActive ? Icons.play_arrow_rounded : Icons.history_rounded,
+                  onPressed: () => _navigateToShiftDetails(context),
+                  isPrimary: true,
+                ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildButton({
+    required BuildContext context,
+    required String text,
+    required IconData icon,
+    required VoidCallback onPressed,
+    required bool isPrimary,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(8.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 10.h),
+        decoration: BoxDecoration(
+          color: isPrimary
+              ? ColorsManager.primary
+              : ColorsManager.lightGrey.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18.sp,
+              color: isPrimary ? Colors.white : ColorsManager.primary,
+            ),
+            SizedBox(width: 6.w),
+            Text(
+              text,
+              style: TextStyles.font12BlackBold.copyWith(
+                color: isPrimary ? Colors.white : ColorsManager.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToJobDetails(BuildContext context) {
+    context.push(AppRouter.kEmployerJobDetailsScreen, extra: item);
+  }
+
+  void _navigateToShiftDetails(BuildContext context) {
+    // final job = item.job;
+    // final jobId = job?.id ?? '';
+    // final appId = item.applicationId ?? '';
+    //
+    // if (jobId.isEmpty) {
+    //   debugPrint('❌ Cannot navigate to ShiftDetails: jobId is empty');
+    //   return;
+    // }
+    //
+    // // ✅ إنشاء ShiftModel من MyJobItem مباشرة
+    // final shiftModel = ShiftModel.fromMyJobItem(
+    //   item: item,
+    //   role: UserRole.employer,
+    // );
+
+    context.push(
+      AppRouter.kShiftDetailsView,
+      extra: {
+        'item': item,
+        'role': UserRole.employer,
+      },
     );
   }
 
@@ -135,7 +232,7 @@ class EmployerJobCard extends StatelessWidget {
   _StatusInfo _statusOf(String status) {
     switch (status) {
       case 'active':
-        return _StatusInfo('عرض التفاصيل', ColorsManager.primary);
+        return _StatusInfo('نشطة', ColorsManager.primary);
       case 'completed':
         return _StatusInfo('مكتملة', ColorsManager.success);
       case 'cancelled':

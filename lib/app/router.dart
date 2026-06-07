@@ -39,7 +39,10 @@ import '../features/publish_job/presentation/job_publish_success_screen.dart';
 import '../features/publish_job/presentation/mangers/job_details_cubit/job_details_cubit.dart';
 import '../features/publish_job/presentation/map_picker_screen.dart';
 import '../features/publish_job/presentation/publish_job_view.dart';
+import '../features/shift_details/data/model/shift_model.dart';
+import '../features/shift_details/presentation/managers/shift_cubit.dart';
 import '../features/shift_details/presentation/shift_details_view.dart';
+import '../features/shift_details/presentation/shift_timer_view.dart';
 import '../features/shift_details/presentation/widget/enums.dart';
 import '../features/term_condition/presentation/term_condtion_view.dart';
 
@@ -71,6 +74,7 @@ abstract class AppRouter {
   static const kNotificationsScreen = '/NotificationsScreen';
   static const kJobApplicationsScreen = '/JobApplicationsScreen';
   static const kEmployerJobDetailsScreen = '/EmployerJobDetailsScreen';
+  static const kShiftTimerScreen = '/ShiftTimerScreen';
 
   static final router = GoRouter(
     routes: [
@@ -189,22 +193,39 @@ abstract class AppRouter {
         path: kMapPickerScreen,
         builder: (context, state) => MapPickerScreen(),
       ),
+      // GoRoute(
+      //   path: kShiftDetailsView,
+      //   builder: (context, state) {
+      //     final Map<String, dynamic> data =
+      //         state.extra as Map<String, dynamic>? ??
+      //             {
+      //               'role': UserRole.worker,
+      //               'jobId': 'test_job_123',
+      //             };
+      //
+      //     return ShiftDetailsView(
+      //       role: data['role'] as UserRole,
+      //       shiftId: data['jobId'] as String,
+      //     );
+      //   },
+      // ),
+      // في router.dart
+      // في router.dart
+      // في router.dart
       GoRoute(
         path: kShiftDetailsView,
         builder: (context, state) {
-          final Map<String, dynamic> data =
-              state.extra as Map<String, dynamic>? ??
-                  {
-                    'role': UserRole.worker,
-                    'jobId': 'test_job_123',
-                  };
+          final extra = state.extra as Map<String, dynamic>;
+          final item = extra['item'] as MyJobItem;
+          final role = extra['role'] as UserRole; // ✅ الآن role صحيح
 
-          return ShiftDetailsView(
-            role: data['role'] as UserRole,
-            shiftId: data['jobId'] as String,
+          return BlocProvider(
+            create: (context) => getIt<ShiftCubit>()..initShiftDetails(item, role: role),
+            child: ShiftDetailsView(role: role),
           );
         },
       ),
+
       GoRoute(path: kFaqScreen, builder: (context, state) => FAQScreen()),
       GoRoute(
         path: kMyProfileScreen,
@@ -247,6 +268,16 @@ abstract class AppRouter {
           );
         },
       ),
+  // في router.dart
+
+
+  GoRoute(
+  path: kShiftTimerScreen,
+  builder: (context, state) {
+  final item = state.extra as MyJobItem;
+  return ShiftTimerScreen(item: item);
+  },
+  ),
     ],
   );
 }

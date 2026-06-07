@@ -9,20 +9,17 @@ import 'managers/shift_cubit.dart'; // تأكدي من مسار الـ enum
 class ShiftDetailsView extends StatelessWidget {
   // بنضيف الـ role هنا عشان لما ننتقل للصفحة دي نحدد هي لمين
   final UserRole role;
-  final String shiftId;
+  // final String shiftId;
 
   const ShiftDetailsView(
-      {super.key, required this.role, required this.shiftId});
+      {super.key, required this.role});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<ShiftCubit>()..initShiftDetails(shiftId),
-      child: Scaffold(
-        backgroundColor: Colors.white, // اختياري لتوحيد الخلفية
-        body: SafeArea(
-          child: ShiftDetailsViewBody(role: role), // ✅ تمرير الـ role للـ Body
-        ),
+    return Scaffold(
+      backgroundColor: Colors.white, // اختياري لتوحيد الخلفية
+      body: SafeArea(
+        child: ShiftDetailsViewBody(role: role), // ✅ تمرير الـ role للـ Body
       ),
     );
   }

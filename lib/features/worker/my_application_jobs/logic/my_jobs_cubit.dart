@@ -18,6 +18,7 @@ class MyJobsCubit extends Cubit<MyJobsState> {
         await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
 
     final response = await _repo.getMyJobs('Bearer $token');
+    print('📥-📥-📥-📥📥📥📥📥RAW first item: ${(response as dynamic)}');
 
     response.when(
       success: (data) {

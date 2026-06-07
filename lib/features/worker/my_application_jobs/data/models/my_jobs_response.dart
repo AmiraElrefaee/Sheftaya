@@ -22,6 +22,8 @@ class MyJobsResponse {
 
 @JsonSerializable(explicitToJson: true)
 class MyJobItem {
+  @JsonKey(name: '_id')
+  final String? id;
   final String? title;
   final String? place;
   final String? postedAt;
@@ -31,8 +33,10 @@ class MyJobItem {
   final String? applicationStatus;
   final String? arrivalStatus;
   final String? appliedAt;
+  final String? applicationId; // ← أضيفي السطر ده
 
   MyJobItem({
+    this.id,
     this.title,
     this.place,
     this.postedAt,
@@ -42,6 +46,7 @@ class MyJobItem {
     this.applicationStatus,
     this.arrivalStatus,
     this.appliedAt,
+    this.applicationId, // ← وهنا
   });
 
   factory MyJobItem.fromJson(Map<String, dynamic> json) =>

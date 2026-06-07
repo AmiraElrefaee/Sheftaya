@@ -1,14 +1,29 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/colors_manager.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../../publish_job/presentation/widgets/custom_app_bar.dart';
+import '../../../../features/worker/my_application_jobs/data/models/my_jobs_response.dart';
+import '../../../../core/utils/snackbar.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class ShiftJobSummaryCard extends StatelessWidget {
+  final JobDetails? job;
+  final DateTime startTime;
+  final double price;
+
+  const ShiftJobSummaryCard({
+    super.key,
+    required this.job,
+    required this.startTime,
+    required this.price,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -21,55 +36,47 @@ class ShiftJobSummaryCard extends StatelessWidget {
       child: Column(
         children: [
           CustomAppBar(title: "تأكيد الوصول"),
-
-          _buildMapSection(),
-          SizedBox(height: 20.h,),
-
+          _buildMapSection(context),
+          SizedBox(height: 20.h),
           Row(
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10.r),
-                child:CachedNetworkImage(
-                  imageUrl: "",
+                child: CachedNetworkImage(
+                  imageUrl: job?.jobImages?.isNotEmpty == true ? job!.jobImages!.first : '',
                   width: 100,
                   height: 100,
                   fit: BoxFit.cover,
-                  // يظهر أثناء تحميل الصورة
                   placeholder: (context, url) => Container(
                     color: ColorsManager.lightGrey,
-                    child: const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
+                    child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                   ),
-                  // يظهر في حالة حدوث خطأ في الرابط أو الإنترنت
                   errorWidget: (context, url, error) => Container(
                     color: ColorsManager.lightGrey,
-                    child: Icon(
-                      Icons.image_not_supported_outlined,
-                      color: ColorsManager.grey,
-                      size: 24.w,
-                    ),
+                    child: Icon(Icons.image_not_supported_outlined, color: ColorsManager.grey, size: 24.w),
                   ),
-              ),),
+                ),
+              ),
               SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("نادل", style: TextStyles.font20BlackMedium),
-                    Text(
+                    Text(job?.title ?? '', style: TextStyles.font20BlackMedium),
+                    Text(job?.companyDetails?.companyName ?? job?.place ?? '',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        "Center Perk Cafe", style: TextStyles.font20BlackMedium),
-                    Text("400 ج", style: TextStyles.font20BlackBold.copyWith(color: ColorsManager.green)),
+                        style: TextStyles.font20BlackMedium),
+                    Text('${price.toStringAsFixed(0)} ج',
+                        style: TextStyles.font20BlackBold.copyWith(color: ColorsManager.green)),
                   ],
                 ),
               ),
               Column(
                 children: [
-                  _buildInfoBadge("الثلاثاء 2 ديسمبر"),
+                  _buildInfoBadge(_formatDate(startTime)),
                   SizedBox(height: 4.h),
-                  _buildInfoBadge("من 2:00م : 6:00م"),
+                  _buildInfoBadge(_formatTime(startTime)),
                 ],
               )
             ],
@@ -79,36 +86,252 @@ class ShiftJobSummaryCard extends StatelessWidget {
     );
   }
 
+  // ✅ بناء رابط الخريطة من الإحداثيات أو العنوان
+  Uri? _buildMapsUri() {
+    final coords = job?.location?.coordinates;
+    final address = job?.location?.address ?? job?.place;
+
+    if (coords != null && coords.length >= 2) {
+      final longitude = _asDouble(coords[0]);
+      final latitude = _asDouble(coords[1]);
+
+      if (latitude != null && longitude != null) {
+        return Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
+        );
+      }
+    }
+
+    if (address != null && address.trim().isNotEmpty) {
+      return Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}',
+      );
+    }
+
+    return null;
+  }
+
+  double? _asDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  // ✅ فتح الخريطة عند الضغط
+  Future<void> _openMap(BuildContext context) async {
+    final uri = _buildMapsUri();
+
+    if (uri == null) {
+      if (context.mounted) {
+        customSnackBar(
+          context,
+          'لا يوجد موقع محدد لهذه الوظيفة',
+          ColorsManager.error,
+        );
+      }
+      return;
+    }
+
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched && context.mounted) {
+        customSnackBar(
+          context,
+          'تعذر فتح الخريطة',
+          ColorsManager.error,
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        customSnackBar(
+          context,
+          'حدث خطأ أثناء محاولة فتح الخريطة',
+          ColorsManager.error,
+        );
+      }
+    }
+  }
+
+  // ✅ عرض الخريطة
+  Widget _buildMapSection(BuildContext context) {
+    final location = job?.location;
+    final coordinates = location?.coordinates;
+    final address = location?.address ?? job?.place ?? 'موقع العمل';
+
+    if (coordinates != null && coordinates.length >= 2) {
+      final longitude = _asDouble(coordinates[0]);
+      final latitude = _asDouble(coordinates[1]);
+
+      if (latitude != null && longitude != null) {
+        return GestureDetector(
+          onTap: () => _openMap(context),
+          child: Container(
+            height: 162.h,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: ColorsManager.lightGrey, width: 1),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12.r),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // ✅ خريطة تفاعلية من Flutter Map (مجانية)
+                  FlutterMap(
+                    options: MapOptions(
+                      center: LatLng(latitude, longitude),
+                      zoom: 15,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.sheftaya.app',
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: LatLng(latitude, longitude),
+                            width: 40.w,
+                            height: 40.h,
+                            child: Icon(
+                              Icons.location_on_rounded,
+                              size: 32.sp,
+                              color: ColorsManager.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  // ✅ إضافة AbsorbPointer لمنع التفاعل مع الخريطة (بدلاً من interactive)
+                  Positioned.fill(
+                    child: AbsorbPointer(
+                      absorbing: true,
+                      child: Container(
+                        color: Colors.transparent,
+                      ),
+                    ),
+                  ),
+                  // تراكب شفاف مع أيقونة
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    child: Center(
+                      child: Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.open_in_new,
+                          size: 20.sp,
+                          color: ColorsManager.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
+    return _buildMapPlaceholder(context, address, null, null);
+  }
+
+  // ✅ Placeholder للخريطة
+  Widget _buildMapPlaceholder(BuildContext context, String address, double? lat, double? lng) {
+    return GestureDetector(
+      onTap: () => _openMap(context),
+      child: Container(
+        height: 162.h,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: ColorsManager.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: ColorsManager.lightGrey, width: 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.map_rounded,
+              size: 48.sp,
+              color: ColorsManager.primary,
+            ),
+            SizedBox(height: 8.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Text(
+                address,
+                style: TextStyles.font14BlackMedium.copyWith(
+                  color: ColorsManager.primary,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (lat != null && lng != null) ...[
+              SizedBox(height: 4.h),
+              Text(
+                '${lat.toStringAsFixed(4)}°, ${lng.toStringAsFixed(4)}°',
+                style: TextStyles.font10BlackRegular.copyWith(
+                  color: ColorsManager.grey,
+                ),
+              ),
+            ],
+            SizedBox(height: 4.h),
+            Text(
+              'اضغط للتنقل إلى الموقع',
+              style: TextStyles.font12BlackMedium.copyWith(
+                color: ColorsManager.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime dt) {
+    const days = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    return '${days[dt.weekday - 1]} ${dt.day} ${months[dt.month - 1]}';
+  }
+
+  String _formatTime(DateTime dt) {
+    final h = dt.hour > 12 ? dt.hour - 12 : dt.hour;
+    final m = dt.minute.toString().padLeft(2, '0');
+    final suffix = dt.hour >= 12 ? 'م' : 'ص';
+    return 'من $h:$m$suffix';
+  }
+
   Widget _buildInfoBadge(String text) {
     return Container(
       width: 127.w,
       alignment: Alignment.center,
       padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 9.h),
-      decoration: BoxDecoration(color: ColorsManager.background, borderRadius: BorderRadius.circular(10.r)),
-      child: Text(text, style: TextStyles.font14BlackMedium),
-    );
-  }
-  Widget _buildMapSection() {
-    return Container(
-      height: 162.h,
-      width: double.infinity,
       decoration: BoxDecoration(
-        color: ColorsManager.primary,
-        borderRadius: BorderRadius.circular(12.r),
-        image: DecorationImage(image: AssetImage('assets/images/empty_state.png'),
-            fit: BoxFit.cover),
+        color: ColorsManager.background,
+        borderRadius: BorderRadius.circular(10.r),
       ),
-      child: Center(child:
-      Container(
-
-        padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            
-              color:ColorsManager.primary ,
-            shape: BoxShape.circle
-          ),
-          child: SvgPicture.asset('assets/icon/sigin_state.svg', height: 20,))
-      ),
+      child: Text(text, style: TextStyles.font14BlackMedium),
     );
   }
 }

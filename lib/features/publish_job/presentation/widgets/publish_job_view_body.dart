@@ -103,7 +103,9 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
 
       // التحويل لـ UTC قبل الإرسال
       final DateTime utcStart = localDateTime.toUtc();
-      final DateTime utcEnd = utcStart.add(Duration(days: days));
+      final DateTime utcEnd = utcStart
+          .add(Duration(days: days - 1)) // لو الأيام = 1، هيزود 0 أيام (يعني الشغل في نفس اليوم)
+          .add(Duration(hours: hours));  // هيزود عدد ساعات الشفت المحددة بالظبط
       double dailySalary = double.tryParse(salaryController.text) ?? 0;
 
       double savedLat = await SharedPrefHelper.getDouble(SharedPrefKeys.lastLatitude);
@@ -229,9 +231,24 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
       reqController: requirementsController,
       dateController: dateController,
       timeController: timeController,
-      onDaysChanged: (val) => days = val,
-      onHoursChanged: (val) => hours = val,
-      onWorkersChanged: (val) => workers = val,
+
+      // ✅ تعديل الـ Callbacks لعمل setState لتحديث القيم فوراً:
+      onDaysChanged: (val) {
+        setState(() {
+          days = val;
+        });
+      },
+      onHoursChanged: (val) {
+        setState(() {
+          hours = val;
+        });
+      },
+      onWorkersChanged: (val) {
+        setState(() {
+          workers = val;
+        });
+      },
+
       onExperienceChanged: (val) => setState(() => experience = _mapExperience(val)),
       onLocationSelected: (latValue, lngValue) {
         setState(() {
@@ -239,8 +256,6 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
           pickedLng = lngValue;
         });
       },
-
-      // ✅ Add validators for required fields inside JobInfoStepForm
     );
   }
 

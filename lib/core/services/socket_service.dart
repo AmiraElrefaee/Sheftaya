@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../constants/shared_pref_helper.dart';
 import '../constants/shared_pref_keys.dart';
-import '../networking/api_constants.dart';
 
 class SocketService {
   static final SocketService _instance = SocketService._internal();
@@ -12,17 +11,16 @@ class SocketService {
   IO.Socket? _socket;
   bool _isConnecting = false;
   String? _currentJobId;
+  String? _currentUserId; // ← أضيفي ده
 
-  static const String _baseUrl = "https://sheftaya-production.up.railway.app";
+  static const String _baseUrl = "https://sheftaya-production-12af.up.railway.app";
 
   Future<void> connect() async {
     if (_socket?.connected == true || _isConnecting) return;
     _isConnecting = true;
 
     try {
-      final token = await SharedPrefHelper.getSecuredString(
-        SharedPrefKeys.userToken,
-      );
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
 
       if (token.isEmpty) {
         log('⚠️ No token found');
@@ -34,26 +32,11 @@ class SocketService {
       _socket?.dispose();
       _socket = null;
 
-      // _socket = IO.io(
-      //   _baseUrl,
-      //   IO.OptionBuilder()
-      //       .setTransports(['polling', 'websocket'])
-      //       .setAuth({'token': token})
-      //       .setQuery({'token': token})
-      //       .enableReconnection()
-      //       .setReconnectionAttempts(999999)
-      //       .setReconnectionDelay(300)
-      //       .setReconnectionDelayMax(1500)
-      //       .disableAutoConnect()
-      //       .build(),
-      // );
       _socket = IO.io(
         _baseUrl,
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .setAuth({'token': token})
-        // ❌ شيلي السطر ده
-        // .setQuery({'token': token})
             .enableReconnection()
             .setReconnectionAttempts(999999)
             .setReconnectionDelay(300)
@@ -77,10 +60,14 @@ class SocketService {
     _socket!
       ..onConnect((_) {
         log('✅ Socket Connected');
-        // Rejoin room after reconnect
+        // rejoin كل الـ rooms بعد reconnect
         if (_currentJobId != null) {
           _socket?.emit('join_job', _currentJobId);
           log('🏠 Re-joined job room: $_currentJobId');
+        }
+        if (_currentUserId != null) {
+          _socket?.emit('join_user', _currentUserId);
+          log('👤 Re-joined user room: $_currentUserId');
         }
       })
       ..onDisconnect((reason) {
@@ -94,7 +81,14 @@ class SocketService {
         if (_currentJobId != null) {
           _socket?.emit('join_job', _currentJobId);
         }
+        if (_currentUserId != null) {
+          _socket?.emit('join_user', _currentUserId);
+        }
       });
+  }
+
+  void onAny(Function(String, dynamic) handler) {
+    _socket?.onAny(handler);
   }
 
   void joinJobRoom(String jobId) {
@@ -103,12 +97,17 @@ class SocketService {
     log('📡 Joined job room: $jobId');
   }
 
+  void joinUserRoom(String userId) {
+    _currentUserId = userId; // ← احفظيه
+    _socket?.emit('join_user', userId);
+    log('👤 Joined user room: $userId');
+  }
+
   void leaveJobRoom(String jobId) {
     _socket?.emit('leave_job', jobId);
     _currentJobId = null;
   }
 
-  // Worker Actions
   void workerOnTheWay(String appId, String workerId) {
     _socket?.emit('worker_on_the_way', {
       'appId': appId,
@@ -119,7 +118,6 @@ class SocketService {
   }
 
   void workerArrived(String appId, String workerId) {
-
     _socket?.emit('worker_arrived', {
       'appId': appId,
       'workerId': workerId,
@@ -128,7 +126,6 @@ class SocketService {
     });
   }
 
-  // Employer Actions
   void approveArrival(String appId) {
     _socket?.emit('arrival_approved', {
       'appId': appId,
@@ -143,6 +140,7 @@ class SocketService {
       'status': 'in_progress',
       'time': DateTime.now().toIso8601String(),
     });
+    log('📤 Emitted shift_started for appId: $appId');
   }
 
   void endShift(String appId) {

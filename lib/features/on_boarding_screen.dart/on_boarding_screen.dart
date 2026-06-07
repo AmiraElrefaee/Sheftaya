@@ -69,26 +69,36 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
 
   void _navigateByRole(String? role) {
     if (role == 'employer') {
-      // GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
+      GoRouter.of(context).pushReplacement(AppRouter.kEmployerHomeScreen);
 
-      context.push(
-        AppRouter.kShiftDetailsView,
-        extra: {
-          'role': UserRole.employer, // أو UserRole.employer عشان تشوفي الفرق
-          'jobId': 'job_001',      // الـ ID اللي هيتكرت في Firebase
-        },
-      );
+      // context.push(
+      //   AppRouter.kShiftDetailsView,
+      //   extra: {
+      //     'role': UserRole.employer,
+      //     'jobId': '6a20806aac7f5100decd0d0d',
+      //     'appId': '6a208075ac7f5100decd0d15',
+      //     'title': 'test 1',
+      //     'companyName': 'Supermarket',
+      //     'imageUrl': '',
+      //     'price': 60.0,
+      //     'startTime': DateTime.parse('2026-06-03T19:30:00.000Z'),
+      //   },
+      // );
     } else {
-     // GoRouter.of(context).pushReplacement(AppRouter.kShiftDetailsView);
-
-      context.push(
-        AppRouter.kShiftDetailsView,
-        extra: {
-          'role': UserRole.worker, // أو UserRole.employer عشان تشوفي الفرق
-          'jobId': 'job_001',      // الـ ID اللي هيتكرت في Firebase
-        },
-      );
-      // GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
+      // context.push(
+      //   AppRouter.kShiftDetailsView,
+      //   extra: {
+      //     'role': UserRole.worker,
+      //     'jobId': '6a20806aac7f5100decd0d0d',
+      //     'appId': '6a208075ac7f5100decd0d15',
+      //     'title': 'test 1',
+      //     'companyName': 'Supermarket',
+      //     'imageUrl': '',
+      //     'price': 60.0,
+      //     'startTime': DateTime.parse('2026-06-03T19:30:00.000Z'),
+      //   },
+      // );
+      GoRouter.of(context).pushReplacement(AppRouter.kWorkerHomeScreen);
     }
   }
 

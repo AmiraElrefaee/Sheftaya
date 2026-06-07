@@ -153,7 +153,6 @@ class _JobsList extends StatelessWidget {
   final String emptyTitle;
   final String emptySubtitle;
   final IconData emptyIcon;
-
   final String? notice;
 
   const _JobsList({
@@ -191,9 +190,7 @@ class _JobsList extends StatelessWidget {
           padding: EdgeInsets.only(bottom: 12.h),
           child: EmployerJobCard(
             item: item,
-            onTap: () {
-              context.push(AppRouter.kEmployerJobDetailsScreen, extra: item);
-            },
+            // لا حاجة لـ onTap الآن لأن الزر داخل الـ Card نفسه
           ),
         );
       },

@@ -178,5 +178,10 @@ Future<AcceptWorkerResponse> acceptWorker(
   @Path('applicationId') String applicationId,
   @Header('Authorization') String token,
   );
-  
+
+  @POST('applications/mark-arrival/{appId}')
+  Future<void> markArrival(
+      @Path('appId') String appId,
+      @Header('Authorization') String token,
+      );
 }

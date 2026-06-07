@@ -16,13 +16,13 @@ class ActionButtonsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // زرار تعديل الوظيفة
+
         OutlinedButton(
           onPressed: () {
 
             final state = context.read<JobDetailsCubit>().state;
             if (state is JobDetailsSuccess) {
-              // نرجع لصفحة الـ Create ونبعت الـ Job كـ extra
+
               context.pushReplacement(AppRouter.kPublishJobView, extra: state.job);
             }
           },
@@ -33,14 +33,17 @@ class ActionButtonsSection extends StatelessWidget {
             minimumSize: Size(289.w, 48.h),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
           ),
-          child: Text('تعديل الوظيفة', style: TextStyles.font16BlackBold.copyWith(
+          child: Text('تعديل الوظيفة',
+              style: TextStyles.font16BlackBold.copyWith(
             color: ColorsManager.primary
           )),
         ),
         SizedBox(height: 12.h),
 
         OutlinedButton(
-          onPressed: () {},
+          onPressed: () {
+            context.go(AppRouter.kEmployerHomeScreen);
+          },
 
           style: OutlinedButton.styleFrom(
 
@@ -53,7 +56,8 @@ class ActionButtonsSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16.r)),
 
           ),
-          child: Text('العوده الى الرئيسية', style: TextStyles.font16PrimarySemiBold.copyWith(
+          child: Text('العوده الى الرئيسية',
+              style: TextStyles.font16PrimarySemiBold.copyWith(
 
             fontWeight: FontWeight.bold
           )),

@@ -23,6 +23,7 @@ Map<String, dynamic> _$MyJobsResponseToJson(MyJobsResponse instance) =>
     };
 
 MyJobItem _$MyJobItemFromJson(Map<String, dynamic> json) => MyJobItem(
+  id: json['_id'] as String?,
   title: json['title'] as String?,
   place: json['place'] as String?,
   postedAt: json['postedAt'] as String?,
@@ -34,9 +35,11 @@ MyJobItem _$MyJobItemFromJson(Map<String, dynamic> json) => MyJobItem(
   applicationStatus: json['applicationStatus'] as String?,
   arrivalStatus: json['arrivalStatus'] as String?,
   appliedAt: json['appliedAt'] as String?,
+  applicationId: json['applicationId'] as String?,
 );
 
 Map<String, dynamic> _$MyJobItemToJson(MyJobItem instance) => <String, dynamic>{
+  '_id': instance.id,
   'title': instance.title,
   'place': instance.place,
   'postedAt': instance.postedAt,
@@ -46,6 +49,7 @@ Map<String, dynamic> _$MyJobItemToJson(MyJobItem instance) => <String, dynamic>{
   'applicationStatus': instance.applicationStatus,
   'arrivalStatus': instance.arrivalStatus,
   'appliedAt': instance.appliedAt,
+  'applicationId': instance.applicationId,
 };
 
 JobDetails _$JobDetailsFromJson(Map<String, dynamic> json) => JobDetails(

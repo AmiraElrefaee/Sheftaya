@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/success_mesaage_section.dart';
 
+import '../../../../app/router.dart';
 import '../../../../core/widgets/custom_loading_indicator.dart';
 import '../mangers/job_details_cubit/job_details_cubit.dart';
 import 'action_button_section.dart';
@@ -21,7 +23,9 @@ class JobPublishSuccessViewBody extends StatelessWidget {
           children: [
             CustomAppBar(
               title: 'تأكيد النشر',
-              onTap: (){},
+              onTap: (){
+                context.go(AppRouter.kEmployerHomeScreen);
+              },
             ),
             verticalSpace(20),
             BlocBuilder<JobDetailsCubit, JobDetailsState>(

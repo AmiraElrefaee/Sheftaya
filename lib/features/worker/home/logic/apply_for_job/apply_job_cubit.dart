@@ -21,6 +21,11 @@ class ApplyJobCubit extends Cubit<ApplyJobState> {
 
     response.when(
       success: (data) {
+        // احفظ الـ appId
+        final appId = data.data?['_id'] as String? ?? '';
+        if (appId.isNotEmpty) {
+          SharedPrefHelper.setSecuredString('appId_${data.data?['jobId']}', appId);
+        }
         emit(ApplyJobState.success(data));
       },
       failure: (errorHandler) {

@@ -1,5 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class ApiConstants {
   static String get apiBaseUrl => dotenv.env['API_BASE_URL'] ?? '';
   static const String login = "auth/login";
@@ -25,8 +27,13 @@ class ApiConstants {
   static const String myJobs = 'jobs/my-jobs';
   static const String getApplicationsForJob = 'applications/jobs/{jobId}';
   static const String acceptWorker =
-      'applications/jobs/{jobId}/applications/{applicationId}/accept';     
-                
+      'applications/jobs/{jobId}/applications/{applicationId}/accept';
+  static const String markArrival = 'applications/mark-arrival/{appId}'; // ← جديد
+  static const String shiftOnTheWay = 'shifts/{applicationId}/on-the-way';
+  static const String shiftArrive = 'shifts/{applicationId}/arrive';
+  static const String shiftStart = 'shifts/{applicationId}/start';
+  static const String shiftEnd = 'shifts/{applicationId}/end';
+  static const String shiftConfirm = 'shifts/{applicationId}/confirm';
 }
 
 class ApiErrors {

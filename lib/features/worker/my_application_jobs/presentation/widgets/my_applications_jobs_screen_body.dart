@@ -10,6 +10,8 @@ import 'package:sheftaya/features/worker/my_application_jobs/logic/my_jobs_cubit
 import 'package:sheftaya/features/worker/my_application_jobs/logic/my_jobs_state.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/presentation/widgets/my_applications_job_card.dart';
 
+import '../../../../shift_details/presentation/widget/enums.dart';
+
 class MyApplicationsJobsScreenBody extends StatefulWidget {
   const MyApplicationsJobsScreenBody({super.key});
 
@@ -242,14 +244,18 @@ class _AppList extends StatelessWidget {
   VoidCallback? _showDetails(BuildContext context, MyJobItem item) {
     final jobId = item.job?.id ?? '';
     if (jobId.isEmpty) return null;
-
     if (item.applicationStatus != 'pending' &&
-        item.applicationStatus != 'accepted') {
-      return null;
-    }
+        item.applicationStatus != 'accepted') return null;
 
     return () {
-      context.push(AppRouter.kJobDetailsScreen, extra: jobId);
+      // ✅ مرري الـ role مع الـ item
+      context.push(
+        AppRouter.kShiftDetailsView,
+        extra: {
+          'item': item,
+          'role': UserRole.worker,
+        },
+      );
     };
   }
 }
@@ -286,7 +292,6 @@ class _ErrorWidget extends StatelessWidget {
 class _NoticeCard extends StatelessWidget {
   final String text;
   const _NoticeCard({required this.text});
-
   @override
   Widget build(BuildContext context) {
     return Container(

@@ -9,3 +9,5 @@ part of 'update_fcm_response.dart';
 UpdateFcmResponse _$UpdateFcmResponseFromJson(Map<String, dynamic> json) =>
     UpdateFcmResponse(message: json['data'] as String?);
 
+Map<String, dynamic> _$UpdateFcmResponseToJson(UpdateFcmResponse instance) =>
+    <String, dynamic>{'data': instance.message};
