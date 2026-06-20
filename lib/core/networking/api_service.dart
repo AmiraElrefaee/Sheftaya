@@ -41,54 +41,58 @@ part 'api_service.g.dart';
 abstract class ApiService {
   factory ApiService(Dio dio, {String? baseUrl}) = _ApiService;
 
+  // ===================== Auth =====================
   @POST(ApiConstants.login)
   Future<LoginResponse> login(@Body() LoginRequestBody loginRequestBody);
 
   @POST(ApiConstants.signUp)
   Future<SignupResponse> signup(
-    @Header("Authorization") String token,
-    @Body() SignupRequestBody signupRequestBody,
-  );
+      @Header("Authorization") String token,
+      @Body() SignupRequestBody signupRequestBody,
+      );
 
   @POST(ApiConstants.verifyAccount)
   Future<VerifySignupResponse> verifySignup(
-    @Body() VerifySignupRequestBody body,
-  );
+      @Body() VerifySignupRequestBody body,
+      );
 
+  // ===================== Forget Password =====================
   @POST(ApiConstants.forgetPassword)
   Future<ForgetPassResponse> forgetPassword(
-    @Body() ForgetPassRequestBody forgetPassRequestBody,
-  );
+      @Body() ForgetPassRequestBody forgetPassRequestBody,
+      );
 
   @POST(ApiConstants.verifyPassword)
   Future<VerifyPasswordResponse> verifyPassword(
-    @Body() VerifyPasswordRequestBody verifyPasswordRequestBody,
-  );
+      @Body() VerifyPasswordRequestBody verifyPasswordRequestBody,
+      );
 
   @POST(ApiConstants.resetPassword)
   Future<CreateNewPasswordResponse> createNewPassword(
-    @Header("Authorization") String token,
-    @Body() CreateNewPasswordRequestBody body,
-  );
+      @Header("Authorization") String token,
+      @Body() CreateNewPasswordRequestBody body,
+      );
 
+  // ===================== Jobs =====================
   @POST(ApiConstants.publishJob)
   Future<PublishJobResponse> publishJob(
-    @Header("Authorization") String token,
-    @Body() Map<String, dynamic> job,
-  );
+      @Header("Authorization") String token,
+      @Body() Map<String, dynamic> job,
+      );
+
+  // ✅ التعديل هنا: استخدام @PUT مع المسار الصحيح
+  @PUT("/jobs/{jobId}")
+  Future<PublishJobResponse> updateJob(
+      @Header("Authorization") String token,
+      @Path("jobId") String jobId,
+      @Body() Map<String, dynamic> job,
+      );
 
   @GET(ApiConstants.getJobDetails)
   Future<EmployerJobDetailsResponse> getJobDetails(
-    @Header("Authorization") String token,
-    @Path("jobId") String jobId,
-  );
-
-  @PUT("${ApiConstants.publishJob}/{jobId}")
-  Future<PublishJobResponse> updateJob(
-    @Header("Authorization") String token,
-    @Path("jobId") String jobId,
-    @Body() Map<String, dynamic> job,
-  );
+      @Header("Authorization") String token,
+      @Path("jobId") String jobId,
+      );
 
   @GET(ApiConstants.getOpenJobs)
   Future<JobsResponse> getOpenJobs({
@@ -102,86 +106,98 @@ abstract class ApiService {
     @Path('jobId') required String jobId,
     @Header('Authorization') required String token,
   });
+
   @GET(ApiConstants.getRecommendations)
   Future<JobRecommendationResponse> getRecommendations(
-    @Header('Authorization') String token,
-  );
+      @Header('Authorization') String token,
+      );
+
   @POST(ApiConstants.applyForJob)
   Future<ApplyJobResponse> applyForJob(
-    @Path('jobId') String jobId,
-    @Header('Authorization') String token,
-  );
+      @Path('jobId') String jobId,
+      @Header('Authorization') String token,
+      );
 
+  // ===================== Profile =====================
   @MultiPart()
   @PATCH(ApiConstants.updateImageProfile)
   Future<UpdateImageProfileResponse> updateImageProfile(
-    @Part(name: 'imageProfile') MultipartFile imageProfile,
-    @Header('Authorization') String token,
-  );
+      @Part(name: 'imageProfile') MultipartFile imageProfile,
+      @Header('Authorization') String token,
+      );
 
   @PUT(ApiConstants.updateProfile)
   Future<UpdateProfileResponse> updateProfile(
-    @Body() UpdateProfileRequestBody body,
-    @Header('Authorization') String token,
-  );
-  @MultiPart()
-  @POST(ApiConstants.createSupportRequest)
-  Future<SupportResponse> createSupportRequest(
-    @Part(name: 'problemType') String problemType,
-    @Part(name: 'message') String message,
-    @Part(name: 'image') MultipartFile? image,
-    @Header('Authorization') String token,
-  );
+      @Body() UpdateProfileRequestBody body,
+      @Header('Authorization') String token,
+      );
+
   @PUT(ApiConstants.changePassword)
   Future<ChangePasswordResponse> changePassword(
-    @Body() ChangePasswordRequestBody body,
-    @Header('Authorization') String token,
-  );
+      @Body() ChangePasswordRequestBody body,
+      @Header('Authorization') String token,
+      );
 
   @GET(ApiConstants.getMe)
   Future<AuthMeResponse> getMe(@Header('Authorization') String token);
+
+  // ===================== My Jobs =====================
   @GET(ApiConstants.myJobs)
   Future<MyJobsResponse> getMyJobs(@Header('Authorization') String token);
-  @POST(ApiConstants.updateFcmToken)
-  Future<UpdateFcmResponse> updateFcmToken(
-    @Header('Authorization') String token,
-    @Body() UpdateFcmTokenRequestBody updateFcmTokenRequestBody,
-  );
+
+  // ===================== Notifications =====================
   @GET(ApiConstants.getAllNotifications)
   Future<GetAllNotificationsResponse> getAllNotifications(
-    @Header('Authorization') String token,
-  );
+      @Header('Authorization') String token,
+      );
 
   @DELETE(ApiConstants.deleteNotification)
   Future<DeleteNotificationResponse> deleteNotification(
-    @Header('Authorization') String token,
-    @Path("id") String id,
-  );
+      @Header('Authorization') String token,
+      @Path("id") String id,
+      );
 
   @DELETE(ApiConstants.deleteAllNotifications)
   Future<DeleteAllNotificationsResponse> deleteAllNotifications(
-    @Header('Authorization') String token,
-  );
+      @Header('Authorization') String token,
+      );
 
+  @POST(ApiConstants.updateFcmToken)
+  Future<UpdateFcmResponse> updateFcmToken(
+      @Header('Authorization') String token,
+      @Body() UpdateFcmTokenRequestBody updateFcmTokenRequestBody,
+      );
+
+  // ===================== Applications =====================
   @GET(ApiConstants.getApplicationsForJob)
-Future<JobApplicationsResponse> getApplicationsForJob(
-  @Path('jobId') String jobId,
-  @Query('page') int page,
-  @Query('limit') int limit,
-  @Query('status') String? status,
-  @Header('Authorization') String token,
-);
+  Future<JobApplicationsResponse> getApplicationsForJob(
+      @Path('jobId') String jobId,
+      @Query('page') int page,
+      @Query('limit') int limit,
+      @Query('status') String? status,
+      @Header('Authorization') String token,
+      );
 
-@POST(ApiConstants.acceptWorker)
-Future<AcceptWorkerResponse> acceptWorker(
-  @Path('jobId') String jobId,
-  @Path('applicationId') String applicationId,
-  @Header('Authorization') String token,
-  );
+  @POST(ApiConstants.acceptWorker)
+  Future<AcceptWorkerResponse> acceptWorker(
+      @Path('jobId') String jobId,
+      @Path('applicationId') String applicationId,
+      @Header('Authorization') String token,
+      );
 
   @POST('applications/mark-arrival/{appId}')
   Future<void> markArrival(
       @Path('appId') String appId,
+      @Header('Authorization') String token,
+      );
+
+  // ===================== Support =====================
+  @MultiPart()
+  @POST(ApiConstants.createSupportRequest)
+  Future<SupportResponse> createSupportRequest(
+      @Part(name: 'problemType') String problemType,
+      @Part(name: 'message') String message,
+      @Part(name: 'image') MultipartFile? image,
       @Header('Authorization') String token,
       );
 }

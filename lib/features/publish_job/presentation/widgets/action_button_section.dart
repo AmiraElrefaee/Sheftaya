@@ -16,51 +16,55 @@ class ActionButtonsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-
         OutlinedButton(
           onPressed: () {
-
             final state = context.read<JobDetailsCubit>().state;
             if (state is JobDetailsSuccess) {
-
-              context.pushReplacement(AppRouter.kPublishJobView, extra: state.job);
+              // ✅ التعديل: نمرر الـ job كـ extra عشان نعدله مش ننشره
+              context.push(
+                AppRouter.kPublishJobView,
+                extra: state.job, // ✅ تمرير الـ job للتعديل
+              );
             }
           },
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: ColorsManager.primary,
-                width: 2
+            side: const BorderSide(
+              color: ColorsManager.primary,
+              width: 2,
             ),
             minimumSize: Size(289.w, 48.h),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.r),
+            ),
           ),
-          child: Text('تعديل الوظيفة',
-              style: TextStyles.font16BlackBold.copyWith(
-            color: ColorsManager.primary
-          )),
+          child: Text(
+            'تعديل الوظيفة',
+            style: TextStyles.font16BlackBold.copyWith(
+              color: ColorsManager.primary,
+            ),
+          ),
         ),
         SizedBox(height: 12.h),
-
         OutlinedButton(
           onPressed: () {
             context.go(AppRouter.kEmployerHomeScreen);
           },
-
           style: OutlinedButton.styleFrom(
-
-            side: const BorderSide(color: ColorsManager.primary
-            ,width: 2
+            side: const BorderSide(
+              color: ColorsManager.primary,
+              width: 2,
             ),
             minimumSize: Size(289.w, 48.h),
             shape: RoundedRectangleBorder(
-
-                borderRadius: BorderRadius.circular(16.r)),
-
+              borderRadius: BorderRadius.circular(16.r),
+            ),
           ),
-          child: Text('العوده الى الرئيسية',
-              style: TextStyles.font16PrimarySemiBold.copyWith(
-
-            fontWeight: FontWeight.bold
-          )),
+          child: Text(
+            'العوده إلى الرئيسية',
+            style: TextStyles.font16PrimarySemiBold.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ],
     );

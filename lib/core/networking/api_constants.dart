@@ -34,6 +34,7 @@ class ApiConstants {
   static const String shiftStart = 'shifts/{applicationId}/start';
   static const String shiftEnd = 'shifts/{applicationId}/end';
   static const String shiftConfirm = 'shifts/{applicationId}/confirm';
+  static const String shiftApproveArrival = 'shifts/{applicationId}/approve-arrival';
 }
 
 class ApiErrors {

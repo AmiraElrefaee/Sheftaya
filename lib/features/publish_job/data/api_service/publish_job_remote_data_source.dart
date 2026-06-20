@@ -8,44 +8,43 @@ import '../model/publish_job.dart';
 import '../model/publish_job_request.dart';
 
 class JobRemoteDataSource {
-  // final ApiService _apiService = ApiService(DioFactory.getDio());
   final ApiService _apiService =
   ApiService(DioFactory.getDio(), baseUrl: ApiConstants.apiBaseUrl);
-  // JobRemoteDataSource(this._apiService);
 
   Future<PublishJobResponse> publishJob(JobModel job) async {
     try {
-      final String token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final String token = await SharedPrefHelper.getSecuredString(
+        SharedPrefKeys.userToken,
+      );
+      final String formattedToken =
+      token.startsWith('Bearer') ? token : 'Bearer $token';
 
-      if (token.isEmpty) {
-        throw ServerFailure(errmessage: "Authentication token not found");
-      }
-
-      final String formattedToken = token.startsWith('Bearer') ? token : 'Bearer $token';
       final response = await _apiService.publishJob(
         formattedToken,
         job.toJson(),
       );
       return response;
-
     } catch (e) {
-      print(e);
       throw ServerErrorHandler.handle(e).serverFailure;
     }
   }
 
-
-  // داخل كلاس JobRemoteDataSource
-  // inside JobRemoteDataSource
-  Future<PublishJobResponse> updateJob(String jobId, JobModel job) async {
+  // ✅ للتحديث - تستقبل Map
+  Future<PublishJobResponse> updateJob(
+      String jobId,
+      Map<String, dynamic> jobData,
+      ) async {
     try {
-      final String token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-      final String formattedToken = token.startsWith('Bearer') ? token : 'Bearer $token';
+      final String token = await SharedPrefHelper.getSecuredString(
+        SharedPrefKeys.userToken,
+      );
+      final String formattedToken =
+      token.startsWith('Bearer') ? token : 'Bearer $token';
 
       final response = await _apiService.updateJob(
         formattedToken,
         jobId,
-        job.toJson(),
+        jobData, // ✅ Map مباشرة
       );
       return response;
     } catch (e) {

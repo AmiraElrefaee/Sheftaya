@@ -31,10 +31,22 @@ class ShiftCubit extends Cubit<ShiftState> {
     _currentJobId = item.job?.id ?? '';
     _currentAppId = item.applicationId ?? '';
     _currentRole = role == UserRole.worker ? 'worker' : 'employer';
-    log('🔧 _currentRole set to: $_currentRole');
+
+    log('🔧 ========== INIT SHIFT DETAILS ==========');
+    log('🔧 _currentJobId: $_currentJobId');
+    log('🔧 _currentAppId (before fetch): $_currentAppId');
+    log('🔧 _currentRole: $_currentRole');
+
+    // ✅ إذا كان Employer و _currentAppId فاضي، جيبها من الـ API
+    if (_currentRole == 'employer' && _currentAppId.isEmpty) {
+      _currentAppId = await _fetchApplicationIdForJob();
+      log('🔧 _currentAppId (after fetch): $_currentAppId');
+    }
+
+    log('🔧 =========================================');
 
     final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-    final userId = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userId); // ✅ تعريف واحد فقط هنا
+    final userId = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userId);
 
     _currentStatus = await _loadStatusFromPreferences();
     log('📊 Loaded from preferences: $_currentStatus');
@@ -51,23 +63,59 @@ class ShiftCubit extends Cubit<ShiftState> {
       role: role,
     ));
 
-    // ✅ استخدام userId المعرف أعلاه (ليس تعريف جديد)
     _socketService.joinJobRoom(_currentJobId);
     if (userId.isNotEmpty) {
       _socketService.joinUserRoom(userId);
-      log('👤 Worker joined user room: $userId');
+      log('👤 User joined user room: $userId');
     }
 
     _listenToSocketEvents();
   }
 
+  // ✅ جلب applicationId للـ Employer من API
+  Future<String> _fetchApplicationIdForJob() async {
+    try {
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final dio = getIt<Dio>();
+
+      log('📡 Fetching applicationId for jobId: $_currentJobId');
+
+      final response = await dio.get(
+        '${ApiConstants.apiBaseUrl}applications/jobs/$_currentJobId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      log('📡 Response status: ${response.statusCode}');
+      final data = response.data['data'] as List?;
+
+      if (data != null && data.isNotEmpty) {
+        final appId = data.first['_id'] as String? ?? '';
+        log('📡 ✅ Fetched applicationId: $appId');
+        return appId;
+      } else {
+        log('📡 ❌ No applications found for jobId: $_currentJobId');
+      }
+    } catch (e) {
+      log('📡 ❌ Failed to fetch applicationId: $e');
+    }
+    return '';
+  }
+
   Future<void> _saveStatusToPreferences(ShiftStatus status) async {
+    if (_currentAppId.isEmpty) {
+      log('⚠️ Cannot save status: _currentAppId is empty');
+      return;
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('${_shiftStatusKey}${_currentAppId}_status', status.name);
-    log('💾 Saved status to preferences: ${status.name}');
+    log('💾 Saved status to preferences: ${status.name} for appId: $_currentAppId');
   }
 
   Future<ShiftStatus> _loadStatusFromPreferences() async {
+    if (_currentAppId.isEmpty) {
+      log('⚠️ Cannot load status: _currentAppId is empty');
+      return ShiftStatus.notStarted;
+    }
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString('${_shiftStatusKey}${_currentAppId}_status');
     if (saved == null) return ShiftStatus.notStarted;
@@ -122,26 +170,21 @@ class ShiftCubit extends Cubit<ShiftState> {
     return ShiftStatus.notStarted;
   }
 
-  // ✅ دالة الاستماع للأحداث (أضيفيها هنا)
   void _listenToSocketEvents() {
     _socketService.onAny((event, data) {
       log('📨 ANY EVENT: $event | $data');
     });
 
-    // استماع للأحداث القادمة للـ user room
     _socketService.on('shift_started', (data) {
-      log('📡 Event: shift_started received by worker');
-      log('📡 Data: $data');
+      log('📡 Event: shift_started received');
       _updateStatus(ShiftStatus.inProgress);
     });
 
     _socketService.on('shift_completed', (data) {
-      log('📡 Event: shift_completed received by worker');
-      log('📡 Data: $data');
+      log('📡 Event: shift_completed received');
       _updateStatus(ShiftStatus.completed);
     });
 
-    // أحداث arrival
     _socketService.on('worker_on_the_way', (_) {
       log('📡 Event: worker_on_the_way');
       _updateStatus(ShiftStatus.onTheWay);
@@ -170,14 +213,34 @@ class ShiftCubit extends Cubit<ShiftState> {
         role: currentState.role,
       ));
     }
-    log('✅ Status updated and saved: $newStatus');
+    log('✅ Status updated: $newStatus');
   }
 
   void workerOnTheWay() async {
     final workerId = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userId);
-    log('🔘 workerOnTheWay | status: $_currentStatus');
+    final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+
+    log('🔘 workerOnTheWay | status: $_currentStatus | appId: $_currentAppId');
+
     if (_currentStatus == ShiftStatus.notStarted) {
+      // ✅ 1. API: shift on-the-way (PATCH)
+      if (_currentAppId.isNotEmpty) {
+        try {
+          final dio = getIt<Dio>();
+          await dio.patch(
+            '${ApiConstants.apiBaseUrl}shifts/$_currentAppId/on-the-way',
+            options: Options(headers: {'Authorization': 'Bearer $token'}),
+          );
+          log('✅ On the way saved in DB (PATCH /shifts/on-the-way)');
+        } catch (e) {
+          log('❌ On the way API failed: $e');
+        }
+      }
+
+      // ✅ 2. Socket للإشعار
       _socketService.workerOnTheWay(_currentAppId, workerId);
+
+      // ✅ 3. تحديث الحالة محلياً
       _updateStatus(ShiftStatus.onTheWay);
     }
   }
@@ -185,65 +248,127 @@ class ShiftCubit extends Cubit<ShiftState> {
   void workerArrived() async {
     final workerId = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userId);
     final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+
     log('🔘 workerArrived | status: $_currentStatus | appId: $_currentAppId');
 
     if (_currentStatus == ShiftStatus.onTheWay) {
-      try {
-        final dio = getIt<Dio>();
-        await dio.post(
-          '${ApiConstants.apiBaseUrl}applications/mark-arrival/$_currentAppId',
-          options: Options(headers: {'Authorization': 'Bearer $token'}),
-        );
-        log('✅ Arrival marked in DB');
-      } catch (e) {
-        log('❌ Mark arrival failed: $e');
+      // ✅ 1. API: mark-arrival (POST) - الـ endpoint القديم
+      if (_currentAppId.isNotEmpty) {
+        try {
+          final dio = getIt<Dio>();
+          await dio.post(
+            '${ApiConstants.apiBaseUrl}applications/mark-arrival/$_currentAppId',
+            options: Options(headers: {'Authorization': 'Bearer $token'}),
+          );
+          log('✅ Arrival marked in DB (POST /applications/mark-arrival)');
+        } catch (e) {
+          log('❌ Mark arrival API failed: $e');
+        }
       }
+
+      // ✅ 2. API: shift arrive (PATCH) - الـ endpoint الجديد
+      if (_currentAppId.isNotEmpty) {
+        try {
+          final dio = getIt<Dio>();
+          await dio.patch(
+            '${ApiConstants.apiBaseUrl}shifts/$_currentAppId/arrive',
+            options: Options(headers: {'Authorization': 'Bearer $token'}),
+          );
+          log('✅ Arrive saved in DB (PATCH /shifts/arrive)');
+        } catch (e) {
+          log('❌ Arrive PATCH API failed: $e');
+        }
+      }
+
+      // ✅ 3. Socket event للإشعار
       _socketService.workerArrived(_currentAppId, workerId);
+
+      // ✅ 4. تحديث الحالة محلياً
       _updateStatus(ShiftStatus.arrived);
     }
   }
 
-  void approveArrival() {
-    log('🔘 approveArrival | status: $_currentStatus');
+  void approveArrival() async {
+    log('🔘 approveArrival | status: $_currentStatus | appId: $_currentAppId');
+
     if (_currentStatus == ShiftStatus.arrived) {
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+
+      // ✅ 1. API: approve-arrival (PATCH)
+      if (_currentAppId.isNotEmpty) {
+        try {
+          final dio = getIt<Dio>();
+          await dio.patch(
+            '${ApiConstants.apiBaseUrl}shifts/$_currentAppId/approve-arrival',
+            options: Options(headers: {'Authorization': 'Bearer $token'}),
+          );
+          log('✅ Arrival approved in DB via API (PATCH /shifts/approve-arrival)');
+        } catch (e) {
+          log('❌ Approve arrival API failed: $e');
+        }
+      }
+
+      // ✅ 2. Socket للإشعار
       _socketService.approveArrival(_currentAppId);
+
+      // ✅ 3. تحديث الحالة محلياً
       _updateStatus(ShiftStatus.arrivedApproved);
     }
   }
 
   void startShift() async {
-    log('🔘 startShift | status: $_currentStatus');
+    log('🔘 startShift | status: $_currentStatus | appId: $_currentAppId');
+
     if (_currentStatus == ShiftStatus.arrivedApproved) {
-      // ✅ أولاً: بعث الحدث للسيرفر
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+
+      // ✅ 1. API لبدء الشيفت
+      if (_currentAppId.isNotEmpty) {
+        try {
+          final dio = getIt<Dio>();
+          await dio.patch(
+            '${ApiConstants.apiBaseUrl}shifts/$_currentAppId/start',
+            options: Options(headers: {'Authorization': 'Bearer $token'}),
+          );
+          log('✅ Shift started in DB via API (PATCH /shifts/start)');
+        } catch (e) {
+          log('❌ Start shift API failed: $e');
+        }
+      }
+
+      // ✅ 2. Socket للإشعار
       _socketService.startShift(_currentAppId);
-      log('📤 shift_started emitted to server');
 
-      // ✅ ثانياً: استدعاء API
-      await _callShiftEndpoint('start');
-
-      // ✅ ثالثاً: تحديث الحالة محلياً
+      // ✅ 3. تحديث الحالة محلياً
       _updateStatus(ShiftStatus.inProgress);
     }
   }
-  void endShift() {
-    log('🔘 endShift | status: $_currentStatus');
-    if (_currentStatus == ShiftStatus.inProgress) {
-      _callShiftEndpoint('end');
-      _updateStatus(ShiftStatus.completed);
-    }
-  }
 
-  Future<void> _callShiftEndpoint(String action) async {
-    final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-    try {
-      final dio = getIt<Dio>();
-      await dio.patch(
-        '${ApiConstants.apiBaseUrl}shifts/$_currentAppId/$action',
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-      log('✅ Shift $action called successfully');
-    } catch (e) {
-      log('❌ Failed to call shift $action: $e');
+  void endShift() async {
+    log('🔘 endShift | status: $_currentStatus | appId: $_currentAppId');
+
+    if (_currentStatus == ShiftStatus.inProgress) {
+      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+
+      // ✅ 1. API لإنهاء الشيفت
+      if (_currentAppId.isNotEmpty) {
+        try {
+          final dio = getIt<Dio>();
+          await dio.patch(
+            '${ApiConstants.apiBaseUrl}shifts/$_currentAppId/end',
+            options: Options(headers: {'Authorization': 'Bearer $token'}),
+          );
+          log('✅ Shift ended in DB via API (PATCH /shifts/end)');
+        } catch (e) {
+          log('❌ End shift API failed: $e');
+        }
+      }
+
+      // ✅ 2. Socket للإشعار
+      _socketService.endShift(_currentAppId);
+
+      // ✅ 3. تحديث الحالة محلياً
+      _updateStatus(ShiftStatus.completed);
     }
   }
 

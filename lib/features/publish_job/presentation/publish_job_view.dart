@@ -11,16 +11,14 @@ import 'mangers/job_publish_cubit/job_publish_cubit.dart';
 class PublishJobView extends StatelessWidget {
   final JobDetails? existingJob;
   const PublishJobView({super.key, this.existingJob});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
-
       backgroundColor: ColorsManager.background,
-
       body: BlocProvider(
         create: (context) => getIt<JobPublishCubit>(),
-        child:  PublishJobViewBody( existingJob: existingJob ),
+        child: PublishJobViewBody(existingJob: existingJob),
       ),
     );
   }

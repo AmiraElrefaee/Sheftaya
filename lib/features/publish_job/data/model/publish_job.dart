@@ -43,7 +43,7 @@ class JobModel {
       },
       "startDateTime": startDateTime.toIso8601String(),
       "endDateTime": endDateTime.toIso8601String(),
-      "dailyWorkHours": dailyWorkHours,
+      "dailyWorkHours": dailyWorkHours, // ✅ للنشر الجديد بس
       "requiredWorkers": requiredWorkers,
       "pricePerHour": {
         "amount": pricePerHour,

@@ -2,9 +2,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sheftaya/features/shift_details/presentation/widget/shift_job_summary_card.dart';
 import 'package:sheftaya/features/shift_details/presentation/widget/shift_status_time_line.dart';
 
+import '../../../../app/router.dart';
 import '../../../../core/theme/colors_manager.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../../../core/widgets/custom_button.dart';
@@ -154,7 +156,9 @@ class ShiftDetailsViewBody extends StatelessWidget {
         textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
         backgroundColor: ColorsManager.primary,
         buttonText: "الانتقال لبدء العمل",
-        onPressed: () {},
+        onPressed: () {
+          context.push(AppRouter.kShiftTimerScreen, extra: shift.item);
+        },
       );
     }
 
@@ -189,6 +193,8 @@ class ShiftDetailsViewBody extends StatelessWidget {
     }
 
     // Employer
+    // في _buildActionButton, قسم Employer
+
     if (shift.role == UserRole.employer) {
       if (!shift.isWorkerArrived) {
         return AppTextButton(
@@ -199,20 +205,16 @@ class ShiftDetailsViewBody extends StatelessWidget {
         );
       }
 
-      // ✅ عند الضغط على "تأكيد وصول العامل"، يفتح صفحة التايمر
       return AppTextButton(
         textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
         backgroundColor: ColorsManager.primary,
         buttonText: "تأكيد وصول العامل",
         onPressed: () {
+          log('🔥🔥🔥 BUTTON PRESSED - Navigating to timer');
+
           cubit.approveArrival();
-          // ✅ الانتقال إلى صفحة التايمر
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ShiftTimerScreen(item: shift.item),
-            ),
-          );
+          // ✅ استخدام GoRouter بدلاً من Navigator
+          context.push(AppRouter.kShiftTimerScreen, extra: shift.item);
         },
       );
     }

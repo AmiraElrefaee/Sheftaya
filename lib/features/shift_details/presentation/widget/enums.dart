@@ -19,15 +19,16 @@ extension ShiftStatusExtension on ShiftStatus {
       case 'arrived':
         return ShiftStatus.arrived;
       case 'arrived_approved':
+      case 'approve-arrival':  // ← أضيفي هذا
         return ShiftStatus.arrivedApproved;
       case 'in_progress':
+      case 'start':            // ← أضيفي هذا
         return ShiftStatus.inProgress;
       case 'completed':
+      case 'end':              // ← أضيفي هذا
         return ShiftStatus.completed;
       default:
         return ShiftStatus.notStarted;
     }
   }
-
-  String toJson() => name;
 }

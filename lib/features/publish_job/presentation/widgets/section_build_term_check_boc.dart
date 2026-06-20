@@ -8,7 +8,12 @@ import '../../../../core/theme/colors_manager.dart';
 import '../../../../core/theme/text_styles.dart';
 
 class SectionBuildTermCheckBoc extends StatefulWidget {
-  const SectionBuildTermCheckBoc({super.key});
+  final ValueChanged<bool>? onChanged; // ✅ إضافة الـ Callback
+
+  const SectionBuildTermCheckBoc({
+    super.key,
+    this.onChanged,
+  });
 
   @override
   State<SectionBuildTermCheckBoc> createState() =>
@@ -24,7 +29,7 @@ class _SectionBuildTermCheckBocState extends State<SectionBuildTermCheckBoc> {
       padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
         color: ColorsManager.lightGrey.withValues(alpha: 0.2),
-        border: Border.all(color: Color(0xffD2D2D2)),
+        border: Border.all(color: const Color(0xffD2D2D2)),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
@@ -54,7 +59,7 @@ class _SectionBuildTermCheckBocState extends State<SectionBuildTermCheckBoc> {
                 width: 12,
                 height: 12,
                 child: Transform.scale(
-                  scale: 0.6, // عدلي الرقم حسب الشكل اللي يناسبك
+                  scale: 0.6,
                   child: Checkbox(
                     value: agreeToTerms,
                     activeColor: ColorsManager.primary,
@@ -63,7 +68,13 @@ class _SectionBuildTermCheckBocState extends State<SectionBuildTermCheckBoc> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(3),
                     ),
-                    onChanged: (val) => setState(() => agreeToTerms = val!),
+                    onChanged: (val) {
+                      setState(() {
+                        agreeToTerms = val ?? false;
+                      });
+                      // ✅ إعلام الـ Parent بتغير الحالة
+                      widget.onChanged?.call(agreeToTerms);
+                    },
                   ),
                 ),
               ),

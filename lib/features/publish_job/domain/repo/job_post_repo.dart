@@ -17,11 +17,17 @@ class JobRepository {
       return Left(failure);
     }
   }
-  // inside JobRepository
-  Future<Either<Failure, PublishJobResponse>> updateJob(String jobId, JobModel job) async {
+
+  // ✅ للتحديث - تستقبل Map
+  Future<Either<Failure, PublishJobResponse>> updateJob(
+      String jobId,
+      Map<String, dynamic> jobData,
+      ) async {
     try {
-      final response = await _remoteDataSource.updateJob(jobId, job);
+      final response = await _remoteDataSource.updateJob(jobId, jobData);
       return Right(response);
+    } on Failure catch (failure) {
+      return Left(failure);
     } catch (e) {
       return Left(ServerErrorHandler.handle(e).serverFailure);
     }

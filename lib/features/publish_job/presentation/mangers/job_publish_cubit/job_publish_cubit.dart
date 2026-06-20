@@ -8,28 +8,26 @@ part 'job_publish_state.dart';
 
 class JobPublishCubit extends Cubit<JobPublishState> {
   final JobRepository _repository;
+
   JobPublishCubit(this._repository) : super(JobPublishInitial());
+
+  // ✅ للنشر الجديد
   Future<void> createJob(JobModel job) async {
     emit(PublishJobLoading());
-
     final result = await _repository.publishJob(job);
-
     result.fold(
           (failure) => emit(PublishJobError(failure.errmessage)),
-          (response) {
-
-            final jobId = response.data.id;
-        emit(PublishJobSuccess(jobId: jobId));
-      },
+          (response) => emit(PublishJobSuccess(jobId: response.data.id)),
     );
   }
-  // inside JobPublishCubit
-  Future<void> updateJob(String jobId, JobModel job) async {
-    emit( PublishJobLoading());
-    final result = await _repository.updateJob(jobId, job);
+
+  // ✅ للتحديث - تستقبل Map مش JobModel
+  Future<void> updateJob(String jobId, Map<String, dynamic> jobData) async {
+    emit(PublishJobLoading());
+    final result = await _repository.updateJob(jobId, jobData);
     result.fold(
-          (error) => emit(PublishJobError( error.errmessage)),
-          (response) => emit(PublishJobSuccess(jobId: response.data.id)), // بنرجع نفس الـ ID عشان يروح لصفحة النجاح تاني
+          (failure) => emit(PublishJobError(failure.errmessage)),
+          (response) => emit(PublishJobSuccess(jobId: response.data.id)),
     );
   }
 }

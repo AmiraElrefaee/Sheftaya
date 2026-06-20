@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
-import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart';
 
 class ShiftTimerScreen extends StatefulWidget {
@@ -16,68 +15,95 @@ class ShiftTimerScreen extends StatefulWidget {
 }
 
 class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
-  late Duration _duration;
+  Duration _elapsedDuration = Duration.zero;
   Timer? _timer;
-  bool _isRunning = false;
+  bool _isShiftEnded = false;
+
+  // Default data (will be replaced with API data)
+  late String _startTimeStr;
+  late String _endTimeStr;
+  late int _totalHours;
+  late double _totalSalary;
+  late double _hourlyRate;
 
   @override
   void initState() {
     super.initState();
-    _calculateDuration();
+    _initJobData();
+    _startTimer();
   }
 
-  void _calculateDuration() {
+  void _initJobData() {
     final job = widget.item.job;
-    if (job?.startDateTime != null && job?.dailyWorkHours != null) {
-      final startTime = DateTime.parse(job!.startDateTime!);
-      final endTime = startTime.add(Duration(hours: job.dailyWorkHours!));
-      final now = DateTime.now();
 
-      if (now.isAfter(endTime)) {
-        _duration = Duration.zero;
-      } else {
-        _duration = endTime.difference(now);
-      }
-    } else {
-      _duration = Duration(hours: 8);
+    // Get start time from API
+    if (job?.startDateTime != null) {
+      try {
+        final startTime = DateTime.parse(job!.startDateTime!);
+        _startTimeStr = _formatTime(startTime);
+
+        // Calculate end time from start + dailyWorkHours
+        final workHours = job.dailyWorkHours ?? 4;
+        final endTime = startTime.add(Duration(hours: workHours));
+        _endTimeStr = _formatTime(endTime);
+
+        // Total hours
+        _totalHours = workHours;
+
+        // Hourly rate
+        _hourlyRate = (job.pricePerHour?.amount ?? 60).toDouble();
+
+        // Total salary
+        _totalSalary = _hourlyRate * _totalHours;
+
+        // Calculate elapsed time if shift already started
+        final now = DateTime.now();
+        if (now.isAfter(startTime)) {
+          _elapsedDuration = now.difference(startTime);
+          final maxDuration = Duration(hours: _totalHours);
+          if (_elapsedDuration > maxDuration) {
+            _elapsedDuration = maxDuration;
+            _isShiftEnded = true;
+          }
+        }
+        return;
+      } catch (_) {}
     }
+
+    // Fallback defaults
+    _startTimeStr = '02:00 مساءً';
+    _endTimeStr = '06:00 مساءً';
+    _totalHours = 4;
+    _hourlyRate = 60;
+    _totalSalary = 400;
+    _elapsedDuration = Duration.zero;
+  }
+
+  String _formatTime(DateTime time) {
+    String hour = time.hour.toString().padLeft(2, '0');
+    String minute = time.minute.toString().padLeft(2, '0');
+    String period = time.hour >= 12 ? 'مساءً' : 'صباحاً';
+    int displayHour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
+    return '$displayHour:$minute $period';
   }
 
   void _startTimer() {
-    if (_timer != null) {
-      _timer!.cancel();
-    }
-
-    setState(() {
-      _isRunning = true;
-    });
+    if (_isShiftEnded) return;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_duration.inSeconds <= 0) {
+      final maxDuration = Duration(hours: _totalHours);
+      if (_elapsedDuration >= maxDuration) {
         timer.cancel();
         setState(() {
-          _isRunning = false;
-          _duration = Duration.zero;
+          _isShiftEnded = true;
+          _elapsedDuration = maxDuration;
         });
       } else {
         setState(() {
-          _duration = Duration(seconds: _duration.inSeconds - 1);
+          _elapsedDuration = Duration(seconds: _elapsedDuration.inSeconds + 1);
         });
       }
     });
-  }
-
-  void _pauseTimer() {
-    _timer?.cancel();
-    setState(() {
-      _isRunning = false;
-    });
-  }
-
-  void _endShift() {
-    _timer?.cancel();
-    // TODO: إرسال إشارة إنهاء الوردية للـ Backend
-    Navigator.pop(context);
   }
 
   @override
@@ -95,125 +121,275 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
   }
 
   double _getProgress() {
-    final job = widget.item.job;
-    if (job?.dailyWorkHours == null) return 0;
-    final totalSeconds = (job!.dailyWorkHours! * 3600);
-    final elapsedSeconds = totalSeconds - _duration.inSeconds;
-    return (elapsedSeconds / totalSeconds).clamp(0.0, 1.0);
+    final totalSeconds = _totalHours * 3600;
+    if (totalSeconds == 0) return 0.0;
+    return (_elapsedDuration.inSeconds / totalSeconds).clamp(0.0, 1.0);
+  }
+
+  double _getCurrentEarnings() {
+    final totalSeconds = _totalHours * 3600;
+    if (totalSeconds == 0) return 0.0;
+    return (_elapsedDuration.inSeconds / totalSeconds) * _totalSalary;
   }
 
   @override
   Widget build(BuildContext context) {
-    final job = widget.item.job;
     final progress = _getProgress();
+    final currentEarnings = _getCurrentEarnings();
+    final isFullProgress = progress >= 1.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: ColorsManager.background, // خلفية رمادية فاتحة
       appBar: AppBar(
-        title: Text('تتبع وقت العمل', style: TextStyles.font18BlackBold),
-        centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: ColorsManager.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new, color: ColorsManager.black),
           onPressed: () => Navigator.pop(context),
         ),
+        title: Text(
+          'تأكيد الوصول',
+          style: TextStyles.font18BlackBold,
+        ),
+        centerTitle: true,
+        titleSpacing: 0,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // معلومات الوظيفة
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: ColorsManager.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16.r),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    job?.title ?? 'الوظيفة',
-                    style: TextStyles.font20BlackBold,
-                    textAlign: TextAlign.center,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // ✅ الجزء الأبيض مع البوردر
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 20.w),
+                decoration: BoxDecoration(
+                  color: ColorsManager.white,
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: const Color(0xFFE5E5E5),
+                    width: 1,
                   ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    job?.companyDetails?.companyName ?? job?.place ?? '',
-                    style: TextStyles.font16BlackMedium.copyWith(
-                      color: ColorsManager.darkGrey,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 40.h),
-
-            // Timer Circle
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: 250.w,
-                  height: 250.w,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 8.w,
-                    backgroundColor: ColorsManager.lightGrey,
-                    color: ColorsManager.primary,
-                  ),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _formatDuration(_duration),
-                      style: TextStyle(
-                        fontSize: 48.sp,
-                        fontWeight: FontWeight.bold,
-                        color: ColorsManager.primary,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      'الوقت المتبقي',
-                      style: TextStyles.font14BlackMedium.copyWith(
-                        color: ColorsManager.grey,
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-              ],
-            ),
-            SizedBox(height: 40.h),
+                child: Column(
+                  children: [
+                    // ⏱️ Timer Circle
+                    Center(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 220.w,
+                            height: 220.w,
+                            child: CircularProgressIndicator(
+                              value: progress,
+                              strokeWidth: 18.w,
+                              backgroundColor: const Color(0xFFF3F4F6),
+                              color: ColorsManager.primary,
+                              strokeCap: StrokeCap.round,
+                            ),
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'الوقت المنقضي',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: ColorsManager.grey,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                _formatDuration(_elapsedDuration),
+                                style: TextStyle(
+                                  fontSize: 38.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: ColorsManager.black,
+                                  fontFeatures: const [FontFeature.tabularFigures()],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
 
-            // الأزرار
-            Row(
-              children: [
-                Expanded(
-                  child: AppTextButton(
-                    buttonText: _isRunning ? 'إيقاف مؤقت' : 'بدء العمل',
-                    onPressed: _isRunning ? _pauseTimer : _startTimer,
-                    backgroundColor: ColorsManager.primary,
-                    textStyle: TextStyles.font16WhiteBold,
-                  ),
+                    SizedBox(height: 24.h),
+
+                    // 💰 الأجر الحالي
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          'الأجر الحالي: ',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: ColorsManager.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Text(
+                          currentEarnings.toStringAsFixed(2),
+                          style: TextStyle(
+                            fontSize: 28.sp,
+                            fontWeight: FontWeight.bold,
+                            color: ColorsManager.green,
+                          ),
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          'جنيه',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: ColorsManager.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 28.h),
+
+                    // 📊 Info Grid - 2 columns
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 12.w,
+                      mainAxisSpacing: 12.h,
+                      childAspectRatio: 2.3,
+                      children: [
+                        _buildInfoCard('وقت البدء', _startTimeStr),
+                        _buildInfoCard('وقت الانتهاء', _endTimeStr),
+                        _buildInfoCard('عدد ساعات الشيفت', '$_totalHours ساعات'),
+                        _buildInfoCard('المبلغ المتفق عليه', '${_totalSalary.toInt()} جنيه'),
+                      ],
+                    ),
+                  ],
                 ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: AppTextButton(
-                    buttonText: 'إنهاء الوردية',
-                    onPressed: _endShift,
-                    backgroundColor: ColorsManager.error,
-                    textStyle: TextStyles.font16WhiteBold,
-                  ),
+              ),
+
+              SizedBox(height: 16.h),
+
+              // ✅ الأزرار السفلية
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                child: Column(
+                  children: [
+                    // زر إنهاء الشيفت
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52.h,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _timer?.cancel();
+                          // TODO: End shift action
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorsManager.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'إنهاء الشيفت',
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: ColorsManager.white,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 12.h),
+
+                    // زر إلغاء الشيفت (يظهر فقط قبل اكتمال الشيفت)
+                    if (!isFullProgress)
+                      TextButton(
+                        onPressed: () {
+                          _timer?.cancel();
+                          // TODO: Cancel shift action
+                          Navigator.pop(context);
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 4.h),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.cancel_outlined,
+                              color: ColorsManager.error,
+                              size: 22.w,
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              'إلغاء الشيفت',
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.bold,
+                                color: ColorsManager.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+
+              SizedBox(height: 20.h),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, String value) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6), // رمادي فاتح
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: const Color(0xFF9CA3AF),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15.sp,
+              color: ColorsManager.black,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

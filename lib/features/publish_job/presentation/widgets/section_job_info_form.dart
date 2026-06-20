@@ -17,6 +17,8 @@ class JobInfoStepForm extends StatelessWidget {
   final Function(int) onDaysChanged, onHoursChanged, onWorkersChanged;
   final Function(String?) onExperienceChanged;
   final Function(double lat, double lng) onLocationSelected;
+  final ValueChanged<bool>? onTermsChanged; // ✅ إضافة الـ Callback
+
   const JobInfoStepForm({
     super.key,
     required this.titleController,
@@ -31,7 +33,9 @@ class JobInfoStepForm extends StatelessWidget {
     required this.onWorkersChanged,
     required this.onExperienceChanged,
     required this.onLocationSelected,
+    this.onTermsChanged,
   });
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -42,28 +46,32 @@ class JobInfoStepForm extends StatelessWidget {
         SizedBox(height: 16.h),
         const CustomLabelText(text: 'عنوان الوظيفة'),
         AppTextFormField(
-            validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
-            controller: titleController, hintText: 'مثال: عامل كافيه'),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'هذا الحقل مطلوب';
+            }
+            return null;
+          },
+          controller: titleController,
+          hintText: 'مثال: عامل كافيه',
+        ),
         SizedBox(height: 16.h),
-        // const CustomLabelText(text: 'موقع العمل'),
-        // AppTextFormField(
-        //     validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
-        //     controller: locationController, hintText: 'ادخل موقع العمل'),
-
-        // داخل JobInfoStepForm في الـ build
         const CustomLabelText(text: 'موقع العمل'),
         AppTextFormField(
-          readOnly: true, // عشان يفتح الخريطة بدل ما يكتب كيبورد
+          readOnly: true,
           onTap: () async {
-            // هنا هننادي الـ Map Picker اللي هنعمله تحت
             final result = await context.push(AppRouter.kMapPickerScreen);
             if (result != null && result is Map<String, dynamic>) {
               locationController.text = result['address'];
-              // بنبعت الإحداثيات للـ ViewBody عشان يحفظها في الـ variables
               onLocationSelected(result['lat'], result['lng']);
             }
           },
-          validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'هذا الحقل مطلوب';
+            }
+            return null;
+          },
           controller: locationController,
           hintText: 'اضغط لتحديد موقع العمل على الخريطة',
           suffixIcon: Icon(Icons.location_on, color: Colors.red),
@@ -74,31 +82,68 @@ class JobInfoStepForm extends StatelessWidget {
           timeController: timeController,
         ),
         SizedBox(height: 16.h),
-
         Row(
           children: [
-            Expanded(child: CounterFieldWidget(label: 'عدد الأيام', initialValue: 1, onChanged: onDaysChanged)),
+            Expanded(
+              child: CounterFieldWidget(
+                label: 'عدد الأيام',
+                initialValue: 1,
+                onChanged: onDaysChanged,
+              ),
+            ),
             SizedBox(width: 10.w),
-            Expanded(child: CounterFieldWidget(label: 'عدد الساعات اليومية', initialValue: 1, onChanged: onHoursChanged)),
+            Expanded(
+              child: CounterFieldWidget(
+                label: 'عدد الساعات اليومية',
+                initialValue: 1,
+                onChanged: onHoursChanged,
+              ),
+            ),
             SizedBox(width: 10.w),
-            Expanded(child: CounterFieldWidget(label: 'عدد العمال', initialValue: 1, onChanged: onWorkersChanged)),
+            Expanded(
+              child: CounterFieldWidget(
+                label: 'عدد العمال',
+                initialValue: 1,
+                onChanged: onWorkersChanged,
+              ),
+            ),
           ],
         ),
         SizedBox(height: 16.h),
-        sectionExpericeAndSalay(salaryController: salaryController,
-          onExperienceChanged: onExperienceChanged,),
+        sectionExpericeAndSalay(
+          salaryController: salaryController,
+          onExperienceChanged: onExperienceChanged,
+        ),
         SizedBox(height: 16.h),
         const CustomLabelText(text: 'تفاصيل الوظيفة'),
         AppTextFormField(
-            validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
-            controller: detailsController, hintText: 'اكتب تفاصيل الوظيفة', maxLines: 4),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'هذا الحقل مطلوب';
+            }
+            return null;
+          },
+          controller: detailsController,
+          hintText: 'اكتب تفاصيل الوظيفة',
+          maxLines: 4,
+        ),
         SizedBox(height: 16.h),
         const CustomLabelText(text: 'متطلبات الوظيفة'),
         AppTextFormField(
-            validator: (value) {if (value == null || value.isEmpty) {return 'هذا الحقل مطلوب';}return null;},
-            controller: reqController, hintText: 'اكتب متطلبات الوظيفة', maxLines: 4),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'هذا الحقل مطلوب';
+            }
+            return null;
+          },
+          controller: reqController,
+          hintText: 'اكتب متطلبات الوظيفة',
+          maxLines: 4,
+        ),
         SizedBox(height: 20.h),
-        const SectionBuildTermCheckBoc(),
+        SectionBuildTermCheckBoc(
+          onChanged: onTermsChanged, // ✅ تمرير الـ Callback
+        ),
       ],
     );
   }

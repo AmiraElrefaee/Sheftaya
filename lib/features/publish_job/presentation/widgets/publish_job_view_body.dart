@@ -1,3 +1,5 @@
+// lib/features/publish_job/presentation/widgets/publish_job_view_body.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,15 +15,17 @@ import '../../../../core/constants/shared_pref_helper.dart';
 import '../../../../core/constants/shared_pref_keys.dart';
 import '../../../../core/helper/location_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../data/api_service/company_service.dart';
 import '../../data/model/job_details_response.dart';
 import '../../data/model/publish_job.dart';
+import '../../data/model/company_model.dart';
 import '../mangers/job_publish_cubit/job_publish_cubit.dart';
 import 'custom_app_bar.dart';
 import 'custom_label_text.dart';
 
 class PublishJobViewBody extends StatefulWidget {
   final JobDetails? existingJob;
-  const PublishJobViewBody({super.key,  this.existingJob});
+  const PublishJobViewBody({super.key, this.existingJob});
 
   @override
   State<PublishJobViewBody> createState() => _PublishJobViewBodyState();
@@ -34,7 +38,7 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
   int days = 1, hours = 1, workers = 1;
   String experience = 'junior';
 
-  final _formKey = GlobalKey<FormState>(); // ✅ Form key for validation
+  final _formKey = GlobalKey<FormState>();
 
   final jobTitleController = TextEditingController();
   final jobLocationController = TextEditingController();
@@ -46,54 +50,104 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
 
   final institutionNameController = TextEditingController();
   final institutionAddressController = TextEditingController();
+  final institutionTypeController = TextEditingController();
   final taxNumberController = TextEditingController();
-  double? lat;
-  double? long;
+
   double? pickedLat;
   double? pickedLng;
+
+  // ✅ قائمة المؤسسات
+  List<CompanyModel> _companies = [];
+  bool _isLoading = true;
+
+  // ✅ حالة الـ Checkbox
+  bool _isTermsAccepted = false;
+
+  // ✅ صور المؤسسة
+  List<String> _companyImages = [];
 
   @override
   void initState() {
     super.initState();
+    _loadCompanies();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       LocationHelper.checkAndRequestLocation();
     });
+
     if (widget.existingJob != null) {
-      final job = widget.existingJob!;
-      jobTitleController.text = job.title;
-      jobLocationController.text = job.address ?? '';
-      salaryController.text = job.price.toString();
-      detailsController.text = job.details ?? '';
-      requirementsController.text = job.details ?? '';
-
-      // تحويل التاريخ والوقت للعرض
-      if (job.startDateTime != null) {
-        DateTime parsedDate = DateTime.parse(job.startDateTime);
-        dateController.text = DateFormat('yyyy-MM-dd').format(parsedDate!.toLocal());
-        timeController.text = DateFormat('HH:mm').format(parsedDate!.toLocal());
-      }
-
-      // تحديث قيم الـ Counters
-      // days = job. ?? 1;
-      hours = job.dailyWorkHours;
-      workers = job.requiredWorkers;
-      experience = job.experienceLevel;
+      _loadExistingJobData();
     }
-    // _getUserCurrentLocation(); // جلب الموقع فور فتح الصفحة
   }
 
+  // ✅ تحميل المؤسسات
+  Future<void> _loadCompanies() async {
+    setState(() => _isLoading = true);
+    final companies = await CompanyService.getCompanies();
+
+    setState(() {
+      _companies = companies;
+      _isLoading = false;
+
+      // ✅ إذا فيه مؤسسات، اختار آخر واحدة كـ default
+      if (_companies.isNotEmpty) {
+        selectedInstitution = _companies.last.name;
+      }
+    });
+  }
+
+  void _loadExistingJobData() {
+    final job = widget.existingJob!;
+    jobTitleController.text = job.title;
+    jobLocationController.text = job.address ?? '';
+    salaryController.text = job.price.toString();
+    detailsController.text = job.details ?? '';
+    requirementsController.text = job.details ?? '';
+
+    if (job.startDateTime != null) {
+      DateTime parsedDate = DateTime.parse(job.startDateTime);
+      dateController.text = DateFormat('yyyy-MM-dd').format(parsedDate.toLocal());
+      timeController.text = DateFormat('HH:mm').format(parsedDate.toLocal());
+    }
+
+    hours = job.dailyWorkHours;
+    workers = job.requiredWorkers;
+    experience = job.experienceLevel;
+  }
+
+  // ✅ دالة لتحديث حالة الـ Checkbox
+  void _onTermsChanged(bool value) {
+    setState(() {
+      _isTermsAccepted = value;
+    });
+  }
+
+  // ✅ دالة لتحديث الصور
+  void _onCompanyImagesChanged(List<String> images) {
+    setState(() {
+      _companyImages = images;
+    });
+  }
 
   void _onPublish() async {
-    if (!_formKey.currentState!.validate()) {
+    // ✅ التحقق من الموافقة على الشروط
+    if (!_isTermsAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('يجب الموافقة على سياسة الدفع وشروط نشر الوظائف'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
+
+    if (!_formKey.currentState!.validate()) return;
 
     try {
       final dateParts = dateController.text.split('-');
       final timeParts = timeController.text.split(':');
 
-      // إنشاء DateTime بالتوقيت المحلي
-      final DateTime localDateTime = DateTime(
+      final DateTime localStart = DateTime(
         int.parse(dateParts[0]),
         int.parse(dateParts[1]),
         int.parse(dateParts[2]),
@@ -101,51 +155,100 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
         int.parse(timeParts[1]),
       );
 
-      // التحويل لـ UTC قبل الإرسال
-      final DateTime utcStart = localDateTime.toUtc();
+      final DateTime utcStart = localStart.toUtc();
       final DateTime utcEnd = utcStart
-          .add(Duration(days: days - 1)) // لو الأيام = 1، هيزود 0 أيام (يعني الشغل في نفس اليوم)
-          .add(Duration(hours: hours));  // هيزود عدد ساعات الشفت المحددة بالظبط
+          .add(Duration(days: days - 1))
+          .add(Duration(hours: hours));
+
       double dailySalary = double.tryParse(salaryController.text) ?? 0;
 
-      double savedLat = await SharedPrefHelper.getDouble(SharedPrefKeys.lastLatitude);
-      double savedLong = await SharedPrefHelper.getDouble(SharedPrefKeys.lastLongitude);
+      // ✅ إذا كان المستخدم أضاف مؤسسة جديدة
+      if (selectedInstitution == 'إضافة مؤسسة أخرى') {
+        // ✅ حفظ المؤسسة الجديدة مع الصور
+        final newCompany = CompanyModel(
+          id: CompanyService.generateId(),
+          name: institutionNameController.text,
+          type: institutionTypeController.text,
+          address: institutionAddressController.text,
+          taxNumber: taxNumberController.text,
+          city: 'بورسعيد',
+          images: _companyImages, // ✅ إضافة الصور
+        );
 
-      // ✅ قمنا بتسمية المتغير jobData ليتوافق مع الاستخدام تحت
-      final jobData = JobModel(
-        title: jobTitleController.text,
-        place: selectedInstitution ?? "المؤسسة المسجلة",
-        longitude: pickedLng ?? 31.2357, // الإحداثيات اللي اختارها من الخريطة
-        latitude: pickedLat ?? 30.0444,
-        mainPlace: jobLocationController.text,
-        address: jobLocationController.text,
-        startDateTime: utcStart,
-        endDateTime: utcEnd,
-        dailyWorkHours: hours,
-        requiredWorkers: workers,
-        pricePerHour: (hours > 0) ? (dailySalary / hours).toInt() : 0,
-        experienceLevel: experience,
-        details: detailsController.text,
-        paymentMethod: "card",
-      );
+        await CompanyService.addCompany(newCompany);
+        await _loadCompanies();
 
-      print("📦 Job JSON to be sent: ${jobData.toJson()}");
-
-      if (widget.existingJob != null) {
-        // ✅ الآن jobData معرف والـ id سيتم سحبه من existingJob
-        context.read<JobPublishCubit>().updateJob(widget.existingJob!.id, jobData);
-      } else {
-        // ✅ تم تصحيح الاسم هنا أيضاً
-        context.read<JobPublishCubit>().createJob(jobData);
+        // ✅ اختيار المؤسسة الجديدة
+        selectedInstitution = newCompany.name;
       }
 
+      if (widget.existingJob != null) {
+        final locationMap = {
+          "type": "Point",
+          "coordinates": [pickedLng ?? 31.2357, pickedLat ?? 30.0444],
+          "mainPlace": jobLocationController.text,
+          "address": jobLocationController.text,
+        };
+
+        final updateData = {
+          "title": jobTitleController.text,
+          "place": selectedInstitution ?? "المؤسسة المسجلة",
+          "location": locationMap,
+          "dailyWorkHours": hours,
+          "requiredWorkers": workers,
+          "pricePerHour": {
+            "amount": (hours > 0) ? (dailySalary / hours).toInt() : 0,
+            "currency": "EGP",
+          },
+          "experienceLevel": experience,
+          "details": detailsController.text,
+          "paymentMethod": "card",
+        };
+
+        print('📦 Update Data: $updateData');
+
+        context.read<JobPublishCubit>().updateJob(
+          widget.existingJob!.id,
+          updateData,
+        );
+      } else {
+        final jobData = JobModel(
+          title: jobTitleController.text,
+          place: selectedInstitution ?? "المؤسسة المسجلة",
+          longitude: pickedLng ?? 31.2357,
+          latitude: pickedLat ?? 30.0444,
+          mainPlace: jobLocationController.text,
+          address: jobLocationController.text,
+          startDateTime: utcStart,
+          endDateTime: utcEnd,
+          dailyWorkHours: hours,
+          requiredWorkers: workers,
+          pricePerHour: (hours > 0) ? (dailySalary / hours).toInt() : 0,
+          experienceLevel: experience,
+          details: detailsController.text,
+          paymentMethod: "card",
+        );
+
+        print('📦 Sending JSON: ${jobData.toJson()}');
+
+        context.read<JobPublishCubit>().createJob(jobData);
+      }
     } catch (e, stacktrace) {
-      print("❌ [ERROR] in _onPublish Logic: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("حدث خطأ في معالجة البيانات: $e")),
-      );
+      print("❌ ERROR: $e");
+      print(stacktrace);
     }
   }
+
+  // ✅ بناء قائمة الـ Dropdown من المؤسسات المحفوظة
+  List<String> get _companyDropdownItems {
+    final List<String> items = [];
+    for (final company in _companies) {
+      items.add(company.name);
+    }
+    items.add('إضافة مؤسسة أخرى');
+    return items;
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isNewLocationMode = selectedInstitution == 'إضافة مؤسسة أخرى';
@@ -167,7 +270,7 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-            child: Form( // ✅ Wrap everything in Form
+            child: Form(
               key: _formKey,
               child: Column(
                 children: [
@@ -176,18 +279,24 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
                     children: [
                       const CustomAppBar(title: 'نشر وظيفة'),
                       const CustomLabelText(text: 'مكان العمل'),
-                      AppDropdown(
-                        items: const ['المؤسسة المسجلة (كافيه 88 cups)', "كافيه", 'إضافة مؤسسة أخرى'],
-                        value: selectedInstitution,
-                        onChanged: (val) {
-                          setState(() {
-                            selectedInstitution = val;
-                            currentStep = 1;
-                          });
-                        },
-                        hint: 'المؤسسة المسجلة (كافيه 88 cups)',
-                        // ✅ Required field validator
-                      ),
+                      if (_isLoading)
+                        const CircularProgressIndicator()
+                      else
+                        AppDropdown(
+                          items: _companyDropdownItems,
+                          value: selectedInstitution,
+                          onChanged: (val) {
+                            setState(() {
+                              selectedInstitution = val;
+                              if (val != 'إضافة مؤسسة أخرى') {
+                                currentStep = 1;
+                              }
+                            });
+                          },
+                          hint: _companies.isNotEmpty
+                              ? _companies.last.name
+                              : 'اختر مؤسستك',
+                        ),
                       if (isNewLocationMode) ...[
                         SizedBox(height: 20.h),
                         StepProgressIndicator(
@@ -220,6 +329,8 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
         nameController: institutionNameController,
         addressController: institutionAddressController,
         taxController: taxNumberController,
+        typeController: institutionTypeController,
+        onImagesChanged: _onCompanyImagesChanged, // ✅ تمرير
       );
     }
 
@@ -231,24 +342,9 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
       reqController: requirementsController,
       dateController: dateController,
       timeController: timeController,
-
-      // ✅ تعديل الـ Callbacks لعمل setState لتحديث القيم فوراً:
-      onDaysChanged: (val) {
-        setState(() {
-          days = val;
-        });
-      },
-      onHoursChanged: (val) {
-        setState(() {
-          hours = val;
-        });
-      },
-      onWorkersChanged: (val) {
-        setState(() {
-          workers = val;
-        });
-      },
-
+      onDaysChanged: (val) => setState(() => days = val),
+      onHoursChanged: (val) => setState(() => hours = val),
+      onWorkersChanged: (val) => setState(() => workers = val),
       onExperienceChanged: (val) => setState(() => experience = _mapExperience(val)),
       onLocationSelected: (latValue, lngValue) {
         setState(() {
@@ -256,6 +352,7 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
           pickedLng = lngValue;
         });
       },
+      onTermsChanged: _onTermsChanged, // ✅ تمرير الـ Callback
     );
   }
 
@@ -278,7 +375,8 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
   }
 
   String _mapExperience(String? val) {
-    if (val == '1-3 سنوات') return 'mid-level';
+    if (val == 'بدون خبره' || val == 'أقل من سنة') return 'junior';
+    if (val == '1-3 سنوات') return 'mid';
     if (val == 'أكثر من 3 سنوات') return 'senior';
     return 'junior';
   }

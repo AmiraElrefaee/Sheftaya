@@ -33,6 +33,7 @@ import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs
 import 'package:sheftaya/features/worker/my_application_jobs/logic/my_jobs_cubit.dart';
 
 import '../core/di/service_locator.dart';
+// ✅ استخدم alias للـ Publish Job Models
 import '../features/publish_job/data/model/job_details_response.dart'
 as publish_job;
 import '../features/publish_job/presentation/job_publish_success_screen.dart';
@@ -102,9 +103,12 @@ abstract class AppRouter {
         path: kForgetPassScreen,
         builder: (context, state) => const ForgetPassScreen(),
       ),
+      // ✅ هنا نستخدم publish_job.JobDetails
       GoRoute(
-        path: kPublishJobView,
+        path: AppRouter.kPublishJobView,
+        name: AppRouter.kPublishJobView,
         builder: (context, state) {
+          // ✅ استقبال الـ extra للتعديل
           final job = state.extra as publish_job.JobDetails?;
           return PublishJobView(existingJob: job);
         },
@@ -193,31 +197,12 @@ abstract class AppRouter {
         path: kMapPickerScreen,
         builder: (context, state) => MapPickerScreen(),
       ),
-      // GoRoute(
-      //   path: kShiftDetailsView,
-      //   builder: (context, state) {
-      //     final Map<String, dynamic> data =
-      //         state.extra as Map<String, dynamic>? ??
-      //             {
-      //               'role': UserRole.worker,
-      //               'jobId': 'test_job_123',
-      //             };
-      //
-      //     return ShiftDetailsView(
-      //       role: data['role'] as UserRole,
-      //       shiftId: data['jobId'] as String,
-      //     );
-      //   },
-      // ),
-      // في router.dart
-      // في router.dart
-      // في router.dart
       GoRoute(
         path: kShiftDetailsView,
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
           final item = extra['item'] as MyJobItem;
-          final role = extra['role'] as UserRole; // ✅ الآن role صحيح
+          final role = extra['role'] as UserRole;
 
           return BlocProvider(
             create: (context) => getIt<ShiftCubit>()..initShiftDetails(item, role: role),
@@ -225,8 +210,10 @@ abstract class AppRouter {
           );
         },
       ),
-
-      GoRoute(path: kFaqScreen, builder: (context, state) => FAQScreen()),
+      GoRoute(
+        path: kFaqScreen,
+        builder: (context, state) => FAQScreen(),
+      ),
       GoRoute(
         path: kMyProfileScreen,
         builder: (context, state) => const MyProfileScreen(),
@@ -268,16 +255,13 @@ abstract class AppRouter {
           );
         },
       ),
-  // في router.dart
-
-
-  GoRoute(
-  path: kShiftTimerScreen,
-  builder: (context, state) {
-  final item = state.extra as MyJobItem;
-  return ShiftTimerScreen(item: item);
-  },
-  ),
+      GoRoute(
+        path: kShiftTimerScreen,
+        builder: (context, state) {
+          final item = state.extra as MyJobItem;
+          return ShiftTimerScreen(item: item);
+        },
+      ),
     ],
   );
 }
