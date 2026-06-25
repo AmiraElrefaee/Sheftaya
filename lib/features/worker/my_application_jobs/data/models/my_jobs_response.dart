@@ -64,6 +64,7 @@ class JobDetails {
   final String? place;
   final JobLocation? location;
   final String? startDateTime;
+  final String? endDateTime;  // ← أضيفي هذا السطر
   final int? dailyWorkHours;
   final int? requiredWorkers;
   final int? acceptedWorkersCount;
@@ -81,6 +82,7 @@ class JobDetails {
     this.place,
     this.location,
     this.startDateTime,
+    this.endDateTime,  // ← وأضيفيه هنا
     this.dailyWorkHours,
     this.requiredWorkers,
     this.acceptedWorkersCount,
@@ -97,6 +99,7 @@ class JobDetails {
 
   Map<String, dynamic> toJson() => _$JobDetailsToJson(this);
 }
+
 
 @JsonSerializable(explicitToJson: true)
 class JobLocation {

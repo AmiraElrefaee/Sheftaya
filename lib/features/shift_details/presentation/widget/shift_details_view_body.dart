@@ -73,10 +73,24 @@ class ShiftDetailsViewBody extends StatelessWidget {
   }
 
   Widget _buildTimelineSection(ShiftLoaded shift) {
-    final startTime = shift.item.job?.startDateTime != null
+    // ✅ استخدم اليوم الحالي بدلاً من التاريخ الثابت
+    final baseStartTime = shift.item.job?.startDateTime != null
         ? DateTime.parse(shift.item.job!.startDateTime!)
         : DateTime.now();
-    final timeStarted = DateTime.now().isAfter(startTime);
+
+    // ✅ احسب وقت البدء لليوم الحالي
+    final now = DateTime.now();
+    final todayStartTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      baseStartTime.hour,
+      baseStartTime.minute,
+      baseStartTime.second,
+    );
+
+    // ✅ الوقت الحالي بالنسبة لوقت البدء اليوم
+    final timeStarted = now.isAfter(todayStartTime);
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -90,7 +104,7 @@ class ShiftDetailsViewBody extends StatelessWidget {
         children: [
           // 1. وقت البدء
           ShiftStatusTimelineStep(
-            title: "وقت البدء الساعة (${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')})",
+            title: "وقت البدء الساعة (${todayStartTime.hour}:${todayStartTime.minute.toString().padLeft(2, '0')})",
             subTitle: timeStarted ? "تم بحلول الوقت الرسمي" : "لم يحن الوقت بعد",
             status: timeStarted ? ShiftStepStatus.completed : ShiftStepStatus.pending,
           ),
@@ -151,79 +165,167 @@ class ShiftDetailsViewBody extends StatelessWidget {
   Widget _buildActionButton(BuildContext context, ShiftLoaded shift) {
     final cubit = context.read<ShiftCubit>();
 
-    if (shift.status == ShiftStatus.arrivedApproved || shift.status == ShiftStatus.inProgress) {
+    // ✅ التحقق من انتهاء الوظيفة
+    final endDateTime = shift.item.job?.endDateTime != null
+        ? DateTime.parse(shift.item.job!.endDateTime!)
+        : null;
+
+    if (endDateTime != null && DateTime.now().isAfter(endDateTime)) {
       return AppTextButton(
         textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
-        backgroundColor: ColorsManager.primary,
-        buttonText: "الانتقال لبدء العمل",
-        onPressed: () {
-          context.push(AppRouter.kShiftTimerScreen, extra: shift.item);
-        },
+        backgroundColor: const Color(0xffD9D9D9),
+        buttonText: "انتهت الوردية",
+        onPressed: () {},
       );
     }
 
-    // Worker
-    if (shift.role == UserRole.worker) {
-      if (shift.status == ShiftStatus.notStarted) {
-        return AppTextButton(
-          textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
-          backgroundColor: ColorsManager.primary,
-          buttonText: "في الطريق",
-          onPressed: () => cubit.workerOnTheWay(),
-        );
-      }
+    // ✅ التحقق من وقت البدء اليوم
+    final startDateTime = shift.item.job?.startDateTime != null
+        ? DateTime.parse(shift.item.job!.startDateTime!)
+        : null;
 
-      if (shift.status == ShiftStatus.onTheWay) {
-        return AppTextButton(
-          textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
-          backgroundColor: ColorsManager.primary,
-          buttonText: "تأكيد وصولي",
-          onPressed: () => cubit.workerArrived(),
-        );
-      }
-
-      if (shift.status == ShiftStatus.arrived) {
-        return AppTextButton(
-          textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
-          backgroundColor: const Color(0xffD9D9D9),
-          buttonText: "بانتظار تأكيد صاحب العمل",
-          onPressed: () {},
-        );
-      }
-    }
-
-    // Employer
-    // في _buildActionButton, قسم Employer
-
-    if (shift.role == UserRole.employer) {
-      if (!shift.isWorkerArrived) {
-        return AppTextButton(
-          textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
-          backgroundColor: const Color(0xffD9D9D9),
-          buttonText: "بانتظار وصول العامل",
-          onPressed: () {},
-        );
-      }
-
-      return AppTextButton(
-        textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
-        backgroundColor: ColorsManager.primary,
-        buttonText: "تأكيد وصول العامل",
-        onPressed: () {
-          log('🔥🔥🔥 BUTTON PRESSED - Navigating to timer');
-
-          cubit.approveArrival();
-          // ✅ استخدام GoRouter بدلاً من Navigator
-          context.push(AppRouter.kShiftTimerScreen, extra: shift.item);
-        },
+    if (startDateTime != null) {
+      final now = DateTime.now();
+      final todayStart = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        startDateTime.hour,
+        startDateTime.minute,
+        startDateTime.second,
       );
+
+      if (now.isBefore(todayStart) && shift.status == ShiftStatus.notStarted) {
+        return SizedBox(
+          width: double.infinity,
+          height: 56.h,
+          child: ElevatedButton(
+            onPressed: null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xffD9D9D9),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              elevation: 0,
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "سيتم تفعيل الزر في وقت بدء العمل",
+                  style: TextStyles.font14BlackMedium.copyWith(
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  "(${todayStart.hour}:${todayStart.minute.toString().padLeft(2, '0')})",
+                  style: TextStyles.font14BlackMedium.copyWith(
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      // ✅ إذا كانت الحالة arrivedApproved أو inProgress
+      if (shift.status == ShiftStatus.arrivedApproved || shift.status == ShiftStatus.inProgress) {
+        return AppTextButton(
+          textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+          backgroundColor: ColorsManager.primary,
+          buttonText: "الانتقال لبدء العمل",
+          onPressed: () {
+            context.push(AppRouter.kShiftTimerScreen, extra: shift.item);
+          },
+        );
+      }
+
+      // Worker
+      if (shift.role == UserRole.worker) {
+        if (shift.status == ShiftStatus.notStarted) {
+          return AppTextButton(
+            textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+            backgroundColor: ColorsManager.primary,
+            buttonText: "في الطريق",
+            onPressed: () => cubit.workerOnTheWay(),
+          );
+        }
+
+        if (shift.status == ShiftStatus.onTheWay) {
+          return AppTextButton(
+            textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+            backgroundColor: ColorsManager.primary,
+            buttonText: "تأكيد وصولي",
+            onPressed: () => cubit.workerArrived(),
+          );
+        }
+
+        if (shift.status == ShiftStatus.arrived) {
+          return AppTextButton(
+            textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+            backgroundColor: const Color(0xffD9D9D9),
+            buttonText: "بانتظار تأكيد صاحب العمل",
+            onPressed: () {},
+          );
+        }
+      }
+
+      // Employer
+      if (shift.role == UserRole.employer) {
+        if (!shift.isWorkerArrived) {
+          return AppTextButton(
+            textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+            backgroundColor: const Color(0xffD9D9D9),
+            buttonText: "بانتظار وصول العامل",
+            onPressed: () {},
+          );
+        }
+
+        if (shift.status == ShiftStatus.arrived) {
+          return AppTextButton(
+            textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+            backgroundColor: ColorsManager.primary,
+            buttonText: "تأكيد وصول العامل",
+            onPressed: () {
+              cubit.approveArrival();
+              context.push(AppRouter.kShiftTimerScreen, extra: shift.item);
+            },
+          );
+        }
+
+        if (shift.status == ShiftStatus.arrivedApproved) {
+          return AppTextButton(
+            textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+            backgroundColor: ColorsManager.primary,
+            buttonText: "بدء العمل",
+            onPressed: () {
+              cubit.startShift();
+              context.push(AppRouter.kShiftTimerScreen, extra: shift.item);
+            },
+          );
+        }
+
+        if (shift.status == ShiftStatus.inProgress) {
+          return AppTextButton(
+            textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+            backgroundColor: ColorsManager.primary,
+            buttonText: "إنهاء الوردية",
+            onPressed: () => cubit.endShift(),
+          );
+        }
+      }
     }
 
+    // ✅ return في النهاية (لأي حالة لم تغطيها الشروط السابقة)
     return AppTextButton(
       textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
       backgroundColor: const Color(0xffD9D9D9),
       buttonText: "جاري التحميل...",
       onPressed: () {},
     );
-  }
-}
+  }}

@@ -11,9 +11,24 @@ class SocketService {
   IO.Socket? _socket;
   bool _isConnecting = false;
   String? _currentJobId;
-  String? _currentUserId; // ← أضيفي ده
+  String? _currentUserId;
 
   static const String _baseUrl = "https://sheftaya-production-12af.up.railway.app";
+
+  // ✅ دالة للاستماع على الأحداث الصادرة من السيرفر
+  void on(String event, Function(dynamic) handler) {
+    _socket?.on(event, handler);
+  }
+
+  // ✅ دالة لإيقاف الاستماع على حدث معين
+  void off(String event) {
+    _socket?.off(event);
+  }
+
+  // ✅ دالة للاستماع على أي حدث (للتتبع والـ Debug)
+  void onAny(Function(String, dynamic) handler) {
+    _socket?.onAny(handler);
+  }
 
   Future<void> connect() async {
     if (_socket?.connected == true || _isConnecting) return;
@@ -60,7 +75,6 @@ class SocketService {
     _socket!
       ..onConnect((_) {
         log('✅ Socket Connected');
-        // rejoin كل الـ rooms بعد reconnect
         if (_currentJobId != null) {
           _socket?.emit('join_job', _currentJobId);
           log('🏠 Re-joined job room: $_currentJobId');
@@ -87,10 +101,6 @@ class SocketService {
       });
   }
 
-  void onAny(Function(String, dynamic) handler) {
-    _socket?.onAny(handler);
-  }
-
   void joinJobRoom(String jobId) {
     _currentJobId = jobId;
     _socket?.emit('join_job', jobId);
@@ -98,7 +108,7 @@ class SocketService {
   }
 
   void joinUserRoom(String userId) {
-    _currentUserId = userId; // ← احفظيه
+    _currentUserId = userId;
     _socket?.emit('join_user', userId);
     log('👤 Joined user room: $userId');
   }
@@ -108,7 +118,10 @@ class SocketService {
     _currentJobId = null;
   }
 
+  // ===================== Worker Events =====================
+
   void workerOnTheWay(String appId, String workerId) {
+    log('📤 Emitting worker_on_the_way | appId: $appId, workerId: $workerId');
     _socket?.emit('worker_on_the_way', {
       'appId': appId,
       'workerId': workerId,
@@ -118,6 +131,7 @@ class SocketService {
   }
 
   void workerArrived(String appId, String workerId) {
+    log('📤 Emitting worker_arrived | appId: $appId, workerId: $workerId');
     _socket?.emit('worker_arrived', {
       'appId': appId,
       'workerId': workerId,
@@ -126,7 +140,10 @@ class SocketService {
     });
   }
 
+  // ===================== Employer Events =====================
+
   void approveArrival(String appId) {
+    log('📤 Emitting arrival_approved | appId: $appId');
     _socket?.emit('arrival_approved', {
       'appId': appId,
       'status': 'arrived_approved',
@@ -135,28 +152,21 @@ class SocketService {
   }
 
   void startShift(String appId) {
+    log('📤 Emitting shift_started | appId: $appId');
     _socket?.emit('shift_started', {
       'appId': appId,
       'status': 'in_progress',
       'time': DateTime.now().toIso8601String(),
     });
-    log('📤 Emitted shift_started for appId: $appId');
   }
 
   void endShift(String appId) {
+    log('📤 Emitting shift_completed | appId: $appId');
     _socket?.emit('shift_completed', {
       'appId': appId,
       'status': 'completed',
       'time': DateTime.now().toIso8601String(),
     });
-  }
-
-  void on(String event, Function(dynamic) handler) {
-    _socket?.on(event, handler);
-  }
-
-  void off(String event) {
-    _socket?.off(event);
   }
 
   void disconnect() {

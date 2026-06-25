@@ -234,6 +234,39 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<PublishJobResponse> updateJob(
+    String token,
+    String jobId,
+    Map<String, dynamic> job,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = <String, dynamic>{};
+    _data.addAll(job);
+    final _options = _setStreamType<PublishJobResponse>(
+      Options(method: 'PUT', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/jobs/${jobId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late PublishJobResponse _value;
+    try {
+      _value = PublishJobResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<EmployerJobDetailsResponse> getJobDetails(
     String token,
     String jobId,
@@ -257,39 +290,6 @@ class _ApiService implements ApiService {
     late EmployerJobDetailsResponse _value;
     try {
       _value = EmployerJobDetailsResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<PublishJobResponse> updateJob(
-    String token,
-    String jobId,
-    Map<String, dynamic> job,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': token};
-    _headers.removeWhere((k, v) => v == null);
-    final _data = <String, dynamic>{};
-    _data.addAll(job);
-    final _options = _setStreamType<PublishJobResponse>(
-      Options(method: 'PUT', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            'jobs/${jobId}',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late PublishJobResponse _value;
-    try {
-      _value = PublishJobResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -487,50 +487,6 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<SupportResponse> createSupportRequest(
-    String problemType,
-    String message,
-    MultipartFile? image,
-    String token,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    queryParameters.removeWhere((k, v) => v == null);
-    final _headers = <String, dynamic>{r'Authorization': token};
-    _headers.removeWhere((k, v) => v == null);
-    final _data = FormData();
-    _data.fields.add(MapEntry('problemType', problemType));
-    _data.fields.add(MapEntry('message', message));
-    if (image != null) {
-      _data.files.add(MapEntry('image', image));
-    }
-    final _options = _setStreamType<SupportResponse>(
-      Options(
-            method: 'POST',
-            headers: _headers,
-            extra: _extra,
-            contentType: 'multipart/form-data',
-          )
-          .compose(
-            _dio.options,
-            'support',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late SupportResponse _value;
-    try {
-      _value = SupportResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
   Future<ChangePasswordResponse> changePassword(
     ChangePasswordRequestBody body,
     String token,
@@ -611,38 +567,6 @@ class _ApiService implements ApiService {
     late MyJobsResponse _value;
     try {
       _value = MyJobsResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<UpdateFcmResponse> updateFcmToken(
-    String token,
-    UpdateFcmTokenRequestBody updateFcmTokenRequestBody,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{r'Authorization': token};
-    _headers.removeWhere((k, v) => v == null);
-    final _data = <String, dynamic>{};
-    _data.addAll(updateFcmTokenRequestBody.toJson());
-    final _options = _setStreamType<UpdateFcmResponse>(
-      Options(method: 'POST', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            'auth/updateFcmToken',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late UpdateFcmResponse _value;
-    try {
-      _value = UpdateFcmResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -740,6 +664,38 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<UpdateFcmResponse> updateFcmToken(
+    String token,
+    UpdateFcmTokenRequestBody updateFcmTokenRequestBody,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = <String, dynamic>{};
+    _data.addAll(updateFcmTokenRequestBody.toJson());
+    final _options = _setStreamType<UpdateFcmResponse>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            'auth/updateFcmToken',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UpdateFcmResponse _value;
+    try {
+      _value = UpdateFcmResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<JobApplicationsResponse> getApplicationsForJob(
     String jobId,
     int page,
@@ -828,6 +784,50 @@ class _ApiService implements ApiService {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     await _dio.fetch<void>(_options);
+  }
+
+  @override
+  Future<SupportResponse> createSupportRequest(
+    String problemType,
+    String message,
+    MultipartFile? image,
+    String token,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'Authorization': token};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = FormData();
+    _data.fields.add(MapEntry('problemType', problemType));
+    _data.fields.add(MapEntry('message', message));
+    if (image != null) {
+      _data.files.add(MapEntry('image', image));
+    }
+    final _options = _setStreamType<SupportResponse>(
+      Options(
+            method: 'POST',
+            headers: _headers,
+            extra: _extra,
+            contentType: 'multipart/form-data',
+          )
+          .compose(
+            _dio.options,
+            'support',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late SupportResponse _value;
+    try {
+      _value = SupportResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

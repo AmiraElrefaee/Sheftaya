@@ -63,6 +63,7 @@ JobDetails _$JobDetailsFromJson(Map<String, dynamic> json) => JobDetails(
       ? null
       : JobLocation.fromJson(json['location'] as Map<String, dynamic>),
   startDateTime: json['startDateTime'] as String?,
+  endDateTime: json['endDateTime'] as String?,
   dailyWorkHours: (json['dailyWorkHours'] as num?)?.toInt(),
   requiredWorkers: (json['requiredWorkers'] as num?)?.toInt(),
   acceptedWorkersCount: (json['acceptedWorkersCount'] as num?)?.toInt(),
@@ -88,6 +89,7 @@ Map<String, dynamic> _$JobDetailsToJson(JobDetails instance) =>
       'place': instance.place,
       'location': instance.location?.toJson(),
       'startDateTime': instance.startDateTime,
+      'endDateTime': instance.endDateTime,
       'dailyWorkHours': instance.dailyWorkHours,
       'requiredWorkers': instance.requiredWorkers,
       'acceptedWorkersCount': instance.acceptedWorkersCount,

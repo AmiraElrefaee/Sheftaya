@@ -26,6 +26,20 @@ class ShiftJobSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ حساب تاريخ اليوم الحالي مع الحفاظ على نفس الوقت
+    final now = DateTime.now();
+    final actualStartTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      startTime.hour,
+      startTime.minute,
+      startTime.second,
+    );
+
+    // ✅ إذا كان الوقت الحالي قبل وقت البدء اليوم، استخدم وقت البدء اليوم
+    final displayTime = now.isBefore(actualStartTime) ? actualStartTime : now;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
       decoration: BoxDecoration(
@@ -74,9 +88,9 @@ class ShiftJobSummaryCard extends StatelessWidget {
               ),
               Column(
                 children: [
-                  _buildInfoBadge(_formatDate(startTime)),
+                  _buildInfoBadge(_formatDate(displayTime)),
                   SizedBox(height: 4.h),
-                  _buildInfoBadge(_formatTime(startTime)),
+                  _buildInfoBadge(_formatTime(displayTime)),
                 ],
               )
             ],
@@ -181,7 +195,6 @@ class ShiftJobSummaryCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // ✅ خريطة تفاعلية من Flutter Map (مجانية)
                   FlutterMap(
                     options: MapOptions(
                       center: LatLng(latitude, longitude),
@@ -208,16 +221,12 @@ class ShiftJobSummaryCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // ✅ إضافة AbsorbPointer لمنع التفاعل مع الخريطة (بدلاً من interactive)
                   Positioned.fill(
                     child: AbsorbPointer(
                       absorbing: true,
-                      child: Container(
-                        color: Colors.transparent,
-                      ),
+                      child: Container(color: Colors.transparent),
                     ),
                   ),
-                  // تراكب شفاف مع أيقونة
                   Container(
                     color: Colors.black.withValues(alpha: 0.05),
                     child: Center(
@@ -308,11 +317,17 @@ class ShiftJobSummaryCard extends StatelessWidget {
     );
   }
 
+  // ✅ دالة لحساب اليوم الحقيقي
   String _formatDate(DateTime dt) {
     const days = ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'];
     const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
       'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-    return '${days[dt.weekday - 1]} ${dt.day} ${months[dt.month - 1]}';
+
+    // ✅ استخدم اليوم الحالي الفعلي
+    final now = DateTime.now();
+    final actualDate = DateTime(now.year, now.month, now.day);
+
+    return '${days[actualDate.weekday - 1]} ${actualDate.day} ${months[actualDate.month - 1]}';
   }
 
   String _formatTime(DateTime dt) {

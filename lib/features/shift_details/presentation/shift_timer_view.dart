@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
@@ -36,38 +37,95 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
   void _initJobData() {
     final job = widget.item.job;
 
-    // Get start time from API
-    if (job?.startDateTime != null) {
+    if (job?.startDateTime != null && job?.dailyWorkHours != null) {
       try {
-        final startTime = DateTime.parse(job!.startDateTime!);
-        _startTimeStr = _formatTime(startTime);
-
-        // Calculate end time from start + dailyWorkHours
-        final workHours = job.dailyWorkHours ?? 4;
-        final endTime = startTime.add(Duration(hours: workHours));
-        _endTimeStr = _formatTime(endTime);
-
-        // Total hours
-        _totalHours = workHours;
-
-        // Hourly rate
-        _hourlyRate = (job.pricePerHour?.amount ?? 60).toDouble();
-
-        // Total salary
-        _totalSalary = _hourlyRate * _totalHours;
-
-        // Calculate elapsed time if shift already started
+        final baseStartTime = DateTime.parse(job!.startDateTime!);
         final now = DateTime.now();
-        if (now.isAfter(startTime)) {
-          _elapsedDuration = now.difference(startTime);
-          final maxDuration = Duration(hours: _totalHours);
-          if (_elapsedDuration > maxDuration) {
-            _elapsedDuration = maxDuration;
+        final workHours = job.dailyWorkHours ?? 4;
+        final hourlyRate = (job.pricePerHour?.amount ?? 60).toDouble();
+
+        // ✅ حساب endDateTime
+        DateTime endDateTime;
+        if (job.endDateTime != null && job.endDateTime!.isNotEmpty) {
+          endDateTime = DateTime.parse(job.endDateTime!);
+        } else {
+          endDateTime = baseStartTime.add(Duration(days: 30));
+        }
+
+        // ✅ حساب وقت البدء لليوم الحالي
+        final todayStartTime = _getTodayStartTime(baseStartTime, now, endDateTime);
+
+        // ✅ إذا كان اليوم الجديد لم يبدأ بعد
+        if (todayStartTime == null) {
+          _isShiftEnded = true;
+          _totalHours = 0;
+          _startTimeStr = 'انتهت الوظيفة';
+          _endTimeStr = '-';
+          _totalSalary = 0;
+          _hourlyRate = 0;
+          _elapsedDuration = Duration.zero;
+          return;
+        }
+
+        // ✅ حساب وقت الانتهاء
+        final todayEndTime = todayStartTime.add(Duration(hours: workHours));
+
+        // ✅ إذا كان الوقت الحالي قبل وقت البدء
+        if (now.isBefore(todayStartTime)) {
+          _startTimeStr = _formatTime(todayStartTime);
+          _endTimeStr = _formatTime(todayEndTime);
+          _totalHours = workHours;
+          _hourlyRate = hourlyRate;
+          _totalSalary = _hourlyRate * _totalHours;
+          _elapsedDuration = Duration.zero;
+          _isShiftEnded = false;
+          return;
+        }
+
+        // ✅ إذا كان الوقت الحالي في منتصف الشيفت
+        if (now.isAfter(todayStartTime) && now.isBefore(todayEndTime)) {
+          _startTimeStr = _formatTime(todayStartTime);
+          _endTimeStr = _formatTime(todayEndTime);
+          _totalHours = workHours;
+          _hourlyRate = hourlyRate;
+          _totalSalary = _hourlyRate * _totalHours;
+          _elapsedDuration = now.difference(todayStartTime);
+          _isShiftEnded = false;
+          return;
+        }
+
+        // ✅ إذا انتهى الشيفت اليوم
+        if (now.isAfter(todayEndTime)) {
+          // ✅ التحقق من وجود يوم تالي
+          final nextDayStart = todayStartTime.add(Duration(days: 1));
+          if (nextDayStart.isBefore(endDateTime)) {
+            // ✅ اليوم التالي لم يبدأ بعد، اعرض وقت البدء القادم
+            _startTimeStr = _formatTime(nextDayStart);
+            _endTimeStr = _formatTime(nextDayStart.add(Duration(hours: workHours)));
+            _totalHours = workHours;
+            _hourlyRate = hourlyRate;
+            _totalSalary = _hourlyRate * _totalHours;
+            _elapsedDuration = Duration.zero;
+            _isShiftEnded = false;
+            log('⏰ Next shift starts at: ${_startTimeStr}');
+            return;
+          } else {
+            // ✅ الوظيفة انتهت تماماً
             _isShiftEnded = true;
+            _totalHours = 0;
+            _startTimeStr = 'انتهت الوظيفة';
+            _endTimeStr = '-';
+            _totalSalary = 0;
+            _hourlyRate = 0;
+            _elapsedDuration = Duration.zero;
+            return;
           }
         }
+
         return;
-      } catch (_) {}
+      } catch (e) {
+        log('❌ Error in _initJobData: $e');
+      }
     }
 
     // Fallback defaults
@@ -78,6 +136,48 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
     _totalSalary = 400;
     _elapsedDuration = Duration.zero;
   }
+
+  /// ✅ حساب وقت البدء لليوم الحالي
+  DateTime? _getTodayStartTime(DateTime baseStartTime, DateTime now, DateTime endDateTime) {
+    // إذا كان الوقت الحالي بعد نهاية الوظيفة كلها
+    if (now.isAfter(endDateTime)) {
+      return null;
+    }
+
+    // حساب وقت البدء لليوم الحالي (نفس الوقت ولكن في اليوم الحالي)
+    DateTime todayStart = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      baseStartTime.hour,
+      baseStartTime.minute,
+      baseStartTime.second,
+    );
+
+    // إذا كان الوقت الحالي قبل وقت البدء اليوم، استخدم وقت البدء اليوم
+    if (now.isBefore(todayStart)) {
+      return todayStart;
+    }
+
+    // إذا كان الوقت الحالي بعد وقت البدء اليوم
+    // تحقق من اليوم التالي
+    DateTime nextDayStart = todayStart.add(Duration(days: 1));
+
+    // إذا كان اليوم التالي لا يزال ضمن نطاق الوظيفة
+    if (nextDayStart.isBefore(endDateTime)) {
+      // إذا كان الوقت الحالي بعد نهاية الشيفت اليوم، استخدم اليوم التالي
+      final todayEnd = todayStart.add(Duration(hours: baseStartTime.hour + 8)); // 8 ساعات افتراضية
+      if (now.isAfter(todayEnd)) {
+        return nextDayStart;
+      }
+      return todayStart;
+    }
+
+    // إذا لم يعد هناك أيام متبقية
+    return null;
+  }
+
+  //------
 
   String _formatTime(DateTime time) {
     String hour = time.hour.toString().padLeft(2, '0');

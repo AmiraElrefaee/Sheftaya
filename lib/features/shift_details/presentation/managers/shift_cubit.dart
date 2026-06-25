@@ -14,6 +14,7 @@ part 'shift_state.dart';
 class ShiftCubit extends Cubit<ShiftState> {
   final SocketService _socketService;
   static const String _shiftStatusKey = 'shift_status_';
+  static const String _lastShiftDateKey = 'last_shift_date_';
 
   ShiftCubit(this._socketService) : super(ShiftLoading());
 
@@ -37,28 +38,83 @@ class ShiftCubit extends Cubit<ShiftState> {
     log('🔧 _currentAppId (before fetch): $_currentAppId');
     log('🔧 _currentRole: $_currentRole');
 
-    // ✅ إذا كان Employer و _currentAppId فاضي، جيبها من الـ API
+    final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+    final userId = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userId);
+
+    // ✅ جلب البيانات الكاملة من GET /jobs/{jobId}
+    try {
+      final dio = getIt<Dio>();
+      final response = await dio.get(
+        '${ApiConstants.apiBaseUrl}jobs/$_currentJobId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      final data = response.data['data'] as Map<String, dynamic>?;
+      if (data != null) {
+        final jobData = data['job'] as Map<String, dynamic>?;
+        final applications = data['applications'] as List?;
+        final myApplication = data['myApplication'] as Map<String, dynamic>?;
+
+        if (jobData != null) {
+          final updatedJob = JobDetails.fromJson(jobData);
+          _currentItem = MyJobItem(
+            id: item.id,
+            title: item.title,
+            place: item.place,
+            postedAt: item.postedAt,
+            finalStatus: item.finalStatus,
+            jobStatus: item.jobStatus,
+            job: updatedJob,
+            applicationStatus: item.applicationStatus,
+            arrivalStatus: item.arrivalStatus,
+            appliedAt: item.appliedAt,
+            applicationId: item.applicationId,
+          );
+        }
+
+        if (_currentRole == 'employer' && applications != null && applications.isNotEmpty) {
+          final firstApp = applications.first as Map<String, dynamic>?;
+          if (firstApp != null) {
+            final appId = firstApp['_id'] as String?;
+            if (appId != null && appId.isNotEmpty) {
+              _currentAppId = appId;
+              log('🔧 Updated appId from applications: $_currentAppId');
+            }
+          }
+        } else if (_currentRole == 'worker' && myApplication != null) {
+          final appId = myApplication['_id'] as String?;
+          if (appId != null && appId.isNotEmpty) {
+            _currentAppId = appId;
+            log('🔧 Updated appId from myApplication: $_currentAppId');
+          }
+        }
+      }
+    } catch (e) {
+      log('❌ Failed to fetch full job details: $e');
+    }
+
     if (_currentRole == 'employer' && _currentAppId.isEmpty) {
       _currentAppId = await _fetchApplicationIdForJob();
-      log('🔧 _currentAppId (after fetch): $_currentAppId');
+      log('🔧 _currentAppId (fallback fetch): $_currentAppId');
     }
 
     log('🔧 =========================================');
 
-    final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
-    final userId = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userId);
+    // ✅ 1. التحقق من اليوم الجديد وإعادة تعيين الحالة
+    await _checkAndResetForNewDay();
 
+    // ✅ 2. تحميل الحالة من Preferences
     _currentStatus = await _loadStatusFromPreferences();
     log('📊 Loaded from preferences: $_currentStatus');
 
+    // ✅ 3. إذا كانت notStarted، ابدأ من الصفر
     if (_currentStatus == ShiftStatus.notStarted) {
-      _currentStatus = await _fetchStatusFromApi(token);
-      log('📊 Fetched from API: $_currentStatus');
-      await _saveStatusToPreferences(_currentStatus);
+      log('📊 Starting fresh - status remains notStarted');
+      await _saveStatusToPreferences(ShiftStatus.notStarted);
     }
 
     emit(ShiftLoaded(
-      item: item,
+      item: _currentItem,
       status: _currentStatus,
       role: role,
     ));
@@ -72,7 +128,7 @@ class ShiftCubit extends Cubit<ShiftState> {
     _listenToSocketEvents();
   }
 
-  // ✅ جلب applicationId للـ Employer من API
+  // ✅ جلب applicationId للـ Employer من API (Fallback)
   Future<String> _fetchApplicationIdForJob() async {
     try {
       final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
@@ -85,9 +141,7 @@ class ShiftCubit extends Cubit<ShiftState> {
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
 
-      log('📡 Response status: ${response.statusCode}');
       final data = response.data['data'] as List?;
-
       if (data != null && data.isNotEmpty) {
         final appId = data.first['_id'] as String? ?? '';
         log('📡 ✅ Fetched applicationId: $appId');
@@ -99,6 +153,88 @@ class ShiftCubit extends Cubit<ShiftState> {
       log('📡 ❌ Failed to fetch applicationId: $e');
     }
     return '';
+  }
+
+  // ✅ التحقق من اليوم الجديد وإعادة تعيين الحالة
+// ✅ التحقق من اليوم الجديد وإعادة تعيين الحالة
+  // ✅ التحقق من اليوم الجديد وإعادة تعيين الحالة
+  Future<void> _checkAndResetForNewDay() async {
+    final job = _currentItem.job;
+    if (job?.startDateTime == null) return;
+
+    final startTime = DateTime.parse(job!.startDateTime!);
+    final now = DateTime.now();
+    final endDateTime = job.endDateTime != null && job.endDateTime!.isNotEmpty
+        ? DateTime.parse(job.endDateTime!)
+        : startTime.add(Duration(days: 30));
+
+    // ✅ حساب وقت البدء لليوم الحالي
+    final todayStart = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      startTime.hour,
+      startTime.minute,
+      startTime.second,
+    );
+
+    // ✅ جلب آخر يوم تم فيه تحديث الحالة (باستخدام jobId بدلاً من appId)
+    final prefs = await SharedPreferences.getInstance();
+    final lastUpdateDate = prefs.getString('${_lastShiftDateKey}${_currentJobId}');
+
+    final todayKey = '${now.year}-${now.month}-${now.day}';
+
+    // ✅ التحقق: هل النهارده يوم جديد مختلف عن آخر تحديث؟
+    final bool isNewDay = lastUpdateDate != todayKey;
+
+    // ✅ التحقق: هل الشيفت لسه في نطاق الأيام؟
+    final bool isWithinShiftDays = now.isBefore(endDateTime);
+
+    // ✅ التحقق: هل وقت البدء لسه مجاش اليوم؟
+    final bool isBeforeStartTime = now.isBefore(todayStart);
+
+    if (isNewDay && isWithinShiftDays) {
+      log('🔄 New day detected! Resetting shift status');
+      log('📅 Today: $todayKey | Last update: $lastUpdateDate');
+      log('⏰ Today shift start: $todayStart');
+
+      // ✅ حفظ اليوم الجديد (باستخدام jobId)
+      await prefs.setString('${_lastShiftDateKey}${_currentJobId}', todayKey);
+
+      // ✅ إعادة تعيين الحالة إلى notStarted (بغض النظر عن الوقت)
+      _currentStatus = ShiftStatus.notStarted;
+      await _saveStatusToPreferences(ShiftStatus.notStarted);
+
+      // ✅ إعادة تعيين arrivalStatus في الـ item نفسه
+      log('🔄 Overriding arrivalStatus to not_arrived for new day');
+      _currentItem = MyJobItem(
+        id: _currentItem.id,
+        title: _currentItem.title,
+        place: _currentItem.place,
+        postedAt: _currentItem.postedAt,
+        finalStatus: _currentItem.finalStatus,
+        jobStatus: _currentItem.jobStatus,
+        job: _currentItem.job,
+        applicationStatus: _currentItem.applicationStatus,
+        arrivalStatus: 'not_arrived',
+        appliedAt: _currentItem.appliedAt,
+        applicationId: _currentItem.applicationId,
+      );
+
+      // ✅ تحديث الـ UI
+      if (state is ShiftLoaded) {
+        final currentState = state as ShiftLoaded;
+        emit(ShiftLoaded(
+          item: _currentItem,
+          status: _currentStatus,
+          role: currentState.role,
+        ));
+      }
+
+      log('✅ Shift status reset to notStarted for new day');
+    } else {
+      log('📅 No reset needed - same day or shift ended');
+    }
   }
 
   Future<void> _saveStatusToPreferences(ShiftStatus status) async {
@@ -126,79 +262,6 @@ class ShiftCubit extends Cubit<ShiftState> {
     );
     log('📂 Loaded from preferences: $status');
     return status;
-  }
-
-  Future<ShiftStatus> _fetchStatusFromApi(String token) async {
-    try {
-      final dio = getIt<Dio>();
-
-      if (_currentRole == 'employer') {
-        log('📡 Using employer endpoint');
-        final response = await dio.get(
-          '${ApiConstants.apiBaseUrl}applications/jobs/$_currentJobId',
-          options: Options(headers: {'Authorization': 'Bearer $token'}),
-        );
-        final data = response.data['data'] as List?;
-        if (data != null && data.isNotEmpty) {
-          for (final app in data) {
-            final arrivalStatus = app['arrivalStatus'] as String? ?? 'not_arrived';
-            if (arrivalStatus == 'arrived') return ShiftStatus.arrived;
-            if (arrivalStatus == 'on_the_way') return ShiftStatus.onTheWay;
-          }
-        }
-      } else {
-        log('📡 Using worker endpoint (my-applications)');
-        final response = await dio.get(
-          '${ApiConstants.apiBaseUrl}applications/my-applications',
-          options: Options(headers: {'Authorization': 'Bearer $token'}),
-        );
-        final data = response.data['data'] as List?;
-        if (data != null) {
-          for (final app in data) {
-            final jobIdFromApi = app['job']?['_id'] as String? ?? '';
-            final arrivalStatus = app['arrivalStatus'] as String? ?? 'not_arrived';
-            if (jobIdFromApi == _currentJobId) {
-              if (arrivalStatus == 'arrived') return ShiftStatus.arrived;
-              if (arrivalStatus == 'on_the_way') return ShiftStatus.onTheWay;
-            }
-          }
-        }
-      }
-    } catch (e) {
-      log('❌ Failed to fetch status: $e');
-    }
-    return ShiftStatus.notStarted;
-  }
-
-  void _listenToSocketEvents() {
-    _socketService.onAny((event, data) {
-      log('📨 ANY EVENT: $event | $data');
-    });
-
-    _socketService.on('shift_started', (data) {
-      log('📡 Event: shift_started received');
-      _updateStatus(ShiftStatus.inProgress);
-    });
-
-    _socketService.on('shift_completed', (data) {
-      log('📡 Event: shift_completed received');
-      _updateStatus(ShiftStatus.completed);
-    });
-
-    _socketService.on('worker_on_the_way', (_) {
-      log('📡 Event: worker_on_the_way');
-      _updateStatus(ShiftStatus.onTheWay);
-    });
-
-    _socketService.on('worker_arrived', (_) {
-      log('📡 Event: worker_arrived');
-      _updateStatus(ShiftStatus.arrived);
-    });
-
-    _socketService.on('arrival_approved', (_) {
-      log('📡 Event: arrival_approved');
-      _updateStatus(ShiftStatus.arrivedApproved);
-    });
   }
 
   void _updateStatus(ShiftStatus newStatus) {
@@ -252,7 +315,7 @@ class ShiftCubit extends Cubit<ShiftState> {
     log('🔘 workerArrived | status: $_currentStatus | appId: $_currentAppId');
 
     if (_currentStatus == ShiftStatus.onTheWay) {
-      // ✅ 1. API: mark-arrival (POST) - الـ endpoint القديم
+      // ✅ 1. API: mark-arrival (POST)
       if (_currentAppId.isNotEmpty) {
         try {
           final dio = getIt<Dio>();
@@ -266,7 +329,7 @@ class ShiftCubit extends Cubit<ShiftState> {
         }
       }
 
-      // ✅ 2. API: shift arrive (PATCH) - الـ endpoint الجديد
+      // ✅ 2. API: shift arrive (PATCH)
       if (_currentAppId.isNotEmpty) {
         try {
           final dio = getIt<Dio>();
@@ -370,6 +433,46 @@ class ShiftCubit extends Cubit<ShiftState> {
       // ✅ 3. تحديث الحالة محلياً
       _updateStatus(ShiftStatus.completed);
     }
+  }
+
+  // ✅ دالة الاستماع للأحداث
+  void _listenToSocketEvents() {
+    // ✅ استماع لجميع الأحداث (للـ Debug)
+    _socketService.onAny((event, data) {
+      log('📨 ANY EVENT RECEIVED: $event | data: $data');
+    });
+
+    // ===================== Worker Events =====================
+    _socketService.on('worker_on_the_way', (data) {
+      log('📡 Event: worker_on_the_way received');
+      log('📡 Data: $data');
+      _updateStatus(ShiftStatus.onTheWay);
+    });
+
+    _socketService.on('worker_arrived', (data) {
+      log('📡 Event: worker_arrived received');
+      log('📡 Data: $data');
+      _updateStatus(ShiftStatus.arrived);
+    });
+
+    // ===================== Employer Events =====================
+    _socketService.on('arrival_approved', (data) {
+      log('📡 Event: arrival_approved received');
+      log('📡 Data: $data');
+      _updateStatus(ShiftStatus.arrivedApproved);
+    });
+
+    _socketService.on('shift_started', (data) {
+      log('📡🔥 shift_started RECEIVED!');
+      log('📡 Data: $data');
+      _updateStatus(ShiftStatus.inProgress);
+    });
+
+    _socketService.on('shift_completed', (data) {
+      log('📡 Event: shift_completed received');
+      log('📡 Data: $data');
+      _updateStatus(ShiftStatus.completed);
+    });
   }
 
   @override
