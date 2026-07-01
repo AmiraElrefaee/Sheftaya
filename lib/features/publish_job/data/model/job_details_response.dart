@@ -27,17 +27,20 @@ class JobDetailsData {
   }
 }
 
+// lib/features/publish_job/data/model/job_details_response.dart
+
 class JobDetails {
   final String id;
   final String title;
-  final String mainPlace; // من جوا الـ location
-  final String address;   // من جوا الـ location
+  final String mainPlace;
+  final String address;
   final int dailyWorkHours;
   final int requiredWorkers;
   final String experienceLevel;
   final String details;
-  final int price; // amount
+  final int price;
   final String startDateTime;
+  final List<String>? JobImages; // ✅ أضف هذا الحقل
 
   JobDetails({
     required this.id,
@@ -50,20 +53,24 @@ class JobDetails {
     required this.details,
     required this.price,
     required this.startDateTime,
+    this.JobImages, // ✅ اختياري
   });
 
   factory JobDetails.fromJson(Map<String, dynamic> json) {
     return JobDetails(
       id: json['_id'],
       title: json['title'],
-      mainPlace: json['location']['mainPlace'], // الوصول للـ mainPlace
-      address: json['location']['address'],     // الوصول للـ address
+      mainPlace: json['location']['mainPlace'],
+      address: json['location']['address'],
       dailyWorkHours: json['dailyWorkHours'],
       requiredWorkers: json['requiredWorkers'],
       experienceLevel: json['experienceLevel'],
       details: json['details'],
-      price: json['pricePerHour']['amount'],    // الوصول للسعر
-      startDateTime: json['startDateTime'],     // التاريخ
+      price: json['pricePerHour']['amount'],
+      startDateTime: json['startDateTime'],
+      JobImages: json['JobImages'] != null
+          ? List<String>.from(json['JobImages'])
+          : [], // ✅ استخراج الصور
     );
   }
 }
