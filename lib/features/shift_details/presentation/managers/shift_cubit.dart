@@ -155,9 +155,14 @@ class ShiftCubit extends Cubit<ShiftState> {
     return '';
   }
 
-  // ✅ التحقق من اليوم الجديد وإعادة تعيين الحالة
-// ✅ التحقق من اليوم الجديد وإعادة تعيين الحالة
-  // ✅ التحقق من اليوم الجديد وإعادة تعيين الحالة
+  // أضف هذه الدالة في ShiftCubit
+  void markShiftCompleted() {
+    // ✅ حفظ الحالة كـ completed في Preferences
+    _updateStatus(ShiftStatus.completed);
+
+    // ✅ إعادة تعيين اليوم لليوم التالي
+    _checkAndResetForNewDay();
+  }
   Future<void> _checkAndResetForNewDay() async {
     final job = _currentItem.job;
     if (job?.startDateTime == null) return;

@@ -30,6 +30,7 @@ class JobRemoteDataSource {
   }
 
   // ✅ للتحديث - تستقبل Map
+  // في publish_job_remote_data_source.dart
   Future<PublishJobResponse> updateJob(
       String jobId,
       Map<String, dynamic> jobData,
@@ -41,10 +42,13 @@ class JobRemoteDataSource {
       final String formattedToken =
       token.startsWith('Bearer') ? token : 'Bearer $token';
 
+      // ✅ طباعة البيانات قبل الإرسال للتأكد
+      print('📤 Sending update data: $jobData');
+
       final response = await _apiService.updateJob(
         formattedToken,
         jobId,
-        jobData, // ✅ Map مباشرة
+        jobData, // ✅ Map مباشرة مع location كـ JSON String
       );
       return response;
     } catch (e) {

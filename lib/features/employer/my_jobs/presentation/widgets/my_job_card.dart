@@ -178,21 +178,21 @@ class EmployerJobCard extends StatelessWidget {
   }
 
   void _navigateToShiftDetails(BuildContext context) {
-    // final job = item.job;
-    // final jobId = job?.id ?? '';
-    // final appId = item.applicationId ?? '';
-    //
-    // if (jobId.isEmpty) {
-    //   debugPrint('❌ Cannot navigate to ShiftDetails: jobId is empty');
-    //   return;
-    // }
-    //
-    // // ✅ إنشاء ShiftModel من MyJobItem مباشرة
-    // final shiftModel = ShiftModel.fromMyJobItem(
-    //   item: item,
-    //   role: UserRole.employer,
-    // );
+    final job = item.job;
+    final endDateTime = job?.endDateTime != null
+        ? DateTime.parse(job!.endDateTime!)
+        : null;
 
+    // ✅ إذا انتهت الوظيفة بالكامل، اذهب للملخص مباشرة
+    if (endDateTime != null && DateTime.now().isAfter(endDateTime)) {
+      context.push(
+        AppRouter.kShiftSummaryScreen,
+        extra: item,
+      );
+      return;
+    }
+
+    // ✅ إذا لسه شغالة، اذهب لصفحة التفاصيل
     context.push(
       AppRouter.kShiftDetailsView,
       extra: {

@@ -1,5 +1,7 @@
 // lib/features/publish_job/presentation/widgets/publish_job_view_body.dart
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -182,6 +184,12 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
         selectedInstitution = newCompany.name;
       }
 
+      // في publish_job_view_body.dart - _onPublish()
+
+      // في publish_job_view_body.dart - _onPublish()
+
+      // في publish_job_view_body.dart - _onPublish()
+
       if (widget.existingJob != null) {
         final locationMap = {
           "type": "Point",
@@ -193,7 +201,8 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
         final updateData = {
           "title": jobTitleController.text,
           "place": selectedInstitution ?? "المؤسسة المسجلة",
-          "location": locationMap,
+          // ✅ ✅ ✅ الحل السحري: jsonDecode + jsonEncode
+          "location": jsonDecode(jsonEncode(locationMap)),
           "dailyWorkHours": hours,
           "requiredWorkers": workers,
           "pricePerHour": {
@@ -211,7 +220,7 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
           widget.existingJob!.id,
           updateData,
         );
-      } else {
+      }else {
         final jobData = JobModel(
           title: jobTitleController.text,
           place: selectedInstitution ?? "المؤسسة المسجلة",

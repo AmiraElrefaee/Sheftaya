@@ -81,6 +81,9 @@ abstract class ApiService {
       );
 
   // ✅ التعديل هنا: استخدام @PUT مع المسار الصحيح
+
+  // في api_service.dart
+  // في api_service.dart
   @PUT("/jobs/{jobId}")
   Future<PublishJobResponse> updateJob(
       @Header("Authorization") String token,

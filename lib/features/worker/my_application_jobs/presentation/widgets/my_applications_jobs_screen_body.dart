@@ -248,7 +248,21 @@ class _AppList extends StatelessWidget {
         item.applicationStatus != 'accepted') return null;
 
     return () {
-      // ✅ مرري الـ role مع الـ item
+      final job = item.job;
+      final endDateTime = job?.endDateTime != null
+          ? DateTime.parse(job!.endDateTime!)
+          : null;
+
+      // ✅ إذا انتهت الوظيفة بالكامل، اذهب للملخص مباشرة
+      if (endDateTime != null && DateTime.now().isAfter(endDateTime)) {
+        context.push(
+          AppRouter.kShiftSummaryScreen,
+          extra: item,
+        );
+        return;
+      }
+
+      // ✅ إذا لسه شغالة، اذهب لصفحة التفاصيل
       context.push(
         AppRouter.kShiftDetailsView,
         extra: {

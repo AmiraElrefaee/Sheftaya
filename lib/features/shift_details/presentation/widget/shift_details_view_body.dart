@@ -19,6 +19,16 @@ class ShiftDetailsViewBody extends StatelessWidget {
 
   const ShiftDetailsViewBody({super.key, required this.role});
 
+  // ✅ تنسيق الوقت بنظام 12 ساعة (صباحاً / مساءً)
+  String _formatTime12(DateTime time) {
+    int hour = time.hour;
+    int minute = time.minute;
+    String period = hour >= 12 ? 'مساءً' : 'صباحاً';
+    int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    String minuteStr = minute.toString().padLeft(2, '0');
+    return '$displayHour:$minuteStr $period';
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ShiftCubit, ShiftState>(
@@ -102,9 +112,9 @@ class ShiftDetailsViewBody extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // 1. وقت البدء
+          // 1. وقت البدء ✅ استخدام _formatTime12
           ShiftStatusTimelineStep(
-            title: "وقت البدء الساعة (${todayStartTime.hour}:${todayStartTime.minute.toString().padLeft(2, '0')})",
+            title: "وقت البدء الساعة (${_formatTime12(todayStartTime)})",
             subTitle: timeStarted ? "تم بحلول الوقت الرسمي" : "لم يحن الوقت بعد",
             status: timeStarted ? ShiftStepStatus.completed : ShiftStepStatus.pending,
           ),
@@ -171,6 +181,36 @@ class ShiftDetailsViewBody extends StatelessWidget {
         : null;
 
     if (endDateTime != null && DateTime.now().isAfter(endDateTime)) {
+      // ✅ إذا انتهت الوظيفة بالكامل، اذهب إلى صفحة الملخص
+      return AppTextButton(
+        textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+        backgroundColor: ColorsManager.primary,
+        buttonText: "عرض الملخص النهائي",
+        onPressed: () {
+          context.push(
+            AppRouter.kShiftSummaryScreen,
+            extra: shift.item,
+          );
+        },
+      );
+    }
+
+// ✅ باقي الكود (التحقق من انتهاء اليوم فقط)
+    final todayEndDateTime = shift.item.job?.startDateTime != null
+        ? DateTime.parse(shift.item.job!.startDateTime!)
+        .add(Duration(hours: shift.item.job!.dailyWorkHours ?? 8))
+        : null;
+
+    if (todayEndDateTime != null && DateTime.now().isAfter(todayEndDateTime)) {
+      // ✅ إذا انتهى اليوم فقط ولكن الوظيفة لسه شغالة
+      return AppTextButton(
+        textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
+        backgroundColor: const Color(0xffD9D9D9),
+        buttonText: "انتهى شيفت اليوم - انتظر اليوم التالي",
+        onPressed: () {},
+      );
+    }
+    if (endDateTime != null && DateTime.now().isAfter(endDateTime)) {
       return AppTextButton(
         textStyle: TextStyles.font16BlackMedium.copyWith(color: Colors.white),
         backgroundColor: const Color(0xffD9D9D9),
@@ -195,6 +235,7 @@ class ShiftDetailsViewBody extends StatelessWidget {
         startDateTime.second,
       );
 
+      // ✅ إذا كان الوقت الحالي قبل وقت البدء اليوم
       if (now.isBefore(todayStart) && shift.status == ShiftStatus.notStarted) {
         return SizedBox(
           width: double.infinity,
@@ -221,7 +262,7 @@ class ShiftDetailsViewBody extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  "(${todayStart.hour}:${todayStart.minute.toString().padLeft(2, '0')})",
+                  "(${_formatTime12(todayStart)})", // ✅ استخدام _formatTime12
                   style: TextStyles.font14BlackMedium.copyWith(
                     color: Colors.white,
                   ),
@@ -328,4 +369,5 @@ class ShiftDetailsViewBody extends StatelessWidget {
       buttonText: "جاري التحميل...",
       onPressed: () {},
     );
-  }}
+  }
+}

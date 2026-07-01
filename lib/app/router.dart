@@ -43,6 +43,7 @@ import '../features/publish_job/presentation/publish_job_view.dart';
 import '../features/shift_details/data/model/shift_model.dart';
 import '../features/shift_details/presentation/managers/shift_cubit.dart';
 import '../features/shift_details/presentation/shift_details_view.dart';
+import '../features/shift_details/presentation/shift_summary_screen.dart';
 import '../features/shift_details/presentation/shift_timer_view.dart';
 import '../features/shift_details/presentation/widget/enums.dart';
 import '../features/term_condition/presentation/term_condtion_view.dart';
@@ -76,6 +77,8 @@ abstract class AppRouter {
   static const kJobApplicationsScreen = '/JobApplicationsScreen';
   static const kEmployerJobDetailsScreen = '/EmployerJobDetailsScreen';
   static const kShiftTimerScreen = '/ShiftTimerScreen';
+  static const kShiftSummaryScreen = '/ShiftSummaryScreen';
+
 
   static final router = GoRouter(
     routes: [
@@ -260,6 +263,30 @@ abstract class AppRouter {
         builder: (context, state) {
           final item = state.extra as MyJobItem;
           return ShiftTimerScreen(item: item);
+        },
+      ),
+
+      GoRoute(
+        path: kShiftSummaryScreen,
+        builder: (context, state) {
+          final extra = state.extra;
+
+          // ✅ إذا كانت البيانات Map (من التايمر)
+          if (extra is Map<String, dynamic>) {
+            return ShiftSummaryScreen(
+              item: extra['item'] as MyJobItem,
+              isFinalDay: extra['isFinalDay'] as bool,
+              totalDays: extra['totalDays'] as int,
+              totalHours: extra['totalHours'] as int,
+              totalEarnings: extra['totalEarnings'] as double,
+              platformFee: extra['platformFee'] as double,
+              netEarnings: extra['netEarnings'] as double,
+            );
+          }
+
+          // ✅ إذا كانت البيانات MyJobItem فقط (للتوافق القديم)
+          final item = extra as MyJobItem;
+          return ShiftSummaryScreen.fromToday(item);
         },
       ),
     ],

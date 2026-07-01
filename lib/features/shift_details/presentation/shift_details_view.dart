@@ -17,7 +17,7 @@ class ShiftDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // اختياري لتوحيد الخلفية
+      backgroundColor: const Color(0xFFFAFAFA), // اختياري لتوحيد الخلفية
       body: SafeArea(
         child: ShiftDetailsViewBody(role: role), // ✅ تمرير الـ role للـ Body
       ),

@@ -90,7 +90,7 @@ class ShiftJobSummaryCard extends StatelessWidget {
                 children: [
                   _buildInfoBadge(_formatDate(displayTime)),
                   SizedBox(height: 4.h),
-                  _buildInfoBadge(_formatTime(displayTime)),
+                  _buildInfoBadge(_formatTime(displayTime)), // ✅ استخدام _formatTime الجديد
                 ],
               )
             ],
@@ -330,11 +330,14 @@ class ShiftJobSummaryCard extends StatelessWidget {
     return '${days[actualDate.weekday - 1]} ${actualDate.day} ${months[actualDate.month - 1]}';
   }
 
+  // ✅ تنسيق الوقت بنظام 12 ساعة (صباحاً / مساءً)
   String _formatTime(DateTime dt) {
-    final h = dt.hour > 12 ? dt.hour - 12 : dt.hour;
-    final m = dt.minute.toString().padLeft(2, '0');
-    final suffix = dt.hour >= 12 ? 'م' : 'ص';
-    return 'من $h:$m$suffix';
+    int hour = dt.hour;
+    int minute = dt.minute;
+    String period = hour >= 12 ? 'م' : 'ص';
+    int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    String minuteStr = minute.toString().padLeft(2, '0');
+    return 'من $displayHour:$minuteStr $period';
   }
 
   Widget _buildInfoBadge(String text) {

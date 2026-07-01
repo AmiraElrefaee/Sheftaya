@@ -1,10 +1,17 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart';
+
+import '../../../app/router.dart';
+import 'managers/shift_cubit.dart';
+
+
 
 class ShiftTimerScreen extends StatefulWidget {
   final MyJobItem item;
@@ -19,13 +26,16 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
   Duration _elapsedDuration = Duration.zero;
   Timer? _timer;
   bool _isShiftEnded = false;
+  bool _isShiftEnding = false; // ✅ لمنع تكرار الضغط
 
-  // Default data (will be replaced with API data)
+  // Data
   late String _startTimeStr;
   late String _endTimeStr;
   late int _totalHours;
   late double _totalSalary;
   late double _hourlyRate;
+  late DateTime _todayStartTime;
+  late DateTime _todayEndTime;
 
   @override
   void initState() {
@@ -44,19 +54,26 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
         final workHours = job.dailyWorkHours ?? 4;
         final hourlyRate = (job.pricePerHour?.amount ?? 60).toDouble();
 
-        // ✅ حساب endDateTime
-        DateTime endDateTime;
-        if (job.endDateTime != null && job.endDateTime!.isNotEmpty) {
-          endDateTime = DateTime.parse(job.endDateTime!);
-        } else {
-          endDateTime = baseStartTime.add(Duration(days: 30));
-        }
-
         // ✅ حساب وقت البدء لليوم الحالي
-        final todayStartTime = _getTodayStartTime(baseStartTime, now, endDateTime);
+        _todayStartTime = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          baseStartTime.hour,
+          baseStartTime.minute,
+          baseStartTime.second,
+        );
 
-        // ✅ إذا كان اليوم الجديد لم يبدأ بعد
-        if (todayStartTime == null) {
+        // ✅ وقت الانتهاء اليوم
+        _todayEndTime = _todayStartTime.add(Duration(hours: workHours));
+
+        // ✅ التحقق من انتهاء الوظيفة بالكامل
+        final endDateTime = job.endDateTime != null && job.endDateTime!.isNotEmpty
+            ? DateTime.parse(job.endDateTime!)
+            : _todayStartTime.add(Duration(days: 30));
+
+        // ✅ إذا كان الوقت الحالي بعد نهاية الوظيفة كلها
+        if (now.isAfter(endDateTime)) {
           _isShiftEnded = true;
           _totalHours = 0;
           _startTimeStr = 'انتهت الوظيفة';
@@ -64,16 +81,35 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
           _totalSalary = 0;
           _hourlyRate = 0;
           _elapsedDuration = Duration.zero;
+          _goToShiftSummary(isFinalDay: true);
           return;
         }
 
-        // ✅ حساب وقت الانتهاء
-        final todayEndTime = todayStartTime.add(Duration(hours: workHours));
+        // ✅ إذا كان اليوم التالي لا يزال ضمن نطاق الوظيفة
+        final nextDayStart = _todayStartTime.add(Duration(days: 1));
+        final isLastDay = nextDayStart.isAfter(endDateTime) || nextDayStart.isAtSameMomentAs(endDateTime);
+
+        // ✅ إذا انتهى اليوم الحالي
+        if (now.isAfter(_todayEndTime)) {
+          _isShiftEnded = true;
+          _elapsedDuration = Duration(hours: workHours);
+          _totalHours = workHours;
+          _hourlyRate = hourlyRate;
+          _totalSalary = _hourlyRate * _totalHours;
+          _startTimeStr = _formatTime(_todayStartTime);
+          _endTimeStr = _formatTime(_todayEndTime);
+
+          // ✅ اذهب إلى ملخص اليوم مع تحديد إذا كان آخر يوم
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _goToShiftSummary(isFinalDay: isLastDay);
+          });
+          return;
+        }
 
         // ✅ إذا كان الوقت الحالي قبل وقت البدء
-        if (now.isBefore(todayStartTime)) {
-          _startTimeStr = _formatTime(todayStartTime);
-          _endTimeStr = _formatTime(todayEndTime);
+        if (now.isBefore(_todayStartTime)) {
+          _startTimeStr = _formatTime(_todayStartTime);
+          _endTimeStr = _formatTime(_todayEndTime);
           _totalHours = workHours;
           _hourlyRate = hourlyRate;
           _totalSalary = _hourlyRate * _totalHours;
@@ -82,53 +118,23 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
           return;
         }
 
-        // ✅ إذا كان الوقت الحالي في منتصف الشيفت
-        if (now.isAfter(todayStartTime) && now.isBefore(todayEndTime)) {
-          _startTimeStr = _formatTime(todayStartTime);
-          _endTimeStr = _formatTime(todayEndTime);
-          _totalHours = workHours;
-          _hourlyRate = hourlyRate;
-          _totalSalary = _hourlyRate * _totalHours;
-          _elapsedDuration = now.difference(todayStartTime);
-          _isShiftEnded = false;
-          return;
-        }
-
-        // ✅ إذا انتهى الشيفت اليوم
-        if (now.isAfter(todayEndTime)) {
-          // ✅ التحقق من وجود يوم تالي
-          final nextDayStart = todayStartTime.add(Duration(days: 1));
-          if (nextDayStart.isBefore(endDateTime)) {
-            // ✅ اليوم التالي لم يبدأ بعد، اعرض وقت البدء القادم
-            _startTimeStr = _formatTime(nextDayStart);
-            _endTimeStr = _formatTime(nextDayStart.add(Duration(hours: workHours)));
-            _totalHours = workHours;
-            _hourlyRate = hourlyRate;
-            _totalSalary = _hourlyRate * _totalHours;
-            _elapsedDuration = Duration.zero;
-            _isShiftEnded = false;
-            log('⏰ Next shift starts at: ${_startTimeStr}');
-            return;
-          } else {
-            // ✅ الوظيفة انتهت تماماً
-            _isShiftEnded = true;
-            _totalHours = 0;
-            _startTimeStr = 'انتهت الوظيفة';
-            _endTimeStr = '-';
-            _totalSalary = 0;
-            _hourlyRate = 0;
-            _elapsedDuration = Duration.zero;
-            return;
-          }
-        }
-
+        // ✅ الوقت الحالي في منتصف الشيفت
+        _startTimeStr = _formatTime(_todayStartTime);
+        _endTimeStr = _formatTime(_todayEndTime);
+        _totalHours = workHours;
+        _hourlyRate = hourlyRate;
+        _totalSalary = _hourlyRate * _totalHours;
+        _elapsedDuration = now.difference(_todayStartTime);
+        _isShiftEnded = false;
         return;
       } catch (e) {
         log('❌ Error in _initJobData: $e');
       }
     }
 
-    // Fallback defaults
+    // Fallback
+    _todayStartTime = DateTime.now();
+    _todayEndTime = DateTime.now().add(Duration(hours: 4));
     _startTimeStr = '02:00 مساءً';
     _endTimeStr = '06:00 مساءً';
     _totalHours = 4;
@@ -137,79 +143,80 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
     _elapsedDuration = Duration.zero;
   }
 
-  /// ✅ حساب وقت البدء لليوم الحالي
-  DateTime? _getTodayStartTime(DateTime baseStartTime, DateTime now, DateTime endDateTime) {
-    // إذا كان الوقت الحالي بعد نهاية الوظيفة كلها
-    if (now.isAfter(endDateTime)) {
-      return null;
-    }
-
-    // حساب وقت البدء لليوم الحالي (نفس الوقت ولكن في اليوم الحالي)
-    DateTime todayStart = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      baseStartTime.hour,
-      baseStartTime.minute,
-      baseStartTime.second,
-    );
-
-    // إذا كان الوقت الحالي قبل وقت البدء اليوم، استخدم وقت البدء اليوم
-    if (now.isBefore(todayStart)) {
-      return todayStart;
-    }
-
-    // إذا كان الوقت الحالي بعد وقت البدء اليوم
-    // تحقق من اليوم التالي
-    DateTime nextDayStart = todayStart.add(Duration(days: 1));
-
-    // إذا كان اليوم التالي لا يزال ضمن نطاق الوظيفة
-    if (nextDayStart.isBefore(endDateTime)) {
-      // إذا كان الوقت الحالي بعد نهاية الشيفت اليوم، استخدم اليوم التالي
-      final todayEnd = todayStart.add(Duration(hours: baseStartTime.hour + 8)); // 8 ساعات افتراضية
-      if (now.isAfter(todayEnd)) {
-        return nextDayStart;
-      }
-      return todayStart;
-    }
-
-    // إذا لم يعد هناك أيام متبقية
-    return null;
-  }
-
-  //------
-
-  String _formatTime(DateTime time) {
-    String hour = time.hour.toString().padLeft(2, '0');
-    String minute = time.minute.toString().padLeft(2, '0');
-    String period = time.hour >= 12 ? 'مساءً' : 'صباحاً';
-    int displayHour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
-    return '$displayHour:$minute $period';
-  }
-
   void _startTimer() {
     if (_isShiftEnded) return;
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       final maxDuration = Duration(hours: _totalHours);
-      if (_elapsedDuration >= maxDuration) {
+
+      // ✅ تحقق من انتهاء اليوم
+      if (DateTime.now().isAfter(_todayEndTime)) {
         timer.cancel();
         setState(() {
           _isShiftEnded = true;
           _elapsedDuration = maxDuration;
         });
-      } else {
-        setState(() {
-          _elapsedDuration = Duration(seconds: _elapsedDuration.inSeconds + 1);
-        });
+        _goToShiftSummary(isFinalDay: false);
+        return;
       }
+
+      // ✅ تحقق من انتهاء الوظيفة بالكامل
+      final job = widget.item.job;
+      if (job?.endDateTime != null) {
+        final endDateTime = DateTime.parse(job!.endDateTime!);
+        if (DateTime.now().isAfter(endDateTime)) {
+          timer.cancel();
+          setState(() {
+            _isShiftEnded = true;
+          });
+          _goToShiftSummary(isFinalDay: true);
+          return;
+        }
+      }
+
+      setState(() {
+        _elapsedDuration = Duration(seconds: _elapsedDuration.inSeconds + 1);
+      });
     });
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
+  // ✅ الانتقال إلى ملخص اليوم
+  void _goToShiftSummary({required bool isFinalDay}) {
+    if (_isShiftEnding) return;
+    _isShiftEnding = true;
+
+    // ✅ حساب البيانات
+    final totalEarnings = _totalSalary;
+    final platformFee = totalEarnings * 0.02;
+    final netEarnings = totalEarnings - platformFee;
+
+    // ✅ احفظ الحالة في SharedPreferences (سيتم في الـ Cubit)
+    final cubit = context.read<ShiftCubit>();
+    if (isFinalDay) {
+      cubit.markShiftCompleted();
+    }
+
+    // ✅ اذهب إلى صفحة الملخص
+    context.pushReplacement(
+      AppRouter.kShiftSummaryScreen,
+      extra: {
+        'item': widget.item,
+        'isFinalDay': isFinalDay,
+        'totalDays': 1,
+        'totalHours': _totalHours,
+        'totalEarnings': totalEarnings,
+        'platformFee': platformFee,
+        'netEarnings': netEarnings,
+      },
+    );
+  }
+
+  String _formatTime(DateTime time) {
+    int hour = time.hour;
+    int minute = time.minute;
+    String period = hour >= 12 ? 'مساءً' : 'صباحاً';
+    int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
   }
 
   String _formatDuration(Duration duration) {
@@ -233,13 +240,39 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
   }
 
   @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final progress = _getProgress();
     final currentEarnings = _getCurrentEarnings();
     final isFullProgress = progress >= 1.0;
 
+    // ✅ إذا انتهى اليوم وتم الانتقال، لا تعرض الصفحة
+    if (_isShiftEnded) {
+      return Scaffold(
+        backgroundColor: ColorsManager.background,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              SizedBox(height: 20.h),
+              Text(
+                'جاري الانتقال إلى الملخص...',
+                style: TextStyles.font16BlackMedium,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: ColorsManager.background, // خلفية رمادية فاتحة
+      backgroundColor: ColorsManager.background,
       appBar: AppBar(
         backgroundColor: ColorsManager.white,
         elevation: 0,
@@ -258,17 +291,13 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // ✅ الجزء الأبيض مع البوردر
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
                 padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 20.w),
                 decoration: BoxDecoration(
                   color: ColorsManager.white,
                   borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: const Color(0xFFE5E5E5),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0xFFE5E5E5), width: 1),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.05),
@@ -321,7 +350,6 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
                         ],
                       ),
                     ),
-
                     SizedBox(height: 24.h),
 
                     // 💰 الأجر الحالي
@@ -357,10 +385,9 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: 28.h),
 
-                    // 📊 Info Grid - 2 columns
+                    // 📊 Info Grid
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
@@ -378,7 +405,6 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
                   ],
                 ),
               ),
-
               SizedBox(height: 16.h),
 
               // ✅ الأزرار السفلية
@@ -386,25 +412,24 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
                   children: [
-                    // زر إنهاء الشيفت
                     SizedBox(
                       width: double.infinity,
                       height: 52.h,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: _isShiftEnded ? null : () {
                           _timer?.cancel();
-                          // TODO: End shift action
-                          Navigator.pop(context);
+                          // ✅ عند الضغط على إنهاء الشيفت مبكراً، اذهب للملخص
+                          _goToShiftSummary(isFinalDay: false);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorsManager.primary,
+                          backgroundColor: _isShiftEnded ? ColorsManager.grey : ColorsManager.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14.r),
                           ),
                           elevation: 0,
                         ),
                         child: Text(
-                          'إنهاء الشيفت',
+                          _isShiftEnded ? 'تم الانتهاء' : 'إنهاء الشيفت',
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
@@ -413,44 +438,10 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 12.h),
-
-                    // زر إلغاء الشيفت (يظهر فقط قبل اكتمال الشيفت)
-                    if (!isFullProgress)
-                      TextButton(
-                        onPressed: () {
-                          _timer?.cancel();
-                          // TODO: Cancel shift action
-                          Navigator.pop(context);
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 4.h),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.cancel_outlined,
-                              color: ColorsManager.error,
-                              size: 22.w,
-                            ),
-                            SizedBox(width: 6.w),
-                            Text(
-                              'إلغاء الشيفت',
-                              style: TextStyle(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.bold,
-                                color: ColorsManager.error,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                   ],
                 ),
               ),
-
               SizedBox(height: 20.h),
             ],
           ),
@@ -463,7 +454,7 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6), // رمادي فاتح
+        color: const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(10.r),
       ),
       child: Column(
