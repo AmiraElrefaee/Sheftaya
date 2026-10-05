@@ -1,13 +1,9 @@
-// lib/features/publish_job/presentation/widgets/section_institute_step_form.dart
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/section_image_upload.dart';
 
 import '../../../../core/theme/colors_manager.dart';
 import '../../../../core/theme/text_styles.dart';
-import '../../../../core/widgets/app_dropdown.dart';
 import '../../../../core/widgets/custom_text_form_field.dart';
 import 'custom_label_text.dart';
 
@@ -80,7 +76,7 @@ class _InstitutionStepFormState extends State<InstitutionStepForm> {
             border: Border.all(color: ColorsManager.grey),
           ),
           child: DropdownButtonFormField<String>(
-            value: _selectedType,
+            initialValue: _selectedType,
             isExpanded: true,
             hint: Text(
               'اختار نوع مؤسستك',

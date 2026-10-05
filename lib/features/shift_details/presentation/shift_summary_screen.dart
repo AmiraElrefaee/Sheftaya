@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
-import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart';
 
@@ -108,7 +106,7 @@ class ShiftSummaryScreen extends StatelessWidget {
                       ),
                       border: Border(
                         bottom: BorderSide(
-                          color: const Color(0xffD9D9D),
+                          color: const Color(0xFFD9D9D9),
                           width: 2,
                         ),
                       ),

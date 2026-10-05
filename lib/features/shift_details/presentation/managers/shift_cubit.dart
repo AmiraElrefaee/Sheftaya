@@ -185,7 +185,7 @@ class ShiftCubit extends Cubit<ShiftState> {
 
     // ✅ جلب آخر يوم تم فيه تحديث الحالة (باستخدام jobId بدلاً من appId)
     final prefs = await SharedPreferences.getInstance();
-    final lastUpdateDate = prefs.getString('${_lastShiftDateKey}${_currentJobId}');
+    final lastUpdateDate = prefs.getString('$_lastShiftDateKey$_currentJobId');
 
     final todayKey = '${now.year}-${now.month}-${now.day}';
 
@@ -195,16 +195,13 @@ class ShiftCubit extends Cubit<ShiftState> {
     // ✅ التحقق: هل الشيفت لسه في نطاق الأيام؟
     final bool isWithinShiftDays = now.isBefore(endDateTime);
 
-    // ✅ التحقق: هل وقت البدء لسه مجاش اليوم؟
-    final bool isBeforeStartTime = now.isBefore(todayStart);
-
     if (isNewDay && isWithinShiftDays) {
       log('🔄 New day detected! Resetting shift status');
       log('📅 Today: $todayKey | Last update: $lastUpdateDate');
       log('⏰ Today shift start: $todayStart');
 
       // ✅ حفظ اليوم الجديد (باستخدام jobId)
-      await prefs.setString('${_lastShiftDateKey}${_currentJobId}', todayKey);
+      await prefs.setString('$_lastShiftDateKey$_currentJobId', todayKey);
 
       // ✅ إعادة تعيين الحالة إلى notStarted (بغض النظر عن الوقت)
       _currentStatus = ShiftStatus.notStarted;
@@ -248,7 +245,7 @@ class ShiftCubit extends Cubit<ShiftState> {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('${_shiftStatusKey}${_currentAppId}_status', status.name);
+    await prefs.setString('$_shiftStatusKey${_currentAppId}_status', status.name);
     log('💾 Saved status to preferences: ${status.name} for appId: $_currentAppId');
   }
 
@@ -258,7 +255,7 @@ class ShiftCubit extends Cubit<ShiftState> {
       return ShiftStatus.notStarted;
     }
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('${_shiftStatusKey}${_currentAppId}_status');
+    final saved = prefs.getString('$_shiftStatusKey${_currentAppId}_status');
     if (saved == null) return ShiftStatus.notStarted;
 
     final status = ShiftStatus.values.firstWhere(

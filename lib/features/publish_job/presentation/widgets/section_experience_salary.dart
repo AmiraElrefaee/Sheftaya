@@ -1,25 +1,27 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../core/widgets/app_dropdown.dart';
-import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_text_form_field.dart';
 import 'custom_label_text.dart';
 
-class sectionExpericeAndSalay extends StatefulWidget {
-  const sectionExpericeAndSalay({
+class SectionExperienceAndSalary extends StatefulWidget {
+  const SectionExperienceAndSalary({
     super.key,
-    required this.salaryController, required this.onExperienceChanged,
+    required this.salaryController,
+    required this.onExperienceChanged,
   });
 
   final TextEditingController salaryController;
   final Function(String?) onExperienceChanged;
 
   @override
-  State<sectionExpericeAndSalay> createState() => _sectionExpericeAndSalayState();
+  State<SectionExperienceAndSalary> createState() =>
+      _SectionExperienceAndSalaryState();
 }
 
-class _sectionExpericeAndSalayState extends State<sectionExpericeAndSalay> {
+class _SectionExperienceAndSalaryState
+    extends State<SectionExperienceAndSalary> {
   String ?item;
   @override
   Widget build(BuildContext context) {

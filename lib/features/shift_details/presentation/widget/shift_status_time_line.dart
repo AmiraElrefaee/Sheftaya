@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -13,6 +12,7 @@ class ShiftStatusTimelineStep extends StatelessWidget {
   final bool isLast;
 
   const ShiftStatusTimelineStep({
+    super.key,
     required this.title,
     required this.subTitle,
     required this.status,

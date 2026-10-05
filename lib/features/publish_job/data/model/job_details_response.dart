@@ -40,7 +40,7 @@ class JobDetails {
   final String details;
   final int price;
   final String startDateTime;
-  final List<String>? JobImages; // ✅ أضف هذا الحقل
+  final List<String>? jobImages; // ✅ أضف هذا الحقل
 
   JobDetails({
     required this.id,
@@ -53,7 +53,7 @@ class JobDetails {
     required this.details,
     required this.price,
     required this.startDateTime,
-    this.JobImages, // ✅ اختياري
+    this.jobImages, // ✅ اختياري
   });
 
   factory JobDetails.fromJson(Map<String, dynamic> json) {
@@ -68,9 +68,11 @@ class JobDetails {
       details: json['details'],
       price: json['pricePerHour']['amount'],
       startDateTime: json['startDateTime'],
-      JobImages: json['JobImages'] != null
+      jobImages: json['JobImages'] != null
           ? List<String>.from(json['JobImages'])
-          : [], // ✅ استخراج الصور
+          : (json['jobImages'] != null
+              ? List<String>.from(json['jobImages'])
+              : []),
     );
   }
 }

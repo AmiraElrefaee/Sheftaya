@@ -11,6 +11,7 @@ import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/core/utils/snackbar.dart';
 import 'package:sheftaya/core/widgets/custom_button.dart';
 import 'package:sheftaya/core/widgets/custom_text_form_field.dart';
+import 'package:sheftaya/features/login/data/models/login_response.dart';
 import 'package:sheftaya/features/login/logic/login_cubit.dart';
 import 'package:sheftaya/features/login/logic/login_state.dart';
 
@@ -23,7 +24,9 @@ class LoginScreenBody extends StatelessWidget {
       listener: (context, state) {
         state.maybeWhen(
           success: (data) {
-            final role = context.read<UserCubit>().state.user?.role;
+            final loginResponse = data is LoginResponse ? data : null;
+            final role = loginResponse?.user?.role ??
+                context.read<UserCubit>().state.user?.role;
             if (role == 'employer') {
               context.go(AppRouter.kEmployerHomeScreen);
             } else {
@@ -98,7 +101,7 @@ class LoginScreenBody extends StatelessWidget {
                     AppTextButton(
                       buttonText: 'تسجيل الدخول',
                       onPressed: () {
-                        if (cubit.formKey.currentState!.validate()) {
+                        if (cubit.formKey.currentState?.validate() ?? false) {
                           cubit.emitLoginStates();
                         }
                       },

@@ -249,7 +249,6 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
   Widget build(BuildContext context) {
     final progress = _getProgress();
     final currentEarnings = _getCurrentEarnings();
-    final isFullProgress = progress >= 1.0;
 
     // ✅ إذا انتهى اليوم وتم الانتقال، لا تعرض الصفحة
     if (_isShiftEnded) {
@@ -300,7 +299,7 @@ class _ShiftTimerScreenState extends State<ShiftTimerScreen> {
                   border: Border.all(color: const Color(0xFFE5E5E5), width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.05),
+                      color: Colors.grey.withValues(alpha: 0.05),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

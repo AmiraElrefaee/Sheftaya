@@ -27,8 +27,8 @@ class JobSummaryCard extends StatelessWidget {
     // ✅ الحصول على أول صورة من القائمة
     // lib/features/publish_job/presentation/widgets/custom_job_card.dart
 
-    String imageUrl = job.JobImages?.isNotEmpty == true
-        ? job.JobImages!.first
+    String imageUrl = job.jobImages?.isNotEmpty == true
+        ? job.jobImages!.first
         : '';
 
     return Container(

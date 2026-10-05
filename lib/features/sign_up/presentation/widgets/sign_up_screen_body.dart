@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sheftaya/app/router.dart';
+import 'package:sheftaya/core/constants/app_regex.dart';
 import 'package:sheftaya/core/constants/shared_pref_helper.dart';
 import 'package:sheftaya/core/constants/shared_pref_keys.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
@@ -45,8 +46,16 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
   String? institutionType;
   List<String> availableJobs = [];
   String? institutiSelectedGovernorate;
+  final TextEditingController _taxNumberController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _taxNumberController.dispose();
+    super.dispose();
+  }
 
   final List<String> governorates = [
     'القاهرة',
@@ -153,7 +162,55 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
     return null;
   }
 
-  void _nextPage() {
+  void _nextPage(SignupCubit cubit) {
+    if (_pageIndex == 0) {
+      final List<String> errors = [];
+      final firstNameError =
+          AppRegex.validateFirstName(cubit.firstNameController.text);
+      if (firstNameError != null) errors.add(firstNameError);
+      final lastNameError =
+          AppRegex.validateLastName(cubit.lastNameController.text);
+      if (lastNameError != null) errors.add(lastNameError);
+      final emailError = AppRegex.validateEmail(cubit.emailController.text);
+      if (emailError != null) errors.add(emailError);
+      final phoneError =
+          AppRegex.validateOptionalPhone(cubit.phoneController.text);
+      if (phoneError != null) errors.add(phoneError);
+      final passwordError =
+          AppRegex.validatePassword(cubit.passwordController.text);
+      if (passwordError != null) errors.add(passwordError);
+      final confirmPasswordError = AppRegex.validateConfirmPassword(
+        cubit.passwordConfirmController.text,
+        cubit.passwordController.text,
+      );
+      if (confirmPasswordError != null) errors.add(confirmPasswordError);
+
+      final isGovSelected = selectedGovernorate != null &&
+          selectedGovernorate!.isNotEmpty;
+
+      if (errors.isNotEmpty || !isGovSelected) {
+        setState(() {
+          _showGovernorateError = !isGovSelected;
+        });
+        customSnackBar(
+          context,
+          errors.isNotEmpty ? errors.first : 'المحافظة مطلوبة',
+          ColorsManager.error,
+        );
+        return;
+      }
+    } else if (_pageIndex == 1) {
+      final proofOk = cubit.frontIdImage != null && cubit.backIdImage != null;
+      if (!proofOk) {
+        customSnackBar(
+          context,
+          'يرجى إرفاق صورتي وجه وخلف البطاقة',
+          ColorsManager.error,
+        );
+        return;
+      }
+    }
+
     if (_pageIndex < 2) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -183,14 +240,44 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
       cubit.companyCityController.text = institutiSelectedGovernorate ?? '';
     }
 
-    final isValid = cubit.formKey.currentState?.validate() ?? false;
-    final isGovernorateSelected = selectedGovernorate != null;
+    // Validate personal info fields manually since PageView may have
+    // disposed the form fields on page 0.
+    final List<String> errors = [];
 
-    if (!isValid || !isGovernorateSelected) {
-      if (!isValid) {
+    final firstNameError =
+        AppRegex.validateFirstName(cubit.firstNameController.text);
+    if (firstNameError != null) errors.add(firstNameError);
+
+    final lastNameError =
+        AppRegex.validateLastName(cubit.lastNameController.text);
+    if (lastNameError != null) errors.add(lastNameError);
+
+    final emailError = AppRegex.validateEmail(cubit.emailController.text);
+    if (emailError != null) errors.add(emailError);
+
+    final phoneError =
+        AppRegex.validateOptionalPhone(cubit.phoneController.text);
+    if (phoneError != null) errors.add(phoneError);
+
+    final passwordError =
+        AppRegex.validatePassword(cubit.passwordController.text);
+    if (passwordError != null) errors.add(passwordError);
+
+    final confirmPasswordError = AppRegex.validateConfirmPassword(
+      cubit.passwordConfirmController.text,
+      cubit.passwordController.text,
+    );
+    if (confirmPasswordError != null) errors.add(confirmPasswordError);
+
+    final isGovernorateSelected = selectedGovernorate != null &&
+        selectedGovernorate!.isNotEmpty;
+    final hasPersonalInfoErrors = errors.isNotEmpty;
+
+    if (hasPersonalInfoErrors || !isGovernorateSelected) {
+      if (hasPersonalInfoErrors) {
         customSnackBar(
           context,
-          'يرجى إكمال الحقول المطلوبة بشكل صحيح',
+          errors.first,
           ColorsManager.error,
         );
       }
@@ -225,9 +312,8 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
           workerStatus != null && workerStatus!.isNotEmpty;
       final isPreviousJobsSelected = previousJobs.isNotEmpty;
       final isSearchingJobsSelected = searchingJobs.isNotEmpty;
-      final isEducationFilled = cubit.educationController.text
-          .trim()
-          .isNotEmpty;
+      final isEducationFilled =
+          cubit.educationController.text.trim().isNotEmpty;
 
       if (!isWorkerStatusSelected ||
           !isPreviousJobsSelected ||
@@ -243,6 +329,33 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
         customSnackBar(
           context,
           'يرجى إكمال جميع الحقول المطلوبة في المعلومات المهنية',
+          ColorsManager.error,
+        );
+
+        _pageController.animateToPage(
+          2,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.ease,
+        );
+        return;
+      }
+    } else {
+      final isCompanyNameFilled =
+          cubit.companyNameController.text.trim().isNotEmpty;
+      final isCompanyTypeSelected =
+          institutionType != null && institutionType!.isNotEmpty;
+      final isCompanyAddressFilled =
+          cubit.companyAddressController.text.trim().isNotEmpty;
+      final isCompanyGovSelected = institutiSelectedGovernorate != null &&
+          institutiSelectedGovernorate!.isNotEmpty;
+
+      if (!isCompanyNameFilled ||
+          !isCompanyTypeSelected ||
+          !isCompanyAddressFilled ||
+          !isCompanyGovSelected) {
+        customSnackBar(
+          context,
+          'يرجى إكمال جميع الحقول المطلوبة لمعلومات المؤسسة',
           ColorsManager.error,
         );
 
@@ -346,14 +459,15 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                   ),
                   SizedBox(height: 14.h),
                   Expanded(
-                    child: PageView(
+                    child: Form(
+                      key: cubit.formKey,
+                      child: PageView(
                       controller: _pageController,
                       physics: const BouncingScrollPhysics(),
                       onPageChanged: (idx) => setState(() => _pageIndex = idx),
                       children: [
                         SingleChildScrollView(
                           child: PersonalInfoStep(
-                            formKey: cubit.formKey,
                             firstNameController: cubit.firstNameController,
                             lastNameController: cubit.lastNameController,
                             emailController: cubit.emailController,
@@ -458,7 +572,7 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                                     institutionAddressController:
                                         cubit.companyAddressController,
                                     taxNumberController:
-                                        TextEditingController(),
+                                        _taxNumberController,
                                     institutionGovernorates: [...governorates],
                                     institutiSelectedGovernorate:
                                         institutiSelectedGovernorate,
@@ -485,13 +599,14 @@ class _SignUpScreenBodyState extends State<SignUpScreenBody> {
                         ),
                       ],
                     ),
+                    ),
                   ),
                   AppTextButton(
                     buttonText: _pageIndex < 2 ? 'التالي' : 'سجل الآن',
                     isLoading: isLoading,
                     onPressed: () {
                       if (_pageIndex < 2) {
-                        _nextPage();
+                        _nextPage(cubit);
                       } else {
                         _submit(cubit);
                       }

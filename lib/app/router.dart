@@ -40,7 +40,6 @@ import '../features/publish_job/presentation/job_publish_success_screen.dart';
 import '../features/publish_job/presentation/mangers/job_details_cubit/job_details_cubit.dart';
 import '../features/publish_job/presentation/map_picker_screen.dart';
 import '../features/publish_job/presentation/publish_job_view.dart';
-import '../features/shift_details/data/model/shift_model.dart';
 import '../features/shift_details/presentation/managers/shift_cubit.dart';
 import '../features/shift_details/presentation/shift_details_view.dart';
 import '../features/shift_details/presentation/shift_summary_screen.dart';

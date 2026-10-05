@@ -15,7 +15,6 @@ import 'package:sheftaya/features/on_boarding_screen.dart/screen3.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../core/services/socket_service.dart';
-import '../shift_details/presentation/widget/enums.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});

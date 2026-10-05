@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../../../core/constants/shared_pref_helper.dart';
 import '../../../../core/constants/shared_pref_keys.dart';
 import '../../../../core/networking/api_constants.dart';
@@ -43,7 +45,7 @@ class JobRemoteDataSource {
       token.startsWith('Bearer') ? token : 'Bearer $token';
 
       // ✅ طباعة البيانات قبل الإرسال للتأكد
-      print('📤 Sending update data: $jobData');
+      log('📤 Sending update data: $jobData');
 
       final response = await _apiService.updateJob(
         formattedToken,

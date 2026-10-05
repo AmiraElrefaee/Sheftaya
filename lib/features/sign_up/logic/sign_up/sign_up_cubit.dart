@@ -104,9 +104,6 @@ class SignupCubit extends Cubit<SignupState> {
 
   // ================= SIGNUP =================
   Future<void> emitSignupStates() async {
-    final isValid = formKey.currentState?.validate() ?? false;
-    if (!isValid) return;
-
     emit(const SignupState.loading());
 
     final signupBody = SignupRequestBody(

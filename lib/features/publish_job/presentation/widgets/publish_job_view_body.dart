@@ -1,11 +1,11 @@
 // lib/features/publish_job/presentation/widgets/publish_job_view_body.dart
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:sheftaya/app/router.dart';
@@ -13,8 +13,6 @@ import 'package:sheftaya/core/widgets/app_dropdown.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/section_institute_step_form.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/section_job_info_form.dart';
 import 'package:sheftaya/features/publish_job/presentation/widgets/set_progress_indicator.dart';
-import '../../../../core/constants/shared_pref_helper.dart';
-import '../../../../core/constants/shared_pref_keys.dart';
 import '../../../../core/helper/location_helper.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../data/api_service/company_service.dart';
@@ -101,16 +99,14 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
   void _loadExistingJobData() {
     final job = widget.existingJob!;
     jobTitleController.text = job.title;
-    jobLocationController.text = job.address ?? '';
+    jobLocationController.text = job.address;
     salaryController.text = job.price.toString();
-    detailsController.text = job.details ?? '';
-    requirementsController.text = job.details ?? '';
+    detailsController.text = job.details;
+    requirementsController.text = job.details;
 
-    if (job.startDateTime != null) {
-      DateTime parsedDate = DateTime.parse(job.startDateTime);
-      dateController.text = DateFormat('yyyy-MM-dd').format(parsedDate.toLocal());
-      timeController.text = DateFormat('HH:mm').format(parsedDate.toLocal());
-    }
+    DateTime parsedDate = DateTime.parse(job.startDateTime);
+    dateController.text = DateFormat('yyyy-MM-dd').format(parsedDate.toLocal());
+    timeController.text = DateFormat('HH:mm').format(parsedDate.toLocal());
 
     hours = job.dailyWorkHours;
     workers = job.requiredWorkers;
@@ -214,13 +210,14 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
           "paymentMethod": "card",
         };
 
-        print('📦 Update Data: $updateData');
+        log('📦 Update Data: $updateData');
 
+        if (!mounted) return;
         context.read<JobPublishCubit>().updateJob(
           widget.existingJob!.id,
           updateData,
         );
-      }else {
+      } else {
         final jobData = JobModel(
           title: jobTitleController.text,
           place: selectedInstitution ?? "المؤسسة المسجلة",
@@ -238,13 +235,14 @@ class _PublishJobViewBodyState extends State<PublishJobViewBody> {
           paymentMethod: "card",
         );
 
-        print('📦 Sending JSON: ${jobData.toJson()}');
+        log('📦 Sending JSON: ${jobData.toJson()}');
 
+        if (!mounted) return;
         context.read<JobPublishCubit>().createJob(jobData);
       }
     } catch (e, stacktrace) {
-      print("❌ ERROR: $e");
-      print(stacktrace);
+      log("❌ ERROR: $e");
+      log(stacktrace.toString());
     }
   }
 

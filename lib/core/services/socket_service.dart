@@ -13,7 +13,7 @@ class SocketService {
   String? _currentJobId;
   String? _currentUserId;
 
-  static const String _baseUrl = "https://sheftaya-production-12af.up.railway.app";
+  static const String _baseUrl = "https://sheftaya-production.up.railway.app";
 
   // ✅ دالة للاستماع على الأحداث الصادرة من السيرفر
   void on(String event, Function(dynamic) handler) {
@@ -35,7 +35,9 @@ class SocketService {
     _isConnecting = true;
 
     try {
-      final token = await SharedPrefHelper.getSecuredString(SharedPrefKeys.userToken);
+      final token = await SharedPrefHelper.getSecuredString(
+        SharedPrefKeys.userToken,
+      );
 
       if (token.isEmpty) {
         log('⚠️ No token found');

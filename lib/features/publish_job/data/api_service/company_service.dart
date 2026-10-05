@@ -1,6 +1,5 @@
-// lib/features/publish_job/data/services/company_service.dart
-
 import 'dart:convert';
+import 'dart:developer';
 import 'package:sheftaya/core/constants/shared_pref_helper.dart';
 import '../model/company_model.dart';
 
@@ -15,21 +14,21 @@ class CompanyService {
 
       await SharedPrefHelper.setData(_companiesKey, jsonString);
 
-      print('✅ Companies saved: ${companies.length} companies');
+      log('✅ Companies saved: ${companies.length} companies');
     } catch (e) {
-      print('❌ Error saving companies: $e');
+      log('❌ Error saving companies: $e');
     }
   }
 
   // ✅ جلب المؤسسات
   static Future<List<CompanyModel>> getCompanies() async {
     try {
-      final String? data = await SharedPrefHelper.getString(_companiesKey);
+      final data = await SharedPrefHelper.getString(_companiesKey);
 
-      print('📂 Raw data from SharedPref: $data');
+      log('📂 Raw data from SharedPref: $data');
 
-      if (data == null || data.isEmpty) {
-        print('📂 No companies found in SharedPref');
+      if (data.isEmpty) {
+        log('📂 No companies found in SharedPref');
         return [];
       }
 
@@ -43,10 +42,10 @@ class CompanyService {
           .map((json) => CompanyModel.fromJson(json))
           .toList();
 
-      print('✅ Companies loaded: ${companies.length} companies');
+      log('✅ Companies loaded: ${companies.length} companies');
       return companies;
     } catch (e) {
-      print('❌ Error loading companies: $e');
+      log('❌ Error loading companies: $e');
       return [];
     }
   }
@@ -57,9 +56,9 @@ class CompanyService {
       final companies = await getCompanies();
       companies.add(company);
       await saveCompanies(companies);
-      print('✅ Company added: ${company.name}');
+      log('✅ Company added: ${company.name}');
     } catch (e) {
-      print('❌ Error adding company: $e');
+      log('❌ Error adding company: $e');
     }
   }
 
@@ -69,9 +68,9 @@ class CompanyService {
       final companies = await getCompanies();
       companies.removeWhere((c) => c.id == id);
       await saveCompanies(companies);
-      print('✅ Company deleted: $id');
+      log('✅ Company deleted: $id');
     } catch (e) {
-      print('❌ Error deleting company: $e');
+      log('❌ Error deleting company: $e');
     }
   }
 
@@ -82,7 +81,7 @@ class CompanyService {
       if (companies.isEmpty) return null;
       return companies.last;
     } catch (e) {
-      print('❌ Error getting default company: $e');
+      log('❌ Error getting default company: $e');
       return null;
     }
   }
@@ -102,9 +101,9 @@ class CompanyService {
   static Future<void> clearAllCompanies() async {
     try {
       await SharedPrefHelper.removeData(_companiesKey);
-      print('✅ All companies cleared');
+      log('✅ All companies cleared');
     } catch (e) {
-      print('❌ Error clearing companies: $e');
+      log('❌ Error clearing companies: $e');
     }
   }
 }

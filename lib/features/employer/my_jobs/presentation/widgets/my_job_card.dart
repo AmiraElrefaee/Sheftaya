@@ -7,8 +7,6 @@ import 'package:sheftaya/core/theme/text_styles.dart';
 import 'package:sheftaya/features/shift_details/presentation/widget/enums.dart';
 import 'package:sheftaya/features/worker/my_application_jobs/data/models/my_jobs_response.dart';
 
-import '../../../../shift_details/data/model/shift_model.dart';
-
 class EmployerJobCard extends StatelessWidget {
   final MyJobItem item;
   final VoidCallback? onTap;

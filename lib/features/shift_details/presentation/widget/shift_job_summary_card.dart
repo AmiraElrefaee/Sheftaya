@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/colors_manager.dart';
 import '../../../../core/theme/text_styles.dart';
@@ -197,8 +195,8 @@ class ShiftJobSummaryCard extends StatelessWidget {
                 children: [
                   FlutterMap(
                     options: MapOptions(
-                      center: LatLng(latitude, longitude),
-                      zoom: 15,
+                      initialCenter: LatLng(latitude, longitude),
+                      initialZoom: 15,
                     ),
                     children: [
                       TileLayer(

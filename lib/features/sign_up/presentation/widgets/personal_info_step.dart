@@ -7,7 +7,6 @@ import 'package:sheftaya/core/widgets/app_dropdown.dart';
 import 'package:sheftaya/core/theme/colors_manager.dart';
 
 class PersonalInfoStep extends StatefulWidget {
-  final GlobalKey<FormState> formKey;
   final TextEditingController firstNameController;
   final TextEditingController lastNameController;
   final TextEditingController emailController;
@@ -24,7 +23,6 @@ class PersonalInfoStep extends StatefulWidget {
 
   const PersonalInfoStep({
     super.key,
-    required this.formKey,
     required this.firstNameController,
     required this.lastNameController,
     required this.emailController,
@@ -80,13 +78,11 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: widget.formKey,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: 24.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+    return Padding(
+      padding: EdgeInsets.only(bottom: 24.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
             SizedBox(height: 8.h),
             Text(
               'المعلومات الشخصية',
@@ -226,7 +222,6 @@ class _PersonalInfoStepState extends State<PersonalInfoStep> {
             ),
           ],
         ),
-      ),
     );
   }
 }

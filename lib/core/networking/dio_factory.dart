@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:sheftaya/core/constants/app_constants.dart';
@@ -30,23 +31,23 @@ class DioFactory {
         compact: true,
         maxWidth: 120,
         logPrint: (object) {
-          print('🛰️ $object');
+          log('🛰️ $object');
         },
       ),
     );
     dio?.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          print("📤 REQUEST → ${options.method} ${options.baseUrl}${options.path}");
-          print("📦 DATA → ${options.data}");
+          log("📤 REQUEST → ${options.method} ${options.baseUrl}${options.path}");
+          log("📦 DATA → ${options.data}");
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          print("📥 RESPONSE → ${response.data}");
+          log("📥 RESPONSE → ${response.data}");
           return handler.next(response);
         },
         onError: (error, handler) {
-          print("❌ ERROR → ${error.response?.data}");
+          log("❌ ERROR → ${error.response?.data}");
           return handler.next(error);
         },
 

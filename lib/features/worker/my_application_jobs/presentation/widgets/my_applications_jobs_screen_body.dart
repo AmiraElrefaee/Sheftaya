@@ -245,7 +245,9 @@ class _AppList extends StatelessWidget {
     final jobId = item.job?.id ?? '';
     if (jobId.isEmpty) return null;
     if (item.applicationStatus != 'pending' &&
-        item.applicationStatus != 'accepted') return null;
+        item.applicationStatus != 'accepted') {
+      return null;
+    }
 
     return () {
       final job = item.job;
